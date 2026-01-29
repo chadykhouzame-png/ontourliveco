@@ -47,6 +47,14 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        artist: {
+          DEFAULT: "hsl(var(--artist))",
+          foreground: "hsl(var(--artist-foreground))",
+        },
+        venue: {
+          DEFAULT: "hsl(var(--venue))",
+          foreground: "hsl(var(--venue-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
