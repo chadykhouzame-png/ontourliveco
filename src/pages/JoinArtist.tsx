@@ -180,7 +180,7 @@ const JoinArtist = () => {
                   placeholder="you@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={errors.email ? 'border-destructive' : ''}
+                  className={`sentry-mask ${errors.email ? 'border-destructive' : ''}`}
                 />
                 {errors.email && (
                   <p className="text-sm text-destructive">{errors.email}</p>
@@ -196,7 +196,7 @@ const JoinArtist = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
+                    className={`sentry-mask ${errors.password ? 'border-destructive pr-10' : 'pr-10'}`}
                   />
                   <button
                     type="button"
