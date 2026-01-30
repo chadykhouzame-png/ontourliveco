@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Camera, User, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { withRetry, sanitizeError } from '@/lib/errorHandler';
 
 interface ProfileImageUploadProps {
   currentImageUrl?: string | null;
@@ -20,6 +21,7 @@ const ProfileImageUpload = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(currentImageUrl || null);
+  const [retryCount, setRetryCount] = useState(0);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -46,21 +48,40 @@ const ProfileImageUpload = ({
     }
 
     setIsUploading(true);
+    setRetryCount(0);
 
     try {
       // Create a preview
       const objectUrl = URL.createObjectURL(file);
       setPreviewUrl(objectUrl);
 
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage with retry logic
       const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/profile.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('profile-images')
-        .upload(fileName, file, { upsert: true });
+      await withRetry(
+        async () => {
+          setRetryCount(prev => prev + 1);
+          
+          const { error: uploadError } = await supabase.storage
+            .from('profile-images')
+            .upload(fileName, file, { upsert: true });
 
-      if (uploadError) throw uploadError;
+          if (uploadError) {
+            // Convert storage error to retryable format for network issues
+            if (uploadError.message?.includes('fetch') || 
+                uploadError.message?.includes('network') ||
+                uploadError.message?.includes('timeout')) {
+              const networkError = new TypeError('Failed to fetch');
+              networkError.name = 'TypeError';
+              throw networkError;
+            }
+            throw uploadError;
+          }
+        },
+        { maxRetries: 3, baseDelayMs: 1000, maxDelayMs: 5000 },
+        'ProfileImageUpload'
+      );
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
@@ -71,15 +92,20 @@ const ProfileImageUpload = ({
       
       toast({
         title: 'Photo uploaded!',
-        description: 'Your profile photo has been updated.',
+        description: retryCount > 1 
+          ? `Your profile photo has been updated (succeeded after ${retryCount} attempts).`
+          : 'Your profile photo has been updated.',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const sanitized = sanitizeError(error, 'ProfileImageUpload');
       console.error('Upload error:', error);
       setPreviewUrl(currentImageUrl || null);
       toast({
         variant: 'destructive',
         title: 'Upload failed',
-        description: error.message || 'Failed to upload image. Please try again.',
+        description: sanitized.isRetryable 
+          ? `${sanitized.userMessage} (tried ${retryCount} times)`
+          : sanitized.userMessage,
       });
     } finally {
       setIsUploading(false);
