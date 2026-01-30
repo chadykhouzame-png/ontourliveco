@@ -11,11 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { z } from 'zod';
 import SocialLoginButtons from '@/components/SocialLoginButtons';
-
-const signupSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
+import { PasswordStrengthIndicator } from '@/components/PasswordStrengthIndicator';
+import { signupSchema, loginSchema } from '@/lib/passwordValidation';
 
 const JoinArtist = () => {
   const navigate = useNavigate();
@@ -38,7 +35,9 @@ const JoinArtist = () => {
 
   const validateForm = () => {
     try {
-      signupSchema.parse({ email, password });
+      // Use stricter validation for signup, simpler for login
+      const schema = isLogin ? loginSchema : signupSchema;
+      schema.parse({ email, password });
       setErrors({});
       return true;
     } catch (error) {
@@ -164,6 +163,7 @@ const JoinArtist = () => {
                 {errors.password && (
                   <p className="text-sm text-destructive">{errors.password}</p>
                 )}
+                {!isLogin && <PasswordStrengthIndicator password={password} />}
               </div>
 
               <Button 
