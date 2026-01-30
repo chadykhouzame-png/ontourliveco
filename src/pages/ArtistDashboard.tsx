@@ -19,12 +19,14 @@ import { NotificationSettings } from '@/components/NotificationSettings';
 import { NegotiationHistory, addNegotiationEvent } from '@/components/NegotiationHistory';
 import { useNegotiationLimit, MAX_NEGOTIATION_ROUNDS } from '@/hooks/useNegotiationLimit';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { showErrorWithTitle } = useErrorHandler();
   
   const [artist, setArtist] = useState<Artist | null>(null);
   const [travelDates, setTravelDates] = useState<TravelDate[]>([]);
@@ -228,12 +230,8 @@ const ArtistDashboard = () => {
       setCounterOfferDialogOpen(false);
       setCounterOfferAmount('');
       setSelectedBooking(null);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error sending counter-offer",
-        description: error.message || "Something went wrong.",
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, "Error sending counter-offer", 'counter-offer');
     } finally {
       setIsSubmittingCounter(false);
     }

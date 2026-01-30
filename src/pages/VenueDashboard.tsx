@@ -20,11 +20,13 @@ import { NotificationSettings } from '@/components/NotificationSettings';
 import { NegotiationHistory, addNegotiationEvent } from '@/components/NegotiationHistory';
 import { useNegotiationLimit, MAX_NEGOTIATION_ROUNDS } from '@/hooks/useNegotiationLimit';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { showErrorWithTitle } = useErrorHandler();
   
   const [venue, setVenue] = useState<Venue | null>(null);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
@@ -202,12 +204,8 @@ const VenueDashboard = () => {
         title: "Counter-offer accepted!",
         description: `You've agreed to $${booking.counter_offer?.toLocaleString()}. The artist has been notified.`,
       });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error accepting counter-offer",
-        description: error.message || "Something went wrong.",
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, "Error accepting counter-offer", 'accept-counter');
     }
   };
 
@@ -270,12 +268,8 @@ const VenueDashboard = () => {
       setUpdateOfferDialogOpen(false);
       setNewOfferAmount('');
       setSelectedBooking(null);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error updating offer",
-        description: error.message || "Something went wrong.",
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, "Error updating offer", 'update-offer');
     } finally {
       setIsSubmittingOffer(false);
     }
