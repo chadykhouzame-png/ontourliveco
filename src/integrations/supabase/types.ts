@@ -240,6 +240,30 @@ export type Database = {
           },
         ]
       }
+      login_attempts: {
+        Row: {
+          attempted_at: string
+          email: string
+          id: string
+          ip_address: string | null
+          success: boolean
+        }
+        Insert: {
+          attempted_at?: string
+          email: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+        }
+        Update: {
+          attempted_at?: string
+          email?: string
+          id?: string
+          ip_address?: string | null
+          success?: boolean
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
@@ -664,6 +688,14 @@ export type Database = {
       }
     }
     Functions: {
+      check_account_lockout: {
+        Args: {
+          p_email: string
+          p_lockout_minutes?: number
+          p_max_attempts?: number
+        }
+        Returns: Json
+      }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       get_user_role: {
         Args: { _user_id: string }
@@ -675,6 +707,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      record_login_attempt: {
+        Args: { p_email: string; p_ip_address?: string; p_success: boolean }
+        Returns: undefined
       }
     }
     Enums: {
