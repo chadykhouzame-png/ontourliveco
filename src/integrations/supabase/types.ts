@@ -143,6 +143,98 @@ export type Database = {
           },
         ]
       }
+      entertainment_requests: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string
+          description: string | null
+          end_time: string | null
+          id: string
+          preferred_genres: Database["public"]["Enums"]["genre"][] | null
+          requested_date: string
+          requirements: string | null
+          start_time: string
+          status: string
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          preferred_genres?: Database["public"]["Enums"]["genre"][] | null
+          requested_date: string
+          requirements?: string | null
+          start_time: string
+          status?: string
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          preferred_genres?: Database["public"]["Enums"]["genre"][] | null
+          requested_date?: string
+          requirements?: string | null
+          start_time?: string
+          status?: string
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entertainment_requests_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
