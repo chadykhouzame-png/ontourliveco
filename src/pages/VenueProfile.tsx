@@ -140,7 +140,7 @@ const VenueProfile = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-5">
             {/* Hero Card */}
-            <Card className="overflow-hidden">
+            <Card className="glass border-border/50 rounded-2xl overflow-hidden">
               <div className="h-32 bg-gradient-to-br from-venue/40 via-venue/20 to-transparent" />
               <CardContent className="relative pt-0">
                 <div className="w-24 h-24 rounded-2xl bg-venue/20 backdrop-blur-sm flex items-center justify-center -mt-12 border-4 border-card shadow-ios">
@@ -173,11 +173,11 @@ const VenueProfile = () => {
 
             {/* Description */}
             {venue.description && (
-              <Card>
-                <CardHeader>
+              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-border/30 bg-secondary/20">
                   <CardTitle className="text-lg">About</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-4">
                   <p className="text-muted-foreground leading-relaxed">{venue.description}</p>
                 </CardContent>
               </Card>
@@ -185,14 +185,16 @@ const VenueProfile = () => {
 
             {/* Music Preferences */}
             {venue.music_preferences && venue.music_preferences.length > 0 && (
-              <Card>
-                <CardHeader>
+              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-border/30 bg-secondary/20">
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <Music className="w-5 h-5 text-venue" />
+                    <div className="w-8 h-8 rounded-xl bg-venue/20 flex items-center justify-center">
+                      <Music className="w-4 h-4 text-venue" />
+                    </div>
                     Music Preferences
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-4">
                   <div className="flex flex-wrap gap-2">
                     {venue.music_preferences.map((genre) => (
                       <Badge key={genre} variant="outline" className="border-venue/30 text-venue rounded-full px-3">
@@ -206,11 +208,11 @@ const VenueProfile = () => {
 
             {/* Equipment Notes */}
             {venue.equipment_notes && (
-              <Card>
-                <CardHeader>
+              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-border/30 bg-secondary/20">
                   <CardTitle className="text-lg">Equipment & Notes</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-4">
                   <p className="text-muted-foreground leading-relaxed">{venue.equipment_notes}</p>
                 </CardContent>
               </Card>
@@ -226,15 +228,15 @@ const VenueProfile = () => {
           {/* Sidebar */}
           <div className="space-y-5">
             {/* Venue Details */}
-            <Card>
-              <CardHeader>
+            <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-border/30 bg-secondary/20">
                 <CardTitle className="text-lg">Venue Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-4 pt-4">
                 {/* Capacity */}
                 {(venue.capacity_min || venue.capacity_max) && (
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30">
-                    <div className="w-10 h-10 rounded-xl bg-venue/10 flex items-center justify-center">
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30">
+                    <div className="w-10 h-10 rounded-xl bg-venue/20 flex items-center justify-center">
                       <Users className="w-5 h-5 text-venue" />
                     </div>
                     <div>
@@ -251,8 +253,8 @@ const VenueProfile = () => {
 
                 {/* Booking Nights */}
                 {venue.booking_nights && venue.booking_nights.length > 0 && (
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary/30">
-                    <div className="w-10 h-10 rounded-xl bg-venue/10 flex items-center justify-center">
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30">
+                    <div className="w-10 h-10 rounded-xl bg-venue/20 flex items-center justify-center">
                       <Calendar className="w-5 h-5 text-venue" />
                     </div>
                     <div className="flex-1">
@@ -272,16 +274,16 @@ const VenueProfile = () => {
 
             {/* Social Links */}
             {venue.instagram_url && (
-              <Card>
-                <CardHeader>
+              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-border/30 bg-secondary/20">
                   <CardTitle className="text-lg">Links</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-4">
                   <a 
                     href={venue.instagram_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-200 ios-press"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30 hover:bg-secondary/50 transition-all duration-200 haptic"
                   >
                     <Instagram className="w-5 h-5" />
                     <span className="flex-1 font-medium">Instagram</span>
