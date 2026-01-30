@@ -40,15 +40,43 @@ export function initSentry(): void {
     dsn: SENTRY_DSN,
     environment: import.meta.env.MODE,
     
-    // Integrations for performance monitoring
+    // Integrations for performance monitoring and session replay
     integrations: [
       Sentry.browserTracingIntegration({
         // Track navigation and page loads
         enableInp: true,
       }),
+      // Session Replay - captures user sessions to see exactly what happened before errors
       Sentry.replayIntegration({
-        maskAllText: false,
-        blockAllMedia: false,
+        // Privacy controls
+        maskAllText: false, // Don't mask all text (set true for sensitive apps)
+        blockAllMedia: false, // Don't block images/videos
+        
+        // Mask sensitive inputs (passwords, credit cards, etc.)
+        maskAllInputs: true,
+        
+        // Specific element masking - add class "sentry-mask" to elements
+        mask: ['.sentry-mask', '[data-sentry-mask]'],
+        
+        // Block specific elements from replay - add class "sentry-block"
+        block: ['.sentry-block', '[data-sentry-block]'],
+        
+        // Unmask specific elements that are safe to show
+        unmask: ['.sentry-unmask', '[data-sentry-unmask]'],
+        
+        // Capture network request/response bodies for debugging
+        networkDetailAllowUrls: [window.location.origin],
+        networkCaptureBodies: true,
+        
+        // Capture console logs in replay
+        networkRequestHeaders: ['X-Custom-Header'],
+        networkResponseHeaders: ['X-Custom-Header'],
+        
+        // Minimum replay duration (ms) - don't save very short sessions
+        minReplayDuration: 5000,
+        
+        // Canvas recording for interactive elements
+        useCompression: true,
       }),
     ],
     
