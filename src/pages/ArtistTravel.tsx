@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Music, Calendar as CalendarIcon, MapPin, Plus, Trash2, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { TravelDate } from '@/types/database';
@@ -19,6 +20,7 @@ const ArtistTravel = () => {
   const navigate = useNavigate();
   const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { showErrorWithTitle } = useErrorHandler();
   
   const [artistId, setArtistId] = useState<string | null>(null);
   const [travelDates, setTravelDates] = useState<TravelDate[]>([]);
@@ -117,12 +119,8 @@ const ArtistTravel = () => {
         title: "Travel date added!",
         description: `You're now visible in ${city.trim()} from ${format(startDate, 'MMM d')} to ${format(endDate, 'MMM d')}.`,
       });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error adding travel date",
-        description: error.message || "Something went wrong.",
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, "Error adding travel date", 'add-travel');
     } finally {
       setIsLoading(false);
     }
@@ -142,12 +140,8 @@ const ArtistTravel = () => {
       toast({
         title: "Travel date removed",
       });
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error removing travel date",
-        description: error.message,
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, "Error removing travel date", 'delete-travel');
     }
   };
 
@@ -163,12 +157,8 @@ const ArtistTravel = () => {
       setTravelDates(prev => prev.map(td => 
         td.id === id ? { ...td, is_available: !currentStatus } : td
       ));
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error updating availability",
-        description: error.message,
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, "Error updating availability", 'toggle-availability');
     }
   };
 

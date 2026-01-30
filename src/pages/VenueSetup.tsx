@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, Instagram, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { Genre, VenueType, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import CityAutocomplete from '@/components/CityAutocomplete';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
@@ -32,6 +33,7 @@ const VenueSetup = () => {
   const navigate = useNavigate();
   const { user, userRole, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { showErrorWithTitle } = useErrorHandler();
   
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -167,12 +169,8 @@ const VenueSetup = () => {
         description: "You're ready to start discovering artists.",
       });
       navigate('/venue/dashboard');
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error saving profile",
-        description: error.message || "Something went wrong. Please try again.",
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, "Error saving profile", 'venue-setup');
     } finally {
       setIsLoading(false);
     }

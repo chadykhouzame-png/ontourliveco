@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 
@@ -20,6 +21,7 @@ const passwordSchema = z.object({
 const ResetPassword = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { showErrorWithTitle } = useErrorHandler();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -101,13 +103,8 @@ const ResetPassword = () => {
       setTimeout(() => {
         navigate('/');
       }, 3000);
-    } catch (err: any) {
-      console.error('Password update error:', err);
-      toast({
-        variant: "destructive",
-        title: "Error resetting password",
-        description: err.message || "Something went wrong. Please try again.",
-      });
+    } catch (err: unknown) {
+      showErrorWithTitle(err, "Error resetting password", 'reset-password');
     } finally {
       setIsLoading(false);
     }

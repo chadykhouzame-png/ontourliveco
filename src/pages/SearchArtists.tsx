@@ -16,6 +16,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Artist, TravelDate, Genre, GENRE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 interface ArtistWithTravel extends Artist {
   travel_dates: TravelDate[];
@@ -31,6 +32,7 @@ const GENRES: Genre[] = [
 const SearchArtists = () => {
   const navigate = useNavigate();
   const { user, userRole, signOut, isLoading: authLoading } = useAuth();
+  const { showError } = useErrorHandler();
   
   const [city, setCity] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -141,7 +143,7 @@ const SearchArtists = () => {
 
       setArtists(results);
     } catch (error) {
-      console.error('Search error:', error);
+      showError(error, 'searching artists');
     } finally {
       setIsLoading(false);
     }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { lovable } from '@/integrations/lovable/index';
-import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 interface SocialLoginButtonsProps {
   variant?: 'artist' | 'venue';
@@ -10,7 +10,7 @@ interface SocialLoginButtonsProps {
 const SocialLoginButtons = ({ variant = 'artist' }: SocialLoginButtonsProps) => {
   const [isLoadingGoogle, setIsLoadingGoogle] = useState(false);
   const [isLoadingApple, setIsLoadingApple] = useState(false);
-  const { toast } = useToast();
+  const { showErrorWithTitle } = useErrorHandler();
 
   const handleGoogleLogin = async () => {
     setIsLoadingGoogle(true);
@@ -19,12 +19,8 @@ const SocialLoginButtons = ({ variant = 'artist' }: SocialLoginButtonsProps) => 
         redirect_uri: window.location.origin,
       });
       if (error) throw error;
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Google sign-in failed',
-        description: error.message || 'Something went wrong. Please try again.',
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, 'Google sign-in failed', 'google-login');
       setIsLoadingGoogle(false);
     }
   };
@@ -36,12 +32,8 @@ const SocialLoginButtons = ({ variant = 'artist' }: SocialLoginButtonsProps) => 
         redirect_uri: window.location.origin,
       });
       if (error) throw error;
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Apple sign-in failed',
-        description: error.message || 'Something went wrong. Please try again.',
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, 'Apple sign-in failed', 'apple-login');
       setIsLoadingApple(false);
     }
   };
