@@ -16,6 +16,7 @@ import ReviewFormDialog from '@/components/ReviewFormDialog';
 import NotificationBell from '@/components/NotificationBell';
 import ArtistCalendar from '@/components/ArtistCalendar';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { NegotiationHistory, addNegotiationEvent } from '@/components/NegotiationHistory';
 import { useToast } from '@/hooks/use-toast';
 
 const ArtistDashboard = () => {
@@ -135,6 +136,14 @@ const ArtistDashboard = () => {
         } catch (notifyError) {
           console.error('Failed to send notification:', notifyError);
         }
+
+        // Log negotiation event
+        await addNegotiationEvent(
+          requestId,
+          'artist',
+          status === 'accepted' ? 'accept' : 'decline',
+          request.counter_offer || request.offer_amount || undefined
+        );
         
         toast({
           title: status === 'accepted' ? "Booking accepted!" : "Booking declined",
@@ -192,7 +201,14 @@ const ArtistDashboard = () => {
       } catch (notifyError) {
         console.error('Failed to send notification:', notifyError);
       }
-      
+
+      // Log negotiation event
+      await addNegotiationEvent(
+        selectedBooking.id,
+        'artist',
+        'counter_offer',
+        parseInt(counterOfferAmount)
+      );
       setBookingRequests(prev => prev.map(req => 
         req.id === selectedBooking.id 
           ? { ...req, counter_offer: parseInt(counterOfferAmount) } 
@@ -523,10 +539,21 @@ const ArtistDashboard = () => {
           
           {selectedBooking && (
             <div className="space-y-4 pt-2">
+              {/* Negotiation History */}
+              <div className="border border-border/50 rounded-xl p-3">
+                <p className="text-sm font-medium mb-2">Negotiation History</p>
+                <NegotiationHistory
+                  bookingRequestId={selectedBooking.id}
+                  venueName={selectedBooking.venue?.venue_name || 'Venue'}
+                  artistName={artist?.artist_name || 'You'}
+                  currentUserType="artist"
+                />
+              </div>
+              
               {/* Show venue's offer if they made one */}
               {selectedBooking.offer_amount && (
                 <div className="p-4 rounded-xl bg-venue/10 border border-venue/20">
-                  <p className="text-sm text-muted-foreground">Venue offered</p>
+                  <p className="text-sm text-muted-foreground">Current venue offer</p>
                   <p className="text-xl font-bold text-venue">
                     ${selectedBooking.offer_amount.toLocaleString()}
                   </p>

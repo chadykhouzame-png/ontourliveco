@@ -17,6 +17,7 @@ import EntertainmentRequestDialog from '@/components/EntertainmentRequestDialog'
 import NotificationBell from '@/components/NotificationBell';
 import VisitingArtists from '@/components/VisitingArtists';
 import { NotificationSettings } from '@/components/NotificationSettings';
+import { NegotiationHistory, addNegotiationEvent } from '@/components/NegotiationHistory';
 import { useToast } from '@/hooks/use-toast';
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -177,6 +178,14 @@ const VenueDashboard = () => {
       } catch (notifyError) {
         console.error('Failed to send notification:', notifyError);
       }
+
+      // Log negotiation event
+      await addNegotiationEvent(
+        booking.id,
+        'venue',
+        'accept',
+        booking.counter_offer || undefined
+      );
       
       setBookingRequests(prev => prev.map(req => 
         req.id === booking.id 
@@ -233,6 +242,14 @@ const VenueDashboard = () => {
       } catch (notifyError) {
         console.error('Failed to send notification:', notifyError);
       }
+
+      // Log negotiation event
+      await addNegotiationEvent(
+        selectedBooking.id,
+        'venue',
+        selectedBooking.counter_offer ? 'update_offer' : 'initial_offer',
+        parseInt(newOfferAmount)
+      );
       
       setBookingRequests(prev => prev.map(req => 
         req.id === selectedBooking.id 
@@ -568,21 +585,32 @@ const VenueDashboard = () => {
             </DialogDescription>
           </DialogHeader>
           
-          {selectedBooking && (
+          {selectedBooking && venue && (
             <div className="space-y-4 pt-2">
-              {/* Show current offer history */}
-              <div className="space-y-2">
+              {/* Negotiation History */}
+              <div className="border border-border/50 rounded-xl p-3">
+                <p className="text-sm font-medium mb-2">Negotiation History</p>
+                <NegotiationHistory
+                  bookingRequestId={selectedBooking.id}
+                  venueName={venue.venue_name}
+                  artistName={selectedBooking.artist?.artist_name || 'Artist'}
+                  currentUserType="venue"
+                />
+              </div>
+              
+              {/* Show current offer summary */}
+              <div className="flex gap-2">
                 {selectedBooking.offer_amount && (
-                  <div className="p-3 rounded-xl bg-venue/10 border border-venue/20">
-                    <p className="text-sm text-muted-foreground">Your current offer</p>
+                  <div className="flex-1 p-3 rounded-xl bg-venue/10 border border-venue/20">
+                    <p className="text-xs text-muted-foreground">Your offer</p>
                     <p className="text-lg font-semibold text-venue">
                       ${selectedBooking.offer_amount.toLocaleString()}
                     </p>
                   </div>
                 )}
                 {selectedBooking.counter_offer && (
-                  <div className="p-3 rounded-xl bg-artist/10 border border-artist/20">
-                    <p className="text-sm text-muted-foreground">Artist's counter-offer</p>
+                  <div className="flex-1 p-3 rounded-xl bg-artist/10 border border-artist/20">
+                    <p className="text-xs text-muted-foreground">Their counter</p>
                     <p className="text-lg font-semibold text-artist">
                       ${selectedBooking.counter_offer.toLocaleString()}
                     </p>

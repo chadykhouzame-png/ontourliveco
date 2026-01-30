@@ -89,6 +89,44 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_negotiations: {
+        Row: {
+          action_type: string
+          actor_type: string
+          amount: number | null
+          booking_request_id: string
+          created_at: string
+          id: string
+          message: string | null
+        }
+        Insert: {
+          action_type: string
+          actor_type: string
+          amount?: number | null
+          booking_request_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+        }
+        Update: {
+          action_type?: string
+          actor_type?: string
+          amount?: number | null
+          booking_request_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_negotiations_booking_request_id_fkey"
+            columns: ["booking_request_id"]
+            isOneToOne: false
+            referencedRelation: "booking_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       booking_requests: {
         Row: {
           artist_id: string
