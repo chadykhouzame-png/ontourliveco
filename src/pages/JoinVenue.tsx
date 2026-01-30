@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { z } from 'zod';
 import SocialLoginButtons from '@/components/SocialLoginButtons';
 
@@ -20,6 +21,7 @@ const JoinVenue = () => {
   const navigate = useNavigate();
   const { signUp, signIn, user } = useAuth();
   const { toast } = useToast();
+  const { showErrorWithTitle } = useErrorHandler();
   
   const [isLogin, setIsLogin] = useState(false);
   const [email, setEmail] = useState('');
@@ -79,12 +81,8 @@ const JoinVenue = () => {
         });
         navigate('/venue/setup');
       }
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: isLogin ? "Login failed" : "Sign up failed",
-        description: error.message || "Something went wrong. Please try again.",
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, isLogin ? "Login failed" : "Sign up failed", 'auth');
     } finally {
       setIsLoading(false);
     }
