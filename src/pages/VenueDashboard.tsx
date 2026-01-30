@@ -316,14 +316,19 @@ const VenueDashboard = () => {
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground">Welcome back, {venue?.venue_name}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={() => navigate('/search')} className="bg-artist hover:bg-artist/90 haptic shadow-lg shadow-artist/20">
+              <Search className="w-4 h-4 mr-2" />
+              Browse Artists
+            </Button>
             <Button variant="outline" onClick={() => navigate('/venue/setup')} className="haptic glass-subtle">
               <Settings className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
             <Button 
               onClick={() => setEntertainmentDialogOpen(true)} 
-              className="bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20"
+              variant="outline"
+              className="haptic glass-subtle"
             >
               <Plus className="w-4 h-4 mr-2" />
               Fill a Slot
