@@ -1,6 +1,8 @@
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import { ReactNode } from 'react';
 import PageTransition from './PageTransition';
+import RouteErrorBoundary from './RouteErrorBoundary';
 
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
@@ -18,37 +20,44 @@ import VenueProfile from '@/pages/VenueProfile';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
 
+// Wrapper that combines PageTransition with RouteErrorBoundary
+const ProtectedRoute = ({ children }: { children: ReactNode }) => (
+  <RouteErrorBoundary>
+    <PageTransition>{children}</PageTransition>
+  </RouteErrorBoundary>
+);
+
 const AnimatedRoutes = () => {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         
         {/* Auth Routes */}
-        <Route path="/join/artist" element={<PageTransition><JoinArtist /></PageTransition>} />
-        <Route path="/join/venue" element={<PageTransition><JoinVenue /></PageTransition>} />
-        <Route path="/select-role" element={<PageTransition><SelectRole /></PageTransition>} />
-        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
-        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+        <Route path="/join/artist" element={<ProtectedRoute><JoinArtist /></ProtectedRoute>} />
+        <Route path="/join/venue" element={<ProtectedRoute><JoinVenue /></ProtectedRoute>} />
+        <Route path="/select-role" element={<ProtectedRoute><SelectRole /></ProtectedRoute>} />
+        <Route path="/forgot-password" element={<ProtectedRoute><ForgotPassword /></ProtectedRoute>} />
+        <Route path="/reset-password" element={<ProtectedRoute><ResetPassword /></ProtectedRoute>} />
         
         {/* Artist Routes */}
-        <Route path="/artist/setup" element={<PageTransition><ArtistSetup /></PageTransition>} />
-        <Route path="/artist/travel" element={<PageTransition><ArtistTravel /></PageTransition>} />
-        <Route path="/artist/dashboard" element={<PageTransition><ArtistDashboard /></PageTransition>} />
-        <Route path="/artist/:id" element={<PageTransition><ArtistProfile /></PageTransition>} />
+        <Route path="/artist/setup" element={<ProtectedRoute><ArtistSetup /></ProtectedRoute>} />
+        <Route path="/artist/travel" element={<ProtectedRoute><ArtistTravel /></ProtectedRoute>} />
+        <Route path="/artist/dashboard" element={<ProtectedRoute><ArtistDashboard /></ProtectedRoute>} />
+        <Route path="/artist/:id" element={<ProtectedRoute><ArtistProfile /></ProtectedRoute>} />
         
         {/* Venue Routes */}
-        <Route path="/venue/setup" element={<PageTransition><VenueSetup /></PageTransition>} />
-        <Route path="/venue/dashboard" element={<PageTransition><VenueDashboard /></PageTransition>} />
-        <Route path="/venue/:id" element={<PageTransition><VenueProfile /></PageTransition>} />
+        <Route path="/venue/setup" element={<ProtectedRoute><VenueSetup /></ProtectedRoute>} />
+        <Route path="/venue/dashboard" element={<ProtectedRoute><VenueDashboard /></ProtectedRoute>} />
+        <Route path="/venue/:id" element={<ProtectedRoute><VenueProfile /></ProtectedRoute>} />
         
         {/* Search */}
-        <Route path="/search" element={<PageTransition><SearchArtists /></PageTransition>} />
+        <Route path="/search" element={<ProtectedRoute><SearchArtists /></ProtectedRoute>} />
         
         {/* Catch-all */}
-        <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+        <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
       </Routes>
     </AnimatePresence>
   );

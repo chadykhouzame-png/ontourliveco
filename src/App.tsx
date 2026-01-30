@@ -18,9 +18,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <AuthProvider>
-            <ErrorBoundary>
-              <AnimatedRoutes />
-            </ErrorBoundary>
+            <AnimatedRoutes />
             <FloatingActionButton />
           </AuthProvider>
         </BrowserRouter>
