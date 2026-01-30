@@ -461,3 +461,131 @@ export function getRetryConfigForError(error: unknown): RetryConfig {
   
   return DEFAULT_RETRY_CONFIG;
 }
+
+/**
+ * Test utilities for simulating errors and retry behavior
+ * Call from browser console: window.testRetry.networkError() or window.testRetry.rateLimitError()
+ */
+export const retryTestUtils = {
+  /**
+   * Simulate a network failure that succeeds after N attempts
+   */
+  async networkError(successOnAttempt: number = 3): Promise<string> {
+    let attempt = 0;
+    
+    console.log(`[RetryTest] Simulating network error that succeeds on attempt ${successOnAttempt}`);
+    
+    const result = await withRetry(
+      async () => {
+        attempt++;
+        console.log(`[RetryTest] Attempt ${attempt}...`);
+        
+        if (attempt < successOnAttempt) {
+          const error = new TypeError('Failed to fetch');
+          error.name = 'TypeError';
+          throw error;
+        }
+        
+        return `Success on attempt ${attempt}!`;
+      },
+      { maxRetries: 5, baseDelayMs: 500 },
+      'NetworkTest'
+    );
+    
+    console.log(`[RetryTest] ${result}`);
+    return result;
+  },
+
+  /**
+   * Simulate a rate limit error (429) that succeeds after N attempts
+   */
+  async rateLimitError(successOnAttempt: number = 2): Promise<string> {
+    let attempt = 0;
+    
+    console.log(`[RetryTest] Simulating rate limit (429) that succeeds on attempt ${successOnAttempt}`);
+    
+    const result = await withRetry(
+      async () => {
+        attempt++;
+        console.log(`[RetryTest] Attempt ${attempt}...`);
+        
+        if (attempt < successOnAttempt) {
+          throw { code: '429', message: 'Too many requests' };
+        }
+        
+        return `Success on attempt ${attempt}!`;
+      },
+      getRetryConfigForError({ code: '429', message: 'Too many requests' }),
+      'RateLimitTest'
+    );
+    
+    console.log(`[RetryTest] ${result}`);
+    return result;
+  },
+
+  /**
+   * Simulate a timeout error
+   */
+  async timeoutError(successOnAttempt: number = 2): Promise<string> {
+    let attempt = 0;
+    
+    console.log(`[RetryTest] Simulating timeout that succeeds on attempt ${successOnAttempt}`);
+    
+    const result = await withRetry(
+      async () => {
+        attempt++;
+        console.log(`[RetryTest] Attempt ${attempt}...`);
+        
+        if (attempt < successOnAttempt) {
+          throw { code: 'PGRST504', message: 'Request timed out' };
+        }
+        
+        return `Success on attempt ${attempt}!`;
+      },
+      getRetryConfigForError({ code: 'PGRST504', message: 'Timeout' }),
+      'TimeoutTest'
+    );
+    
+    console.log(`[RetryTest] ${result}`);
+    return result;
+  },
+
+  /**
+   * Simulate a non-retryable error (should fail immediately)
+   */
+  async nonRetryableError(): Promise<never> {
+    console.log(`[RetryTest] Simulating non-retryable auth error`);
+    
+    await withRetry(
+      async () => {
+        throw new Error('Invalid login credentials');
+      },
+      { maxRetries: 5 },
+      'AuthTest'
+    );
+    
+    throw new Error('Should not reach here');
+  },
+
+  /**
+   * Simulate exhausting all retries
+   */
+  async exhaustRetries(): Promise<never> {
+    console.log(`[RetryTest] Simulating exhausted retries (will fail after all attempts)`);
+    
+    await withRetry(
+      async () => {
+        throw new TypeError('Failed to fetch');
+      },
+      { maxRetries: 3, baseDelayMs: 300 },
+      'ExhaustTest'
+    );
+    
+    throw new Error('Should not reach here');
+  },
+};
+
+// Expose test utilities globally for console access
+if (typeof window !== 'undefined') {
+  (window as unknown as { testRetry: typeof retryTestUtils }).testRetry = retryTestUtils;
+}
