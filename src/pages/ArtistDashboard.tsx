@@ -267,7 +267,12 @@ const ArtistDashboard = () => {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-medium">{request.venue?.venue_name || 'Unknown Venue'}</p>
+                          <Link 
+                            to={`/venue/${request.venue_id}`}
+                            className="font-medium hover:text-venue hover:underline transition-colors"
+                          >
+                            {request.venue?.venue_name || 'Unknown Venue'}
+                          </Link>
                           <p className="text-sm text-muted-foreground">
                             {format(new Date(request.requested_date), 'EEEE, MMMM d, yyyy')}
                             {request.requested_time && ` at ${request.requested_time}`}
