@@ -163,10 +163,12 @@ export default function EntertainmentRequestDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto glass border-border/50 rounded-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Music className="w-5 h-5 text-venue" />
+            <div className="w-8 h-8 rounded-xl bg-venue/20 flex items-center justify-center">
+              <Music className="w-4 h-4 text-venue" />
+            </div>
             Fill an Entertainment Slot
           </DialogTitle>
           <DialogDescription>
@@ -372,14 +374,14 @@ export default function EntertainmentRequestDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                className="flex-1"
+                className="flex-1 haptic glass-subtle"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="flex-1 bg-venue hover:bg-venue/90"
+                className="flex-1 bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20"
               >
                 {isSubmitting ? 'Sending...' : 'Send Request'}
               </Button>
