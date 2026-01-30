@@ -10,7 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagram, Filter, X, LogOut, DollarSign } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagram, Filter, X, LogOut, DollarSign, Star } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -39,6 +39,8 @@ const SearchArtists = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [feeRange, setFeeRange] = useState<[number, number]>([0, 10000]);
   const [filterByFee, setFilterByFee] = useState(false);
+  const [minRating, setMinRating] = useState<number>(0);
+  const [filterByRating, setFilterByRating] = useState(false);
   
   const [artists, setArtists] = useState<ArtistWithTravel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -115,6 +117,18 @@ const SearchArtists = () => {
         });
       }
 
+      // Filter by minimum rating
+      if (filterByRating && minRating > 0) {
+        results = results.filter(artist => {
+          const rating = (artist as any).average_rating;
+          // Include artists with rating >= minRating, or no ratings yet if minRating is low
+          if (rating === null || rating === undefined) {
+            return minRating <= 1; // Include unrated artists only if filtering for 1+ stars
+          }
+          return rating >= minRating;
+        });
+      }
+
       // Filter by availability only
       if (availableOnly && !selectedDate) {
         results = results.filter(artist =>
@@ -148,6 +162,8 @@ const SearchArtists = () => {
     setAvailableOnly(true);
     setFeeRange([0, 10000]);
     setFilterByFee(false);
+    setMinRating(0);
+    setFilterByRating(false);
     setArtists([]);
     setHasSearched(false);
   };
@@ -331,11 +347,62 @@ const SearchArtists = () => {
                   </div>
                 )}
               </div>
+
+              {/* Rating Filter */}
+              <div className="pt-4 border-t border-border">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="flex items-center gap-2">
+                    <Star className="w-4 h-4" />
+                    Minimum Rating
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={filterByRating}
+                      onCheckedChange={setFilterByRating}
+                      id="filter-rating"
+                    />
+                    <Label htmlFor="filter-rating" className="text-sm cursor-pointer">
+                      Filter by rating
+                    </Label>
+                  </div>
+                </div>
+                {filterByRating && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      {[1, 2, 3, 4, 5].map((rating) => (
+                        <button
+                          key={rating}
+                          type="button"
+                          onClick={() => setMinRating(rating)}
+                          className={cn(
+                            "flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                            minRating === rating
+                              ? "bg-primary text-primary-foreground"
+                              : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                          )}
+                        >
+                          {rating}
+                          <Star className="w-3 h-3 fill-current" />
+                          <span className="text-xs">+</span>
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {minRating === 0 
+                        ? "Select minimum rating" 
+                        : minRating === 1 
+                          ? "Showing all rated artists"
+                          : `Showing artists with ${minRating}+ stars`
+                      }
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Active Filters */}
-          {(city || selectedDate || selectedGenres.length > 0 || filterByFee) && (
+          {(city || selectedDate || selectedGenres.length > 0 || filterByFee || filterByRating) && (
             <div className="mt-4 flex items-center gap-2 flex-wrap">
               <span className="text-sm text-muted-foreground">Active filters:</span>
               {city && (
@@ -360,6 +427,12 @@ const SearchArtists = () => {
                 <Badge variant="secondary" className="gap-1">
                   ${feeRange[0].toLocaleString()} - ${feeRange[1].toLocaleString()}{feeRange[1] >= 10000 ? '+' : ''}
                   <X className="w-3 h-3 cursor-pointer" onClick={() => setFilterByFee(false)} />
+                </Badge>
+              )}
+              {filterByRating && minRating > 0 && (
+                <Badge variant="secondary" className="gap-1 flex items-center">
+                  {minRating}+ <Star className="w-3 h-3 fill-current" />
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => { setFilterByRating(false); setMinRating(0); }} />
                 </Badge>
               )}
               <Button variant="ghost" size="sm" onClick={clearFilters}>
