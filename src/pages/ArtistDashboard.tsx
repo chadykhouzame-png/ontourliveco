@@ -15,6 +15,7 @@ import { RatingDisplay } from '@/components/StarRating';
 import ReviewFormDialog from '@/components/ReviewFormDialog';
 import NotificationBell from '@/components/NotificationBell';
 import ArtistCalendar from '@/components/ArtistCalendar';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import { useToast } from '@/hooks/use-toast';
 
 const ArtistDashboard = () => {
@@ -482,6 +483,11 @@ const ArtistDashboard = () => {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* Notification Settings */}
+        <div className="mt-6">
+          <NotificationSettings />
         </div>
       </div>
 

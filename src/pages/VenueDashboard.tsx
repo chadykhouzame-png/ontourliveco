@@ -16,6 +16,7 @@ import ReviewFormDialog from '@/components/ReviewFormDialog';
 import EntertainmentRequestDialog from '@/components/EntertainmentRequestDialog';
 import NotificationBell from '@/components/NotificationBell';
 import VisitingArtists from '@/components/VisitingArtists';
+import { NotificationSettings } from '@/components/NotificationSettings';
 import { useToast } from '@/hooks/use-toast';
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -518,6 +519,11 @@ const VenueDashboard = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Notification Settings */}
+      <div className="mt-6">
+        <NotificationSettings />
       </div>
 
       {/* Review Dialog */}
