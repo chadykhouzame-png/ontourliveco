@@ -71,8 +71,13 @@ const ERROR_MAP: Record<string, string> = {
 /**
  * Sanitizes a database or API error for user display
  * Logs the full error for debugging while returning a user-friendly message
+ * Optionally tracks errors for production monitoring
  */
-export function sanitizeError(error: unknown, context?: string): SanitizedError {
+export function sanitizeError(
+  error: unknown, 
+  context?: string,
+  options?: { track?: boolean }
+): SanitizedError {
   // Log the full error for debugging (will be stripped in production by build tools)
   if (import.meta.env.DEV) {
     console.error(`[ErrorHandler${context ? ` - ${context}` : ''}]`, error);
@@ -87,41 +92,59 @@ export function sanitizeError(error: unknown, context?: string): SanitizedError 
     };
   }
 
+  let result: SanitizedError;
+
   // Handle Supabase PostgrestError
   if (isPostgrestError(error)) {
-    return handlePostgrestError(error);
+    result = handlePostgrestError(error);
   }
-
   // Handle standard Error objects
-  if (error instanceof Error) {
-    return handleStandardError(error);
+  else if (error instanceof Error) {
+    result = handleStandardError(error);
   }
-
   // Handle string errors
-  if (typeof error === 'string') {
-    return {
+  else if (typeof error === 'string') {
+    result = {
       userMessage: sanitizeMessage(error),
       code: 'STRING_ERROR',
       isRetryable: false,
     };
   }
-
   // Handle objects with message property
-  if (typeof error === 'object' && 'message' in error) {
+  else if (typeof error === 'object' && 'message' in error) {
     const msg = (error as { message: string }).message;
-    return {
+    result = {
       userMessage: sanitizeMessage(msg),
       code: 'OBJECT_ERROR',
       isRetryable: false,
     };
   }
-
   // Fallback for unknown error types
-  return {
-    userMessage: 'An unexpected error occurred. Please try again.',
-    code: 'UNKNOWN',
-    isRetryable: true,
-  };
+  else {
+    result = {
+      userMessage: 'An unexpected error occurred. Please try again.',
+      code: 'UNKNOWN',
+      isRetryable: true,
+    };
+  }
+
+  // Track error if requested (default: true in production)
+  if (options?.track !== false && !import.meta.env.DEV) {
+    // Lazy import to avoid circular dependencies
+    import('@/lib/errorTracking').then(({ trackError }) => {
+      trackError(result.code, result.userMessage, {
+        context,
+        stackTrace: error instanceof Error ? error.stack : undefined,
+        metadata: {
+          originalError: typeof error === 'object' ? JSON.stringify(error) : String(error),
+        },
+      });
+    }).catch(() => {
+      // Silently fail if tracking fails
+    });
+  }
+
+  return result;
 }
 
 /**

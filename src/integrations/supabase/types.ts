@@ -240,6 +240,45 @@ export type Database = {
           },
         ]
       }
+      error_logs: {
+        Row: {
+          context: string | null
+          created_at: string
+          error_code: string
+          error_message: string
+          id: string
+          metadata: Json | null
+          stack_trace: string | null
+          url: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          context?: string | null
+          created_at?: string
+          error_code: string
+          error_message: string
+          id?: string
+          metadata?: Json | null
+          stack_trace?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          context?: string | null
+          created_at?: string
+          error_code?: string
+          error_message?: string
+          id?: string
+          metadata?: Json | null
+          stack_trace?: string | null
+          url?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       login_attempts: {
         Row: {
           attempted_at: string
@@ -696,6 +735,7 @@ export type Database = {
         }
         Returns: Json
       }
+      cleanup_old_error_logs: { Args: never; Returns: undefined }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       get_user_role: {
         Args: { _user_id: string }

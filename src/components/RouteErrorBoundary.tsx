@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { trackErrorFromException } from '@/lib/errorTracking';
 
 interface Props {
   children: ReactNode;
@@ -37,6 +38,12 @@ class RouteErrorBoundaryInner extends Component<InnerProps, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error(`Route error at ${this.props.location.pathname}:`, error, errorInfo);
     this.setState({ errorInfo });
+    
+    // Track the error for monitoring
+    trackErrorFromException(error, `RouteError:${this.props.location.pathname}`, {
+      componentStack: errorInfo.componentStack,
+      pathname: this.props.location.pathname,
+    });
   }
 
   componentDidUpdate(prevProps: InnerProps) {
