@@ -143,6 +143,15 @@ const VenueSetup = () => {
       return;
     }
 
+    if (minCap > 50000 || maxCap > 50000) {
+      toast({
+        variant: "destructive",
+        title: "Invalid capacity",
+        description: "Capacity cannot exceed 50,000.",
+      });
+      return;
+    }
+
     if (maxCap < minCap) {
       toast({
         variant: "destructive",
@@ -332,6 +341,7 @@ const VenueSetup = () => {
                       onChange={(e) => setCapacityMin(e.target.value)}
                       className="w-24"
                       min={1}
+                      max={50000}
                       required
                     />
                     <span className="text-muted-foreground">to</span>
@@ -342,9 +352,11 @@ const VenueSetup = () => {
                       onChange={(e) => setCapacityMax(e.target.value)}
                       className="w-24"
                       min={1}
+                      max={50000}
                       required
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground">Enter values between 1 and 50,000</p>
                 </div>
               </div>
 
