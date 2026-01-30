@@ -3,9 +3,12 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle } from 'lucide-react';
+import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { TravelDate, BookingRequest, Artist, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -27,6 +30,11 @@ const ArtistDashboard = () => {
   // Review dialog state
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingRequest | null>(null);
+  
+  // Counter-offer dialog state
+  const [counterOfferDialogOpen, setCounterOfferDialogOpen] = useState(false);
+  const [counterOfferAmount, setCounterOfferAmount] = useState('');
+  const [isSubmittingCounter, setIsSubmittingCounter] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -118,6 +126,50 @@ const ArtistDashboard = () => {
   const handleReviewSubmitted = () => {
     if (selectedBooking) {
       setExistingReviews(prev => [...prev, selectedBooking.id]);
+    }
+  };
+
+  const handleOpenCounterOffer = (booking: BookingRequest) => {
+    setSelectedBooking(booking);
+    setCounterOfferAmount(artist?.fee_range_min?.toString() || '');
+    setCounterOfferDialogOpen(true);
+  };
+
+  const handleSubmitCounterOffer = async () => {
+    if (!selectedBooking || !counterOfferAmount) return;
+    
+    setIsSubmittingCounter(true);
+    
+    try {
+      const { error } = await supabase
+        .from('booking_requests')
+        .update({ counter_offer: parseInt(counterOfferAmount) })
+        .eq('id', selectedBooking.id);
+      
+      if (error) throw error;
+      
+      setBookingRequests(prev => prev.map(req => 
+        req.id === selectedBooking.id 
+          ? { ...req, counter_offer: parseInt(counterOfferAmount) } 
+          : req
+      ));
+      
+      toast({
+        title: "Counter-offer sent!",
+        description: `You've proposed $${parseInt(counterOfferAmount).toLocaleString()} to the venue.`,
+      });
+      
+      setCounterOfferDialogOpen(false);
+      setCounterOfferAmount('');
+      setSelectedBooking(null);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error sending counter-offer",
+        description: error.message || "Something went wrong.",
+      });
+    } finally {
+      setIsSubmittingCounter(false);
     }
   };
 
@@ -293,13 +345,27 @@ const ArtistDashboard = () => {
                           "{request.message}"
                         </p>
                       )}
-                      {request.offer_amount && (
-                        <p className="text-sm font-medium text-primary mb-3">
-                          Offer: ${request.offer_amount}
-                        </p>
-                      )}
+                      {/* Offer and Counter-offer display */}
+                      <div className="flex flex-wrap gap-3 mb-3">
+                        {request.offer_amount && (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-venue/10 border border-venue/20">
+                            <DollarSign className="w-4 h-4 text-venue" />
+                            <span className="text-sm font-medium text-venue">
+                              Venue offer: ${request.offer_amount.toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {request.counter_offer && (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-artist/10 border border-artist/20">
+                            <DollarSign className="w-4 h-4 text-artist" />
+                            <span className="text-sm font-medium text-artist">
+                              Your counter: ${request.counter_offer.toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       {request.status === 'pending' && (
-                        <div className="flex gap-2">
+                        <div className="flex flex-wrap gap-2">
                           <Button 
                             size="sm"
                             className="bg-artist hover:bg-artist/90"
@@ -310,6 +376,15 @@ const ArtistDashboard = () => {
                           <Button 
                             size="sm"
                             variant="outline"
+                            onClick={() => handleOpenCounterOffer(request)}
+                          >
+                            <DollarSign className="w-4 h-4 mr-1" />
+                            Counter Offer
+                          </Button>
+                          <Button 
+                            size="sm"
+                            variant="ghost"
+                            className="text-muted-foreground"
                             onClick={() => handleUpdateRequestStatus(request.id, 'declined')}
                           >
                             Decline
@@ -368,6 +443,82 @@ const ArtistDashboard = () => {
           onReviewSubmitted={handleReviewSubmitted}
         />
       )}
+
+      {/* Counter-Offer Dialog */}
+      <Dialog open={counterOfferDialogOpen} onOpenChange={setCounterOfferDialogOpen}>
+        <DialogContent className="glass border-border/50 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-artist/20 flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-artist" />
+              </div>
+              Make a Counter-Offer
+            </DialogTitle>
+            <DialogDescription>
+              Propose your fee to {selectedBooking?.venue?.venue_name || 'the venue'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedBooking && (
+            <div className="space-y-4 pt-2">
+              {/* Show venue's offer if they made one */}
+              {selectedBooking.offer_amount && (
+                <div className="p-4 rounded-xl bg-venue/10 border border-venue/20">
+                  <p className="text-sm text-muted-foreground">Venue offered</p>
+                  <p className="text-xl font-bold text-venue">
+                    ${selectedBooking.offer_amount.toLocaleString()}
+                  </p>
+                </div>
+              )}
+              
+              {/* Show artist's rate range if set */}
+              {artist?.show_fee_range && (artist?.fee_range_min || artist?.fee_range_max) && (
+                <div className="p-4 rounded-xl bg-secondary/30 border border-border/50">
+                  <p className="text-sm text-muted-foreground">Your listed rate</p>
+                  <p className="text-lg font-semibold">
+                    {artist.fee_range_min && artist.fee_range_max 
+                      ? `$${artist.fee_range_min.toLocaleString()} - $${artist.fee_range_max.toLocaleString()}`
+                      : artist.fee_range_min 
+                        ? `From $${artist.fee_range_min.toLocaleString()}`
+                        : `Up to $${artist.fee_range_max?.toLocaleString()}`
+                    }
+                  </p>
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <Label htmlFor="counterOffer">Your counter-offer ($)</Label>
+                <Input
+                  id="counterOffer"
+                  type="number"
+                  placeholder="Enter your fee"
+                  value={counterOfferAmount}
+                  onChange={(e) => setCounterOfferAmount(e.target.value)}
+                  min="0"
+                  className="text-lg"
+                />
+              </div>
+              
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setCounterOfferDialogOpen(false)}
+                  className="flex-1 haptic glass-subtle"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmitCounterOffer}
+                  disabled={!counterOfferAmount || isSubmittingCounter}
+                  className="flex-1 bg-artist hover:bg-artist/90 haptic shadow-lg shadow-artist/20"
+                >
+                  {isSubmittingCounter ? 'Sending...' : 'Send Counter-Offer'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, MapPin, Calendar as CalendarIcon, Instagram, ExternalLink, ArrowLeft, Send, LogOut } from 'lucide-react';
+import { Music, MapPin, Calendar as CalendarIcon, Instagram, ExternalLink, ArrowLeft, Send, LogOut, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -285,6 +285,21 @@ const ArtistProfile = () => {
                         {GENRE_LABELS[genre]}
                       </Badge>
                     ))}
+                  </div>
+                )}
+
+                {/* Fee Range - Show if artist has enabled it */}
+                {artist.show_fee_range && (artist.fee_range_min || artist.fee_range_max) && (
+                  <div className="mt-4 flex items-center gap-2 p-3 rounded-xl bg-primary/10 border border-primary/20">
+                    <DollarSign className="w-5 h-5 text-primary" />
+                    <span className="font-semibold text-primary">
+                      {artist.fee_range_min && artist.fee_range_max 
+                        ? `$${artist.fee_range_min.toLocaleString()} - $${artist.fee_range_max.toLocaleString()}`
+                        : artist.fee_range_min 
+                          ? `From $${artist.fee_range_min.toLocaleString()}`
+                          : `Up to $${artist.fee_range_max?.toLocaleString()}`
+                      }
+                    </span>
                   </div>
                 )}
               </CardContent>
