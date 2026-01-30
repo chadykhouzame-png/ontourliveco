@@ -376,7 +376,12 @@ export type Database = {
     }
     Enums: {
       app_role: "artist" | "venue" | "admin"
-      booking_status: "pending" | "accepted" | "declined" | "cancelled"
+      booking_status:
+        | "pending"
+        | "accepted"
+        | "declined"
+        | "cancelled"
+        | "completed"
       genre:
         | "house"
         | "techno"
@@ -535,7 +540,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["artist", "venue", "admin"],
-      booking_status: ["pending", "accepted", "declined", "cancelled"],
+      booking_status: [
+        "pending",
+        "accepted",
+        "declined",
+        "cancelled",
+        "completed",
+      ],
       genre: [
         "house",
         "techno",
