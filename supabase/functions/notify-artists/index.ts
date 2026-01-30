@@ -7,23 +7,94 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// Input validation schema
+// Allowed genre values (must match database enum)
+const ALLOWED_GENRES = [
+  'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats', 'amapiano',
+  'latin', 'pop', 'rock', 'jazz', 'soul', 'funk', 'drum_and_bass',
+  'uk_garage', 'reggae', 'dancehall', 'other'
+] as const;
+
+// Time format regex (HH:MM or HH:MM:SS, 12h or 24h)
+const TIME_REGEX = /^([01]?\d|2[0-3]):[0-5]\d(:[0-5]\d)?(\s?[AaPp][Mm])?$/;
+
+// Dangerous patterns that could indicate injection attempts
+const DANGEROUS_PATTERNS = [
+  /[<>]/g,                    // HTML injection
+  /['";]/g,                   // Quote injection (extra safety)
+  /--/g,                      // SQL comment
+  /\/\*/g,                    // SQL block comment
+  /\bor\b.*=/i,               // SQL OR injection
+  /\band\b.*=/i,              // SQL AND injection
+  /\bunion\b/i,               // SQL UNION
+  /\bdrop\b/i,                // SQL DROP
+  /\bdelete\b/i,              // SQL DELETE
+  /\binsert\b/i,              // SQL INSERT
+  /\bupdate\b.*\bset\b/i,     // SQL UPDATE
+  /\bexec\b/i,                // SQL EXEC
+  /\bexecute\b/i,             // SQL EXECUTE
+];
+
+// Sanitize string to remove dangerous patterns
+function sanitizeString(input: string): string {
+  let sanitized = input.trim();
+  for (const pattern of DANGEROUS_PATTERNS) {
+    sanitized = sanitized.replace(pattern, '');
+  }
+  return sanitized;
+}
+
+// Validate date is not in the past
+function isValidFutureDate(dateString: string): boolean {
+  const date = new Date(dateString);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date >= today;
+}
+
+// Input validation schema with strict rules
 const NotifyArtistsSchema = z.object({
-  entertainment_request_id: z.string().uuid(),
-  venue_id: z.string().uuid(),
-  venue_name: z.string().min(1).max(200),
-  requested_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  start_time: z.string().min(1),
-  end_time: z.string().optional(),
-  budget_min: z.number().positive().optional(),
-  budget_max: z.number().positive().optional(),
-  description: z.string().max(2000),
-  preferred_genres: z.array(z.enum([
-    'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats', 'amapiano',
-    'latin', 'pop', 'rock', 'jazz', 'soul', 'funk', 'drum_and_bass',
-    'uk_garage', 'reggae', 'dancehall', 'other'
-  ])),
-});
+  entertainment_request_id: z.string().uuid({ message: 'Invalid entertainment request ID format' }),
+  venue_id: z.string().uuid({ message: 'Invalid venue ID format' }),
+  venue_name: z.string()
+    .min(1, 'Venue name is required')
+    .max(200, 'Venue name must be less than 200 characters')
+    .transform(sanitizeString),
+  requested_date: z.string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+    .refine(isValidFutureDate, 'Requested date cannot be in the past'),
+  start_time: z.string()
+    .min(1, 'Start time is required')
+    .max(20, 'Invalid time format')
+    .regex(TIME_REGEX, 'Invalid time format (use HH:MM)'),
+  end_time: z.string()
+    .max(20, 'Invalid time format')
+    .regex(TIME_REGEX, 'Invalid time format (use HH:MM)')
+    .optional()
+    .or(z.literal('')),
+  budget_min: z.number()
+    .positive('Minimum budget must be positive')
+    .max(1000000, 'Budget exceeds maximum allowed')
+    .optional(),
+  budget_max: z.number()
+    .positive('Maximum budget must be positive')
+    .max(1000000, 'Budget exceeds maximum allowed')
+    .optional(),
+  description: z.string()
+    .max(2000, 'Description must be less than 2000 characters')
+    .transform(sanitizeString),
+  preferred_genres: z.array(z.enum(ALLOWED_GENRES))
+    .min(1, 'At least one genre must be selected')
+    .max(18, 'Too many genres selected'),
+}).refine(
+  (data) => {
+    // Validate budget_max >= budget_min when both provided
+    if (data.budget_min && data.budget_max) {
+      return data.budget_max >= data.budget_min;
+    }
+    return true;
+  },
+  { message: 'Maximum budget must be greater than or equal to minimum budget', path: ['budget_max'] }
+);
 
 serve(async (req: Request) => {
   // Handle CORS preflight
