@@ -4,15 +4,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { Music, ArrowLeft, Eye, EyeOff, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { z } from 'zod';
 import SocialLoginButtons from '@/components/SocialLoginButtons';
 import { PasswordStrengthIndicator } from '@/components/PasswordStrengthIndicator';
 import { signupSchema, loginSchema } from '@/lib/passwordValidation';
+import { checkAccountLockout, recordLoginAttempt, formatLockoutMessage } from '@/hooks/useAccountLockout';
 
 const JoinArtist = () => {
   const navigate = useNavigate();
@@ -26,6 +28,8 @@ const JoinArtist = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [lockoutMessage, setLockoutMessage] = useState<string | null>(null);
+  const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
 
   // Redirect if already logged in
   if (user) {
@@ -59,11 +63,38 @@ const JoinArtist = () => {
     if (!validateForm()) return;
     
     setIsLoading(true);
+    setLockoutMessage(null);
 
     try {
       if (isLogin) {
+        // Check for account lockout before attempting login
+        const lockoutStatus = await checkAccountLockout(email);
+        
+        if (lockoutStatus.locked) {
+          setLockoutMessage(`Account temporarily locked. Try again in ${formatLockoutMessage(lockoutStatus.minutes_remaining)}.`);
+          setIsLoading(false);
+          return;
+        }
+
         const { error } = await signIn(email, password);
-        if (error) throw error;
+        
+        if (error) {
+          // Record failed attempt
+          await recordLoginAttempt(email, false);
+          
+          // Update remaining attempts display
+          const newStatus = await checkAccountLockout(email);
+          if (newStatus.locked) {
+            setLockoutMessage(`Account temporarily locked. Try again in ${formatLockoutMessage(newStatus.minutes_remaining)}.`);
+          } else if (newStatus.remaining_attempts <= 3) {
+            setRemainingAttempts(newStatus.remaining_attempts);
+          }
+          
+          throw error;
+        }
+        
+        // Record successful login (clears failed attempts)
+        await recordLoginAttempt(email, true);
         navigate('/artist/dashboard');
       } else {
         const { error } = await signUp(email, password, 'artist');
@@ -97,6 +128,21 @@ const JoinArtist = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to home
         </Link>
+
+        {lockoutMessage && (
+          <Alert variant="destructive" className="mb-4">
+            <Lock className="h-4 w-4" />
+            <AlertDescription>{lockoutMessage}</AlertDescription>
+          </Alert>
+        )}
+
+        {remainingAttempts !== null && remainingAttempts <= 3 && !lockoutMessage && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertDescription>
+              Warning: {remainingAttempts} login attempt{remainingAttempts !== 1 ? 's' : ''} remaining before account lockout.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <Card className="bg-card border-border">
           <CardHeader className="text-center">
