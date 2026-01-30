@@ -1,0 +1,189 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { Music, ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
+
+const signupSchema = z.object({
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+const JoinArtist = () => {
+  const navigate = useNavigate();
+  const { signUp, signIn, user } = useAuth();
+  const { toast } = useToast();
+  
+  const [isLogin, setIsLogin] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+
+  // Redirect if already logged in
+  if (user) {
+    navigate('/artist/setup');
+    return null;
+  }
+
+  const validateForm = () => {
+    try {
+      signupSchema.parse({ email, password });
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: { email?: string; password?: string } = {};
+        error.errors.forEach((err) => {
+          if (err.path[0] === 'email') newErrors.email = err.message;
+          if (err.path[0] === 'password') newErrors.password = err.message;
+        });
+        setErrors(newErrors);
+      }
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+    
+    setIsLoading(true);
+
+    try {
+      if (isLogin) {
+        const { error } = await signIn(email, password);
+        if (error) throw error;
+        navigate('/artist/dashboard');
+      } else {
+        const { error } = await signUp(email, password, 'artist');
+        if (error) throw error;
+        toast({
+          title: "Welcome to On Tour!",
+          description: "Let's set up your artist profile.",
+        });
+        navigate('/artist/setup');
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: isLogin ? "Login failed" : "Sign up failed",
+        description: error.message || "Something went wrong. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="w-full max-w-md">
+        <Link 
+          to="/" 
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to home
+        </Link>
+
+        <Card className="bg-card border-border">
+          <CardHeader className="text-center">
+            <div className="w-14 h-14 bg-artist/20 rounded-xl flex items-center justify-center mx-auto mb-4">
+              <Music className="w-7 h-7 text-artist" />
+            </div>
+            <CardTitle className="text-2xl">
+              {isLogin ? 'Welcome back' : 'Join as an Artist'}
+            </CardTitle>
+            <CardDescription>
+              {isLogin 
+                ? 'Sign in to access your artist dashboard' 
+                : 'Create your account and start getting booked'
+              }
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={errors.email ? 'border-destructive' : ''}
+                />
+                {errors.email && (
+                  <p className="text-sm text-destructive">{errors.email}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-sm text-destructive">{errors.password}</p>
+                )}
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full bg-artist hover:bg-artist/90"
+                disabled={isLoading}
+              >
+                {isLoading ? 'Loading...' : (isLogin ? 'Sign In' : 'Create Account')}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-sm text-muted-foreground hover:text-foreground"
+              >
+                {isLogin 
+                  ? "Don't have an account? Sign up" 
+                  : 'Already have an account? Sign in'
+                }
+              </button>
+            </div>
+
+            <div className="mt-4 text-center">
+              <Link 
+                to="/join/venue" 
+                className="text-sm text-venue hover:underline"
+              >
+                Looking to book artists? Join as a venue instead
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+export default JoinArtist;
