@@ -33,6 +33,8 @@ export type BookingStatus = 'pending' | 'accepted' | 'declined' | 'cancelled' | 
 
 export type AppRole = 'artist' | 'venue' | 'admin';
 
+export type EntertainmentRequestStatus = 'open' | 'filled' | 'cancelled';
+
 export interface Artist {
   id: string;
   user_id: string;
@@ -99,6 +101,35 @@ export interface BookingRequest {
   venue?: Venue;
 }
 
+export interface EntertainmentRequest {
+  id: string;
+  venue_id: string;
+  requested_date: string;
+  start_time: string;
+  end_time?: string;
+  budget_min?: number;
+  budget_max?: number;
+  description?: string;
+  requirements?: string;
+  preferred_genres: Genre[];
+  status: EntertainmentRequestStatus;
+  created_at: string;
+  updated_at: string;
+  venue?: Venue;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: 'info' | 'booking' | 'entertainment_request' | 'review';
+  reference_id?: string;
+  reference_type?: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 export const GENRE_LABELS: Record<Genre, string> = {
   house: 'House',
   techno: 'Techno',
@@ -138,4 +169,10 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
   declined: 'Declined',
   cancelled: 'Cancelled',
   completed: 'Completed',
+};
+
+export const ENTERTAINMENT_REQUEST_STATUS_LABELS: Record<EntertainmentRequestStatus, string> = {
+  open: 'Open',
+  filled: 'Filled',
+  cancelled: 'Cancelled',
 };

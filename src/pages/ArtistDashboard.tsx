@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { TravelDate, BookingRequest, Artist, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import ReviewFormDialog from '@/components/ReviewFormDialog';
+import NotificationBell from '@/components/NotificationBell';
 import { useToast } from '@/hooks/use-toast';
 
 const ArtistDashboard = () => {
@@ -151,6 +152,7 @@ const ArtistDashboard = () => {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {artist?.artist_name}
             </span>
+            <NotificationBell />
             <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="w-4 h-4" />
             </Button>
