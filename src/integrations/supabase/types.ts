@@ -21,12 +21,15 @@ export type Database = {
           created_at: string
           fee_range_max: number | null
           fee_range_min: number | null
+          first_name: string | null
           genres: Database["public"]["Enums"]["genre"][] | null
           id: string
           instagram_url: string | null
           is_profile_complete: boolean | null
+          last_name: string | null
           primary_city: string
           profile_image_url: string | null
+          review_status: string
           show_fee_range: boolean | null
           soundcloud_url: string | null
           spotify_url: string | null
@@ -39,12 +42,15 @@ export type Database = {
           created_at?: string
           fee_range_max?: number | null
           fee_range_min?: number | null
+          first_name?: string | null
           genres?: Database["public"]["Enums"]["genre"][] | null
           id?: string
           instagram_url?: string | null
           is_profile_complete?: boolean | null
+          last_name?: string | null
           primary_city: string
           profile_image_url?: string | null
+          review_status?: string
           show_fee_range?: boolean | null
           soundcloud_url?: string | null
           spotify_url?: string | null
@@ -57,12 +63,15 @@ export type Database = {
           created_at?: string
           fee_range_max?: number | null
           fee_range_min?: number | null
+          first_name?: string | null
           genres?: Database["public"]["Enums"]["genre"][] | null
           id?: string
           instagram_url?: string | null
           is_profile_complete?: boolean | null
+          last_name?: string | null
           primary_city?: string
           profile_image_url?: string | null
+          review_status?: string
           show_fee_range?: boolean | null
           soundcloud_url?: string | null
           spotify_url?: string | null
