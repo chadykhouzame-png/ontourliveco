@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@4.0.0";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import React from "https://esm.sh/react@18.3.1";
@@ -31,6 +32,36 @@ serve(async (req: Request) => {
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+
+    // --- JWT AUTHENTICATION ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.error('Missing or invalid Authorization header');
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Missing authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Create client with user's auth token for verification
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    
+    if (userError || !user) {
+      console.error('JWT verification failed:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log('Authenticated user:', user.id);
+
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     if (!resendApiKey) {
       console.error('RESEND_API_KEY not configured');
@@ -62,6 +93,16 @@ serve(async (req: Request) => {
     }
 
     const { email, userType } = parseResult.data;
+
+    // --- AUTHORIZATION: Ensure user can only send welcome email to themselves ---
+    if (user.email?.toLowerCase() !== email.toLowerCase()) {
+      console.error('Authorization failed - user trying to send email to different address');
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - You can only request welcome emails for your own account' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     console.log('Welcome email requested for:', email, 'as', userType);
 
     const resend = new Resend(resendApiKey);
