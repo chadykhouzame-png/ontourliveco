@@ -1,9 +1,10 @@
 /**
  * Error Tracking Service
- * Logs errors to the database via edge function for debugging and monitoring
+ * Logs errors to the database via edge function AND Sentry for debugging and monitoring
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { captureException, isSentryEnabled, addBreadcrumb } from './sentry';
 
 interface ErrorLogPayload {
   error_code: string;
@@ -90,12 +91,22 @@ async function flushErrors(): Promise<void> {
 
 /**
  * Track an error from an Error object
+ * Sends to both database and Sentry (if configured)
  */
 export function trackErrorFromException(
   error: Error,
   context?: string,
   metadata?: Record<string, unknown>
 ): void {
+  // Send to Sentry if enabled
+  if (isSentryEnabled && !import.meta.env.DEV) {
+    captureException(error, {
+      tags: context ? { context } : undefined,
+      extra: metadata,
+    });
+  }
+
+  // Also log to database
   trackError(
     error.name || 'Error',
     error.message,
@@ -105,6 +116,18 @@ export function trackErrorFromException(
       metadata,
     }
   );
+}
+
+/**
+ * Add a breadcrumb for debugging context
+ */
+export function addErrorBreadcrumb(message: string, category?: string, data?: Record<string, unknown>): void {
+  addBreadcrumb({
+    message,
+    category: category || 'app',
+    data,
+    level: 'info',
+  });
 }
 
 /**
