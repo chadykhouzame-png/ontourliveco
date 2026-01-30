@@ -235,11 +235,15 @@ export type Database = {
           created_at: string
           description: string | null
           equipment_notes: string | null
+          first_name: string | null
           id: string
           instagram_url: string | null
           is_profile_complete: boolean | null
+          last_name: string | null
           music_preferences: Database["public"]["Enums"]["genre"][] | null
           profile_image_url: string | null
+          review_status: string
+          tiktok_url: string | null
           updated_at: string
           user_id: string
           venue_name: string
@@ -253,11 +257,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           equipment_notes?: string | null
+          first_name?: string | null
           id?: string
           instagram_url?: string | null
           is_profile_complete?: boolean | null
+          last_name?: string | null
           music_preferences?: Database["public"]["Enums"]["genre"][] | null
           profile_image_url?: string | null
+          review_status?: string
+          tiktok_url?: string | null
           updated_at?: string
           user_id: string
           venue_name: string
@@ -271,11 +279,15 @@ export type Database = {
           created_at?: string
           description?: string | null
           equipment_notes?: string | null
+          first_name?: string | null
           id?: string
           instagram_url?: string | null
           is_profile_complete?: boolean | null
+          last_name?: string | null
           music_preferences?: Database["public"]["Enums"]["genre"][] | null
           profile_image_url?: string | null
+          review_status?: string
+          tiktok_url?: string | null
           updated_at?: string
           user_id?: string
           venue_name?: string

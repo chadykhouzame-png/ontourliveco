@@ -12,6 +12,8 @@ import { Building2, Instagram, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Genre, VenueType, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import CityAutocomplete from '@/components/CityAutocomplete';
+import ProfileImageUpload from '@/components/ProfileImageUpload';
+import ReviewStatusBadge from '@/components/ReviewStatusBadge';
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
@@ -31,8 +33,12 @@ const VenueSetup = () => {
   const { user, userRole, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [venueName, setVenueName] = useState('');
   const [city, setCity] = useState('');
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [reviewStatus, setReviewStatus] = useState('pending');
   const [venueType, setVenueType] = useState<VenueType>('bar');
   const [capacityMin, setCapacityMin] = useState('');
   const [capacityMax, setCapacityMax] = useState('');
@@ -40,6 +46,7 @@ const VenueSetup = () => {
   const [musicPreferences, setMusicPreferences] = useState<Genre[]>([]);
   const [bookingNights, setBookingNights] = useState<string[]>([]);
   const [instagramUrl, setInstagramUrl] = useState('');
+  const [tiktokUrl, setTiktokUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [existingVenue, setExistingVenue] = useState(false);
 
@@ -61,8 +68,12 @@ const VenueSetup = () => {
       
       if (data) {
         setExistingVenue(true);
+        setFirstName((data as any).first_name || '');
+        setLastName((data as any).last_name || '');
         setVenueName(data.venue_name);
         setCity(data.city);
+        setProfileImageUrl(data.profile_image_url);
+        setReviewStatus((data as any).review_status || 'pending');
         setVenueType(data.venue_type as VenueType);
         setCapacityMin(data.capacity_min?.toString() || '');
         setCapacityMax(data.capacity_max?.toString() || '');
@@ -70,6 +81,7 @@ const VenueSetup = () => {
         setMusicPreferences((data.music_preferences as Genre[]) || []);
         setBookingNights(data.booking_nights || []);
         setInstagramUrl(data.instagram_url || '');
+        setTiktokUrl((data as any).tiktok_url || '');
       }
     };
     
@@ -96,11 +108,11 @@ const VenueSetup = () => {
     e.preventDefault();
     
     if (!user) return;
-    if (!venueName.trim() || !city.trim()) {
+    if (!firstName.trim() || !lastName.trim() || !venueName.trim() || !city.trim()) {
       toast({
         variant: "destructive",
         title: "Required fields missing",
-        description: "Please fill in your venue name and city.",
+        description: "Please fill in your name, venue name, and city.",
       });
       return;
     }
@@ -119,8 +131,11 @@ const VenueSetup = () => {
     try {
       const venueData = {
         user_id: user.id,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         venue_name: venueName.trim(),
         city: city.trim(),
+        profile_image_url: profileImageUrl,
         venue_type: venueType,
         capacity_min: capacityMin ? parseInt(capacityMin) : null,
         capacity_max: capacityMax ? parseInt(capacityMax) : null,
@@ -128,6 +143,7 @@ const VenueSetup = () => {
         music_preferences: musicPreferences,
         booking_nights: bookingNights,
         instagram_url: instagramUrl.trim(),
+        tiktok_url: tiktokUrl.trim() || null,
         is_profile_complete: true,
       };
 
@@ -186,10 +202,46 @@ const VenueSetup = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle>Basic Info</CardTitle>
-              <CardDescription>Tell artists about your venue</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Basic Info</CardTitle>
+                  <CardDescription>Tell artists about your venue</CardDescription>
+                </div>
+                <ReviewStatusBadge status={reviewStatus} />
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              <div className="flex justify-center">
+                <ProfileImageUpload
+                  currentImageUrl={profileImageUrl}
+                  onImageUploaded={setProfileImageUrl}
+                  variant="venue"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    placeholder="John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Smith"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="venueName">Venue Name *</Label>
@@ -319,7 +371,7 @@ const VenueSetup = () => {
               <CardTitle>Social Links</CardTitle>
               <CardDescription>Help artists find you online</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="instagram" className="flex items-center gap-2">
                   <Instagram className="w-4 h-4" />
@@ -331,6 +383,16 @@ const VenueSetup = () => {
                   value={instagramUrl}
                   onChange={(e) => setInstagramUrl(e.target.value)}
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tiktok">TikTok URL (optional)</Label>
+                <Input
+                  id="tiktok"
+                  placeholder="https://tiktok.com/@yourvenue"
+                  value={tiktokUrl}
+                  onChange={(e) => setTiktokUrl(e.target.value)}
                 />
               </div>
             </CardContent>
