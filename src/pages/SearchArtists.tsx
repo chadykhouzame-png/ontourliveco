@@ -10,7 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagram, Filter, X, LogOut } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagram, Filter, X, LogOut, DollarSign } from 'lucide-react';
+import { Slider } from '@/components/ui/slider';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Artist, TravelDate, Genre, GENRE_LABELS } from '@/types/database';
@@ -36,6 +37,8 @@ const SearchArtists = () => {
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
   const [availableOnly, setAvailableOnly] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
+  const [feeRange, setFeeRange] = useState<[number, number]>([0, 10000]);
+  const [filterByFee, setFilterByFee] = useState(false);
   
   const [artists, setArtists] = useState<ArtistWithTravel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -98,6 +101,20 @@ const SearchArtists = () => {
         );
       }
 
+      // Filter by fee range
+      if (filterByFee) {
+        results = results.filter(artist => {
+          // Only filter artists who show their fee range
+          if (!artist.show_fee_range) return true;
+          
+          const artistMin = artist.fee_range_min ?? 0;
+          const artistMax = artist.fee_range_max ?? Infinity;
+          
+          // Check if artist's fee range overlaps with selected range
+          return artistMin <= feeRange[1] && artistMax >= feeRange[0];
+        });
+      }
+
       // Filter by availability only
       if (availableOnly && !selectedDate) {
         results = results.filter(artist =>
@@ -129,6 +146,8 @@ const SearchArtists = () => {
     setSelectedDate(undefined);
     setSelectedGenres([]);
     setAvailableOnly(true);
+    setFeeRange([0, 10000]);
+    setFilterByFee(false);
     setArtists([]);
     setHasSearched(false);
   };
@@ -259,7 +278,7 @@ const SearchArtists = () => {
 
           {/* Genre Filters */}
           {showFilters && (
-            <div className="mt-4 pt-4 border-t border-border">
+            <div className="mt-4 pt-4 border-t border-border space-y-4">
               <div className="flex flex-wrap gap-2">
                 {GENRES.map((genre) => (
                   <button
@@ -276,11 +295,47 @@ const SearchArtists = () => {
                   </button>
                 ))}
               </div>
+              
+              {/* Fee Range Filter */}
+              <div className="pt-4 border-t border-border">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="flex items-center gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    Fee Range
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={filterByFee}
+                      onCheckedChange={setFilterByFee}
+                      id="filter-fee"
+                    />
+                    <Label htmlFor="filter-fee" className="text-sm cursor-pointer">
+                      Filter by fee
+                    </Label>
+                  </div>
+                </div>
+                {filterByFee && (
+                  <div className="space-y-3">
+                    <Slider
+                      value={feeRange}
+                      onValueChange={(value) => setFeeRange(value as [number, number])}
+                      min={0}
+                      max={10000}
+                      step={100}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>${feeRange[0].toLocaleString()}</span>
+                      <span>${feeRange[1].toLocaleString()}{feeRange[1] >= 10000 ? '+' : ''}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Active Filters */}
-          {(city || selectedDate || selectedGenres.length > 0) && (
+          {(city || selectedDate || selectedGenres.length > 0 || filterByFee) && (
             <div className="mt-4 flex items-center gap-2 flex-wrap">
               <span className="text-sm text-muted-foreground">Active filters:</span>
               {city && (
@@ -301,6 +356,12 @@ const SearchArtists = () => {
                   <X className="w-3 h-3 cursor-pointer" onClick={() => toggleGenre(genre)} />
                 </Badge>
               ))}
+              {filterByFee && (
+                <Badge variant="secondary" className="gap-1">
+                  ${feeRange[0].toLocaleString()} - ${feeRange[1].toLocaleString()}{feeRange[1] >= 10000 ? '+' : ''}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setFilterByFee(false)} />
+                </Badge>
+              )}
               <Button variant="ghost" size="sm" onClick={clearFilters}>
                 Clear all
               </Button>
