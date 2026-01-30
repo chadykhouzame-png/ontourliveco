@@ -7,12 +7,21 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Instagram, ArrowRight } from 'lucide-react';
+import { Music, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Genre, GENRE_LABELS } from '@/types/database';
 import CityAutocomplete from '@/components/CityAutocomplete';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
 import ReviewStatusBadge from '@/components/ReviewStatusBadge';
+import SocialConnectButton, { SocialPlatform } from '@/components/SocialConnectButton';
+
+type SocialConnection = {
+  platform: SocialPlatform;
+  platform_username?: string | null;
+  follower_count?: number | null;
+  is_connected: boolean;
+  profile_url?: string | null;
+};
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
@@ -33,12 +42,28 @@ const ArtistSetup = () => {
   const [reviewStatus, setReviewStatus] = useState('pending');
   const [bio, setBio] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
-  const [instagramUrl, setInstagramUrl] = useState('');
-  const [tiktokUrl, setTiktokUrl] = useState('');
-  const [soundcloudUrl, setSoundcloudUrl] = useState('');
-  const [spotifyUrl, setSpotifyUrl] = useState('');
+  const [artistId, setArtistId] = useState<string | null>(null);
+  const [socialConnections, setSocialConnections] = useState<SocialConnection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [existingArtist, setExistingArtist] = useState(false);
+
+  // Fetch social connections
+  const fetchSocialConnections = async (artistIdParam: string) => {
+    const { data } = await supabase
+      .from('social_connections')
+      .select('*')
+      .eq('artist_id', artistIdParam);
+    
+    if (data) {
+      setSocialConnections(data.map(conn => ({
+        platform: conn.platform as SocialPlatform,
+        platform_username: conn.platform_username,
+        follower_count: conn.follower_count,
+        is_connected: conn.is_connected,
+        profile_url: conn.profile_url,
+      })));
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -58,6 +83,7 @@ const ArtistSetup = () => {
       
       if (data) {
         setExistingArtist(true);
+        setArtistId(data.id);
         setFirstName((data as any).first_name || '');
         setLastName((data as any).last_name || '');
         setArtistName(data.artist_name);
@@ -66,15 +92,22 @@ const ArtistSetup = () => {
         setReviewStatus((data as any).review_status || 'pending');
         setBio(data.bio || '');
         setSelectedGenres((data.genres as Genre[]) || []);
-        setInstagramUrl(data.instagram_url || '');
-        setTiktokUrl((data as any).tiktok_url || '');
-        setSoundcloudUrl(data.soundcloud_url || '');
-        setSpotifyUrl(data.spotify_url || '');
+        
+        // Fetch social connections
+        fetchSocialConnections(data.id);
       }
     };
     
     checkExistingProfile();
   }, [user]);
+
+  const handleSocialConnect = async (platform: SocialPlatform) => {
+    // For now, show a toast that this feature is coming soon
+    toast({
+      title: "Coming Soon",
+      description: `${platform.charAt(0).toUpperCase() + platform.slice(1)} OAuth integration is being set up. You'll be able to connect your account soon!`,
+    });
+  };
 
   const toggleGenre = (genre: Genre) => {
     setSelectedGenres(prev => 
@@ -97,15 +130,6 @@ const ArtistSetup = () => {
       return;
     }
     
-    if (!instagramUrl.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Instagram required",
-        description: "Please add your Instagram profile URL.",
-      });
-      return;
-    }
-    
     setIsLoading(true);
 
     try {
@@ -118,10 +142,6 @@ const ArtistSetup = () => {
         profile_image_url: profileImageUrl,
         bio: bio.trim() || null,
         genres: selectedGenres,
-        instagram_url: instagramUrl.trim(),
-        tiktok_url: tiktokUrl.trim() || null,
-        soundcloud_url: soundcloudUrl.trim() || null,
-        spotify_url: spotifyUrl.trim() || null,
         is_profile_complete: true,
       };
 
@@ -285,53 +305,32 @@ const ArtistSetup = () => {
 
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle>Social Links</CardTitle>
-              <CardDescription>How venues can check you out</CardDescription>
+              <CardTitle>Connect Your Socials</CardTitle>
+              <CardDescription>
+                Connect your accounts to show venues your follower counts and verify your presence
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="instagram" className="flex items-center gap-2">
-                  <Instagram className="w-4 h-4" />
-                  Instagram URL *
-                </Label>
-                <Input
-                  id="instagram"
-                  placeholder="https://instagram.com/yourprofile"
-                  value={instagramUrl}
-                  onChange={(e) => setInstagramUrl(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="tiktok">TikTok URL (optional)</Label>
-                <Input
-                  id="tiktok"
-                  placeholder="https://tiktok.com/@yourprofile"
-                  value={tiktokUrl}
-                  onChange={(e) => setTiktokUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="soundcloud">SoundCloud URL (optional)</Label>
-                <Input
-                  id="soundcloud"
-                  placeholder="https://soundcloud.com/yourprofile"
-                  value={soundcloudUrl}
-                  onChange={(e) => setSoundcloudUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="spotify">Spotify URL (optional)</Label>
-                <Input
-                  id="spotify"
-                  placeholder="https://open.spotify.com/artist/..."
-                  value={spotifyUrl}
-                  onChange={(e) => setSpotifyUrl(e.target.value)}
-                />
-              </div>
+            <CardContent className="space-y-3">
+              <SocialConnectButton
+                platform="spotify"
+                connection={socialConnections.find(c => c.platform === 'spotify')}
+                onConnect={handleSocialConnect}
+              />
+              <SocialConnectButton
+                platform="instagram"
+                connection={socialConnections.find(c => c.platform === 'instagram')}
+                onConnect={handleSocialConnect}
+              />
+              <SocialConnectButton
+                platform="tiktok"
+                connection={socialConnections.find(c => c.platform === 'tiktok')}
+                onConnect={handleSocialConnect}
+              />
+              <SocialConnectButton
+                platform="soundcloud"
+                connection={socialConnections.find(c => c.platform === 'soundcloud')}
+                onConnect={handleSocialConnect}
+              />
             </CardContent>
           </Card>
 
