@@ -67,12 +67,11 @@ const ArtistProfile = () => {
       
       setArtist(artistData as Artist);
       
-      // Get social connections
+      // Get social connections from public view (excludes sensitive OAuth tokens)
       const { data: connections } = await supabase
-        .from('social_connections')
+        .from('social_connections_public')
         .select('*')
-        .eq('artist_id', id)
-        .eq('is_connected', true);
+        .eq('artist_id', id);
       
       if (connections) {
         setSocialConnections(connections.map(conn => ({
