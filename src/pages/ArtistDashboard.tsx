@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, DollarSign } from 'lucide-react';
+import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, DollarSign, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { TravelDate, BookingRequest, Artist, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -282,12 +282,16 @@ const ArtistDashboard = () => {
             <h1 className="text-3xl font-bold">Dashboard</h1>
             <p className="text-muted-foreground">Welcome back, {artist?.artist_name}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={() => navigate('/search?type=venues')} className="bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20">
+              <Building2 className="w-4 h-4 mr-2" />
+              Browse Venues
+            </Button>
             <Button variant="outline" onClick={() => navigate('/artist/setup')} className="haptic glass-subtle">
               <Settings className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
-            <Button onClick={() => navigate('/artist/travel')} className="bg-artist hover:bg-artist/90 haptic shadow-lg shadow-artist/20">
+            <Button onClick={() => navigate('/artist/travel')} variant="outline" className="haptic glass-subtle">
               <Plus className="w-4 h-4 mr-2" />
               Add Travel
             </Button>
