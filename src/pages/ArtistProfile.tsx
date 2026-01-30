@@ -386,9 +386,22 @@ const ArtistProfile = () => {
                   <DialogHeader>
                     <DialogTitle>Book {artist.artist_name}</DialogTitle>
                     <DialogDescription>
-                      Send a booking request for your venue
+                      Send a booking request from {venue.venue_name}
                     </DialogDescription>
                   </DialogHeader>
+                  
+                  {/* Venue Rating Display */}
+                  <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+                    <div>
+                      <p className="text-sm font-medium">{venue.venue_name}</p>
+                      <p className="text-xs text-muted-foreground">{venue.city}</p>
+                    </div>
+                    <RatingDisplay 
+                      rating={(venue as any).average_rating} 
+                      totalReviews={(venue as any).total_reviews || 0}
+                      size="sm"
+                    />
+                  </div>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
                       <Label>Date *</Label>

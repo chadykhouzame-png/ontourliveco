@@ -14,6 +14,7 @@ import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagra
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Artist, TravelDate, Genre, GENRE_LABELS } from '@/types/database';
+import { RatingDisplay } from '@/components/StarRating';
 
 interface ArtistWithTravel extends Artist {
   travel_dates: TravelDate[];
@@ -334,6 +335,12 @@ const SearchArtists = () => {
                         <MapPin className="w-3 h-3" />
                         {artist.primary_city}
                       </p>
+                      <RatingDisplay 
+                        rating={(artist as any).average_rating} 
+                        totalReviews={(artist as any).total_reviews || 0}
+                        size="sm"
+                        className="mt-1"
+                      />
                     </div>
                   </div>
 
