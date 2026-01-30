@@ -199,9 +199,12 @@ const VisitingArtists = ({ venueCity }: VisitingArtistsProps) => {
                 </div>
                 
                 <div className="text-right shrink-0">
-                  {visit.artist.show_fee_range && visit.artist.fee_range_min && (
+                  {(visit.artist.fee_range_min || visit.artist.fee_range_max) && (
                     <p className="text-sm font-medium text-primary">
-                      From ${visit.artist.fee_range_min.toLocaleString()}
+                      {visit.artist.show_fee_range 
+                        ? `From $${visit.artist.fee_range_min?.toLocaleString() || visit.artist.fee_range_max?.toLocaleString()}`
+                        : 'Contact for rates'
+                      }
                     </p>
                   )}
                   <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors ml-auto mt-1" />
