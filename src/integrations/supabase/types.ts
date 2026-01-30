@@ -161,6 +161,68 @@ export type Database = {
         }
         Relationships: []
       }
+      social_connections: {
+        Row: {
+          access_token: string | null
+          artist_id: string
+          connected_at: string | null
+          created_at: string
+          follower_count: number | null
+          id: string
+          is_connected: boolean
+          last_synced_at: string | null
+          platform: Database["public"]["Enums"]["social_platform"]
+          platform_user_id: string | null
+          platform_username: string | null
+          profile_url: string | null
+          refresh_token: string | null
+          token_expires_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_token?: string | null
+          artist_id: string
+          connected_at?: string | null
+          created_at?: string
+          follower_count?: number | null
+          id?: string
+          is_connected?: boolean
+          last_synced_at?: string | null
+          platform: Database["public"]["Enums"]["social_platform"]
+          platform_user_id?: string | null
+          platform_username?: string | null
+          profile_url?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_token?: string | null
+          artist_id?: string
+          connected_at?: string | null
+          created_at?: string
+          follower_count?: number | null
+          id?: string
+          is_connected?: boolean
+          last_synced_at?: string | null
+          platform?: Database["public"]["Enums"]["social_platform"]
+          platform_user_id?: string | null
+          platform_username?: string | null
+          profile_url?: string | null
+          refresh_token?: string | null
+          token_expires_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_connections_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       travel_dates: {
         Row: {
           artist_id: string
@@ -334,6 +396,7 @@ export type Database = {
         | "reggae"
         | "dancehall"
         | "other"
+      social_platform: "spotify" | "instagram" | "tiktok" | "soundcloud"
       venue_type:
         | "bar"
         | "club"
@@ -493,6 +556,7 @@ export const Constants = {
         "dancehall",
         "other",
       ],
+      social_platform: ["spotify", "instagram", "tiktok", "soundcloud"],
       venue_type: [
         "bar",
         "club",

@@ -16,6 +16,15 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Artist, TravelDate, Venue, GENRE_LABELS } from '@/types/database';
+import { SocialStatsDisplay, SocialPlatform } from '@/components/SocialConnectButton';
+
+type SocialConnection = {
+  platform: SocialPlatform;
+  platform_username?: string | null;
+  follower_count?: number | null;
+  is_connected: boolean;
+  profile_url?: string | null;
+};
 
 const ArtistProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -26,6 +35,7 @@ const ArtistProfile = () => {
   const [artist, setArtist] = useState<Artist | null>(null);
   const [travelDates, setTravelDates] = useState<TravelDate[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
+  const [socialConnections, setSocialConnections] = useState<SocialConnection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Booking form
@@ -53,6 +63,23 @@ const ArtistProfile = () => {
       }
       
       setArtist(artistData as Artist);
+      
+      // Get social connections
+      const { data: connections } = await supabase
+        .from('social_connections')
+        .select('*')
+        .eq('artist_id', id)
+        .eq('is_connected', true);
+      
+      if (connections) {
+        setSocialConnections(connections.map(conn => ({
+          platform: conn.platform as SocialPlatform,
+          platform_username: conn.platform_username,
+          follower_count: conn.follower_count,
+          is_connected: conn.is_connected,
+          profile_url: conn.profile_url,
+        })));
+      }
       
       // Get travel dates
       const { data: dates } = await supabase
@@ -221,50 +248,65 @@ const ArtistProfile = () => {
               </Card>
             )}
 
-            {/* Social Links */}
-            <Card className="bg-card border-border">
-              <CardHeader>
-                <CardTitle>Links</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {artist.instagram_url && (
-                  <a 
-                    href={artist.instagram_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                  >
-                    <Instagram className="w-5 h-5" />
-                    <span className="flex-1">Instagram</span>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                  </a>
-                )}
-                {artist.soundcloud_url && (
-                  <a 
-                    href={artist.soundcloud_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                  >
-                    <Music className="w-5 h-5" />
-                    <span className="flex-1">SoundCloud</span>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                  </a>
-                )}
-                {artist.spotify_url && (
-                  <a 
-                    href={artist.spotify_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
-                  >
-                    <Music className="w-5 h-5" />
-                    <span className="flex-1">Spotify</span>
-                    <ExternalLink className="w-4 h-4 text-muted-foreground" />
-                  </a>
-                )}
-              </CardContent>
-            </Card>
+            {/* Social Stats */}
+            {socialConnections.length > 0 && (
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle>Social Stats</CardTitle>
+                  <CardDescription>Verified follower counts</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <SocialStatsDisplay connections={socialConnections} />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Social Links (legacy URLs) */}
+            {(artist.instagram_url || artist.soundcloud_url || artist.spotify_url) && (
+              <Card className="bg-card border-border">
+                <CardHeader>
+                  <CardTitle>Links</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {artist.instagram_url && (
+                    <a 
+                      href={artist.instagram_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                    >
+                      <Instagram className="w-5 h-5" />
+                      <span className="flex-1">Instagram</span>
+                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                    </a>
+                  )}
+                  {artist.soundcloud_url && (
+                    <a 
+                      href={artist.soundcloud_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                    >
+                      <Music className="w-5 h-5" />
+                      <span className="flex-1">SoundCloud</span>
+                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                    </a>
+                  )}
+                  {artist.spotify_url && (
+                    <a 
+                      href={artist.spotify_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                    >
+                      <Music className="w-5 h-5" />
+                      <span className="flex-1">Spotify</span>
+                      <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                    </a>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           {/* Sidebar */}
