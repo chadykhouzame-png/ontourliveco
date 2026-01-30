@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -14,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { TravelDate } from '@/types/database';
+import CityAutocomplete from '@/components/CityAutocomplete';
 
 const ArtistTravel = () => {
   const navigate = useNavigate();
@@ -205,11 +205,11 @@ const ArtistTravel = () => {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="city">City</Label>
-              <Input
+              <CityAutocomplete
                 id="city"
                 placeholder="e.g., Melbourne, Australia"
                 value={city}
-                onChange={(e) => setCity(e.target.value)}
+                onChange={setCity}
               />
             </div>
 

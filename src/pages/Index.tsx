@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 const Index = () => {
   const { user, userRole, isLoading } = useAuth();
 
-  // Redirect logged-in users to their dashboard
+  // Redirect logged-in users to their dashboard or role selection
   if (!isLoading && user) {
     if (userRole === 'artist') {
       return (
@@ -39,6 +39,21 @@ const Index = () => {
         </div>
       );
     }
+    // User is logged in but has no role - redirect to role selection
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Almost there!</h2>
+          <p className="text-muted-foreground mb-6">Complete your account setup</p>
+          <Link to="/select-role">
+            <Button>
+              Continue Setup
+              <ArrowRight className="ml-2 w-4 h-4" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (

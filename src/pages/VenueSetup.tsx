@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Building2, Instagram, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Genre, VenueType, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
+import CityAutocomplete from '@/components/CityAutocomplete';
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
@@ -202,11 +203,11 @@ const VenueSetup = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="city">City *</Label>
-                  <Input
+                  <CityAutocomplete
                     id="city"
                     placeholder="Sydney, Australia"
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    onChange={setCity}
                     required
                   />
                 </div>
