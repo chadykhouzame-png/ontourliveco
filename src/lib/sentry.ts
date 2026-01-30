@@ -1,5 +1,5 @@
 /**
- * Sentry Error Tracking Configuration
+ * Sentry Error & Performance Monitoring Configuration
  * 
  * To enable Sentry, set your DSN below. The DSN is a public key
  * and is safe to include in client-side code.
@@ -13,11 +13,15 @@ import * as Sentry from '@sentry/react';
 // Leave empty to disable Sentry (will fall back to database-only tracking)
 const SENTRY_DSN = '';
 
+// Performance thresholds (in milliseconds)
+const SLOW_PAGE_LOAD_THRESHOLD = 3000;
+const SLOW_API_CALL_THRESHOLD = 2000;
+
 // Check if Sentry is configured
 export const isSentryEnabled = Boolean(SENTRY_DSN);
 
 /**
- * Initialize Sentry error tracking
+ * Initialize Sentry error and performance tracking
  * Should be called early in the app lifecycle (before React renders)
  */
 export function initSentry(): void {
@@ -36,8 +40,23 @@ export function initSentry(): void {
     dsn: SENTRY_DSN,
     environment: import.meta.env.MODE,
     
-    // Performance monitoring
-    tracesSampleRate: 0.1, // 10% of transactions
+    // Integrations for performance monitoring
+    integrations: [
+      Sentry.browserTracingIntegration({
+        // Track navigation and page loads
+        enableInp: true,
+      }),
+      Sentry.replayIntegration({
+        maskAllText: false,
+        blockAllMedia: false,
+      }),
+    ],
+    
+    // Performance monitoring - sample rates
+    tracesSampleRate: 0.2, // 20% of transactions for performance data
+    
+    // Profile slow transactions
+    profilesSampleRate: 0.1, // 10% of sampled transactions
     
     // Session replay for debugging
     replaysSessionSampleRate: 0.1, // 10% of sessions
@@ -45,23 +64,182 @@ export function initSentry(): void {
     
     // Filter out noisy errors
     ignoreErrors: [
-      // Browser extensions
       'ResizeObserver loop',
       'Non-Error promise rejection',
-      // Network errors that are expected
       'Failed to fetch',
       'NetworkError',
       'Load failed',
+      'AbortError',
     ],
     
-    // Attach user context when available
+    // Custom event processing
     beforeSend(event) {
-      // You can modify the event here before sending
+      return event;
+    },
+    
+    // Custom transaction processing for performance
+    beforeSendTransaction(event) {
+      // Tag slow transactions
+      const duration = event.timestamp && event.start_timestamp
+        ? (event.timestamp - event.start_timestamp) * 1000
+        : 0;
+      
+      if (duration > SLOW_PAGE_LOAD_THRESHOLD) {
+        event.tags = { ...event.tags, slow_transaction: 'true' };
+      }
+      
       return event;
     },
   });
 
-  console.log('[Sentry] Initialized successfully');
+  // Initialize performance observer for Web Vitals
+  initWebVitalsTracking();
+
+  console.log('[Sentry] Initialized with performance monitoring');
+}
+
+/**
+ * Track Web Vitals (LCP, FID, CLS, TTFB, INP)
+ */
+function initWebVitalsTracking(): void {
+  if ('PerformanceObserver' in window) {
+    // Track Largest Contentful Paint
+    try {
+      const lcpObserver = new PerformanceObserver((list) => {
+        const entries = list.getEntries();
+        const lastEntry = entries[entries.length - 1];
+        if (lastEntry) {
+          const lcp = lastEntry.startTime;
+          if (lcp > SLOW_PAGE_LOAD_THRESHOLD) {
+            addBreadcrumb({
+              category: 'performance',
+              message: `Slow LCP detected: ${Math.round(lcp)}ms`,
+              level: 'warning',
+              data: { lcp, threshold: SLOW_PAGE_LOAD_THRESHOLD },
+            });
+          }
+        }
+      });
+      lcpObserver.observe({ type: 'largest-contentful-paint', buffered: true });
+    } catch {
+      // LCP not supported
+    }
+
+    // Track Long Tasks (tasks > 50ms that block main thread)
+    try {
+      const longTaskObserver = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          if (entry.duration > 100) {
+            addBreadcrumb({
+              category: 'performance',
+              message: `Long task detected: ${Math.round(entry.duration)}ms`,
+              level: 'warning',
+              data: { duration: entry.duration, name: entry.name },
+            });
+          }
+        }
+      });
+      longTaskObserver.observe({ type: 'longtask', buffered: true });
+    } catch {
+      // Long tasks not supported
+    }
+  }
+}
+
+/**
+ * Start a performance span for tracking custom operations
+ */
+export function startSpan<T>(
+  name: string,
+  operation: string,
+  callback: () => T
+): T {
+  if (!isSentryEnabled || import.meta.env.DEV) {
+    return callback();
+  }
+
+  return Sentry.startSpan(
+    { name, op: operation },
+    callback
+  );
+}
+
+/**
+ * Track an API call with performance metrics
+ */
+export async function trackApiCall<T>(
+  name: string,
+  apiCall: () => Promise<T>,
+  metadata?: Record<string, string | number | boolean>
+): Promise<T> {
+  if (!isSentryEnabled || import.meta.env.DEV) {
+    return apiCall();
+  }
+
+  const startTime = performance.now();
+  
+  return Sentry.startSpan(
+    { 
+      name, 
+      op: 'http.client',
+      attributes: metadata,
+    },
+    async (span) => {
+      try {
+        const result = await apiCall();
+        const duration = performance.now() - startTime;
+        
+        if (duration > SLOW_API_CALL_THRESHOLD) {
+          addBreadcrumb({
+            category: 'api.slow',
+            message: `Slow API call: ${name} took ${Math.round(duration)}ms`,
+            level: 'warning',
+            data: { duration, threshold: SLOW_API_CALL_THRESHOLD, ...metadata },
+          });
+          
+          span?.setAttribute('slow_api_call', true);
+        }
+        
+        span?.setStatus({ code: 1 }); // OK
+        return result;
+      } catch (error) {
+        span?.setStatus({ code: 2, message: String(error) }); // ERROR
+        throw error;
+      }
+    }
+  );
+}
+
+/**
+ * Track a page/route change for performance
+ */
+export function trackPageView(routeName: string, params?: Record<string, string>): void {
+  if (!isSentryEnabled || import.meta.env.DEV) return;
+  
+  addBreadcrumb({
+    category: 'navigation',
+    message: `Page view: ${routeName}`,
+    level: 'info',
+    data: params,
+  });
+}
+
+/**
+ * Track a user interaction
+ */
+export function trackInteraction(
+  action: string,
+  element: string,
+  metadata?: Record<string, unknown>
+): void {
+  if (!isSentryEnabled || import.meta.env.DEV) return;
+  
+  addBreadcrumb({
+    category: 'ui.interaction',
+    message: `${action}: ${element}`,
+    level: 'info',
+    data: metadata,
+  });
 }
 
 /**
@@ -132,5 +310,18 @@ export function addBreadcrumb(breadcrumb: Sentry.Breadcrumb): void {
   Sentry.addBreadcrumb(breadcrumb);
 }
 
-// Export Sentry's ErrorBoundary for use in components
+/**
+ * Create a React profiler wrapper for component performance tracking
+ */
+export function withProfiler<P extends object>(
+  Component: React.ComponentType<P>,
+  name?: string
+): React.ComponentType<P> {
+  if (!isSentryEnabled) {
+    return Component;
+  }
+  return Sentry.withProfiler(Component, { name });
+}
+
+// Export Sentry for direct access when needed
 export { Sentry };
