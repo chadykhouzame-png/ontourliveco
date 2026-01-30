@@ -15,6 +15,8 @@ import VenueDashboard from '@/pages/VenueDashboard';
 import SearchArtists from '@/pages/SearchArtists';
 import ArtistProfile from '@/pages/ArtistProfile';
 import VenueProfile from '@/pages/VenueProfile';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -28,6 +30,8 @@ const AnimatedRoutes = () => {
         <Route path="/join/artist" element={<PageTransition><JoinArtist /></PageTransition>} />
         <Route path="/join/venue" element={<PageTransition><JoinVenue /></PageTransition>} />
         <Route path="/select-role" element={<PageTransition><SelectRole /></PageTransition>} />
+        <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+        <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
         
         {/* Artist Routes */}
         <Route path="/artist/setup" element={<PageTransition><ArtistSetup /></PageTransition>} />
