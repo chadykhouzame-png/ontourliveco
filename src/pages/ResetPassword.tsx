@@ -210,7 +210,7 @@ const ResetPassword = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={`h-12 rounded-xl pr-10 ${errors.password ? 'border-destructive' : ''}`}
+                    className={`sentry-mask h-12 rounded-xl pr-10 ${errors.password ? 'border-destructive' : ''}`}
                     required
                   />
                   <button
@@ -235,7 +235,7 @@ const ResetPassword = () => {
                     placeholder="••••••••"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`h-12 rounded-xl pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
+                    className={`sentry-mask h-12 rounded-xl pr-10 ${errors.confirmPassword ? 'border-destructive' : ''}`}
                     required
                   />
                   <button

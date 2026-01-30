@@ -128,7 +128,7 @@ const ForgotPassword = () => {
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className={`h-12 rounded-xl ${error ? 'border-destructive' : ''}`}
+                  className={`sentry-mask h-12 rounded-xl ${error ? 'border-destructive' : ''}`}
                   required
                 />
                 {error && (
