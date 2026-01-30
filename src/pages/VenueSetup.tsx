@@ -118,6 +118,37 @@ const VenueSetup = () => {
       });
       return;
     }
+
+    // Validate capacity
+    const minCap = parseInt(capacityMin);
+    const maxCap = parseInt(capacityMax);
+    
+    if (!capacityMin || !capacityMax || isNaN(minCap) || isNaN(maxCap)) {
+      toast({
+        variant: "destructive",
+        title: "Capacity required",
+        description: "Please enter both minimum and maximum capacity.",
+      });
+      return;
+    }
+
+    if (minCap < 1 || maxCap < 1) {
+      toast({
+        variant: "destructive",
+        title: "Invalid capacity",
+        description: "Capacity must be at least 1.",
+      });
+      return;
+    }
+
+    if (maxCap < minCap) {
+      toast({
+        variant: "destructive",
+        title: "Invalid capacity range",
+        description: "Maximum capacity must be greater than or equal to minimum.",
+      });
+      return;
+    }
     
     if (!instagramUrl.trim()) {
       toast({
@@ -139,8 +170,8 @@ const VenueSetup = () => {
         city: city.trim(),
         profile_image_url: profileImageUrl,
         venue_type: venueType,
-        capacity_min: capacityMin ? parseInt(capacityMin) : null,
-        capacity_max: capacityMax ? parseInt(capacityMax) : null,
+        capacity_min: minCap,
+        capacity_max: maxCap,
         description: description.trim() || null,
         music_preferences: musicPreferences,
         booking_nights: bookingNights,
@@ -280,7 +311,7 @@ const VenueSetup = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Capacity Range</Label>
+                  <Label>Capacity Range *</Label>
                   <div className="flex gap-2 items-center">
                     <Input
                       type="number"
@@ -288,6 +319,8 @@ const VenueSetup = () => {
                       value={capacityMin}
                       onChange={(e) => setCapacityMin(e.target.value)}
                       className="w-24"
+                      min={1}
+                      required
                     />
                     <span className="text-muted-foreground">to</span>
                     <Input
@@ -296,6 +329,8 @@ const VenueSetup = () => {
                       value={capacityMax}
                       onChange={(e) => setCapacityMax(e.target.value)}
                       className="w-24"
+                      min={1}
+                      required
                     />
                   </div>
                 </div>

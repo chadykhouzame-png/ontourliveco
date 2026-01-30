@@ -602,8 +602,8 @@ export type Database = {
         Row: {
           average_rating: number | null
           booking_nights: string[] | null
-          capacity_max: number | null
-          capacity_min: number | null
+          capacity_max: number
+          capacity_min: number
           city: string
           created_at: string
           description: string | null
@@ -626,8 +626,8 @@ export type Database = {
         Insert: {
           average_rating?: number | null
           booking_nights?: string[] | null
-          capacity_max?: number | null
-          capacity_min?: number | null
+          capacity_max: number
+          capacity_min: number
           city: string
           created_at?: string
           description?: string | null
@@ -650,8 +650,8 @@ export type Database = {
         Update: {
           average_rating?: number | null
           booking_nights?: string[] | null
-          capacity_max?: number | null
-          capacity_min?: number | null
+          capacity_max?: number
+          capacity_min?: number
           city?: string
           created_at?: string
           description?: string | null
