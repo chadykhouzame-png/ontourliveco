@@ -433,9 +433,27 @@ const SearchArtists = () => {
                     </div>
                   )}
 
+                  {/* Fee Range */}
+                  {(artist.fee_range_min || artist.fee_range_max) && (
+                    <div className="mt-3 flex items-center gap-2 text-primary">
+                      <DollarSign className="w-4 h-4" />
+                      <span className="text-sm font-medium">
+                        {artist.show_fee_range 
+                          ? (artist.fee_range_min && artist.fee_range_max 
+                              ? `$${artist.fee_range_min.toLocaleString()} - $${artist.fee_range_max.toLocaleString()}`
+                              : artist.fee_range_min 
+                                ? `From $${artist.fee_range_min.toLocaleString()}`
+                                : `Up to $${artist.fee_range_max?.toLocaleString()}`
+                            )
+                          : 'Contact for rates'
+                        }
+                      </span>
+                    </div>
+                  )}
+
                   {/* Social Link */}
                   {artist.instagram_url && (
-                    <div className="mt-4 flex items-center gap-2 text-muted-foreground">
+                    <div className="mt-3 flex items-center gap-2 text-muted-foreground">
                       <Instagram className="w-4 h-4" />
                       <span className="text-sm truncate">
                         {artist.instagram_url.replace('https://instagram.com/', '@')}

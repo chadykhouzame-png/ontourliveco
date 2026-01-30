@@ -307,16 +307,19 @@ const ArtistProfile = () => {
                   </div>
                 )}
 
-                {/* Fee Range - Show if artist has enabled it */}
-                {artist.show_fee_range && (artist.fee_range_min || artist.fee_range_max) && (
+                {/* Fee Range - Show rates or contact message */}
+                {(artist.fee_range_min || artist.fee_range_max) && (
                   <div className="mt-4 flex items-center gap-2 p-3 rounded-xl bg-primary/10 border border-primary/20">
                     <DollarSign className="w-5 h-5 text-primary" />
                     <span className="font-semibold text-primary">
-                      {artist.fee_range_min && artist.fee_range_max 
-                        ? `$${artist.fee_range_min.toLocaleString()} - $${artist.fee_range_max.toLocaleString()}`
-                        : artist.fee_range_min 
-                          ? `From $${artist.fee_range_min.toLocaleString()}`
-                          : `Up to $${artist.fee_range_max?.toLocaleString()}`
+                      {artist.show_fee_range 
+                        ? (artist.fee_range_min && artist.fee_range_max 
+                            ? `$${artist.fee_range_min.toLocaleString()} - $${artist.fee_range_max.toLocaleString()}`
+                            : artist.fee_range_min 
+                              ? `From $${artist.fee_range_min.toLocaleString()}`
+                              : `Up to $${artist.fee_range_max?.toLocaleString()}`
+                          )
+                        : 'Contact for rates'
                       }
                     </span>
                   </div>
