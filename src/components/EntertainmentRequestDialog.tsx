@@ -33,6 +33,7 @@ import {
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { Genre, GENRE_LABELS } from '@/types/database';
 
 const ALL_GENRES: Genre[] = [
@@ -74,6 +75,7 @@ export default function EntertainmentRequestDialog({
   onRequestCreated,
 }: EntertainmentRequestDialogProps) {
   const { toast } = useToast();
+  const { showError } = useErrorHandler();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormValues>({
@@ -149,13 +151,8 @@ export default function EntertainmentRequestDialog({
       form.reset();
       onOpenChange(false);
       onRequestCreated?.();
-    } catch (error: any) {
-      console.error('Error creating entertainment request:', error);
-      toast({
-        title: 'Error',
-        description: error.message || 'Failed to create request. Please try again.',
-        variant: 'destructive',
-      });
+    } catch (error: unknown) {
+      showError(error, 'creating entertainment request');
     } finally {
       setIsSubmitting(false);
     }

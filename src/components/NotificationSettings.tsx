@@ -6,10 +6,12 @@ import { Bell, Mail } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 
 export function NotificationSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { showError } = useErrorHandler();
   const [emailEnabled, setEmailEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -32,7 +34,7 @@ export function NotificationSettings() {
       
       setEmailEnabled(data?.email_notifications_enabled ?? true);
     } catch (error) {
-      console.error('Error fetching notification preferences:', error);
+      showError(error, 'fetching notification preferences');
     } finally {
       setIsLoading(false);
     }
@@ -55,17 +57,12 @@ export function NotificationSettings() {
       toast({
         title: enabled ? 'Email notifications enabled' : 'Email notifications disabled',
         description: enabled 
-          ? "You'll receive email updates for bookings and requests."
+        ? "You'll receive email updates for bookings and requests."
           : "You'll only receive in-app notifications.",
       });
     } catch (error) {
-      console.error('Error updating preferences:', error);
       setEmailEnabled(!enabled); // Revert on error
-      toast({
-        title: 'Error',
-        description: 'Failed to update notification preferences.',
-        variant: 'destructive',
-      });
+      showError(error, 'updating notification preferences');
     } finally {
       setIsSaving(false);
     }

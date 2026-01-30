@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Music, ArrowRight, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { Genre, GENRE_LABELS } from '@/types/database';
 import CityAutocomplete from '@/components/CityAutocomplete';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
@@ -34,6 +35,7 @@ const ArtistSetup = () => {
   const navigate = useNavigate();
   const { user, userRole, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
+  const { showErrorWithTitle } = useErrorHandler();
   
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -175,12 +177,8 @@ const ArtistSetup = () => {
         description: "Now let's add your travel dates.",
       });
       navigate('/artist/travel');
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error saving profile",
-        description: error.message || "Something went wrong. Please try again.",
-      });
+    } catch (error: unknown) {
+      showErrorWithTitle(error, "Error saving profile", 'artist-setup');
     } finally {
       setIsLoading(false);
     }
