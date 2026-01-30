@@ -53,11 +53,11 @@ const ArtistSetup = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [existingArtist, setExistingArtist] = useState(false);
 
-  // Fetch social connections
+  // Fetch social connections - use base table for owner (needs to see all connections, not just connected)
   const fetchSocialConnections = async (artistIdParam: string) => {
     const { data } = await supabase
       .from('social_connections')
-      .select('*')
+      .select('id, artist_id, platform, platform_username, profile_url, follower_count, is_connected, connected_at, last_synced_at, created_at, updated_at')
       .eq('artist_id', artistIdParam);
     
     if (data) {
