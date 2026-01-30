@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Music, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
@@ -66,6 +67,12 @@ const JoinArtist = () => {
       } else {
         const { error } = await signUp(email, password, 'artist');
         if (error) throw error;
+        
+        // Send welcome email (fire and forget)
+        supabase.functions.invoke('send-welcome-email', {
+          body: { email, userType: 'artist' },
+        }).catch(err => console.error('Failed to send welcome email:', err));
+        
         toast({
           title: "Welcome to On Tour!",
           description: "Let's set up your artist profile.",
