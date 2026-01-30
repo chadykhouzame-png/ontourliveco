@@ -2,6 +2,7 @@
  * Centralized Error Handler
  * Sanitizes database and API errors before displaying to users
  * Logs detailed errors for debugging while showing user-friendly messages
+ * Includes retry logic for transient failures
  */
 
 import { PostgrestError } from '@supabase/supabase-js';
@@ -12,8 +13,22 @@ export interface SanitizedError {
   isRetryable: boolean;
 }
 
+export interface RetryConfig {
+  maxRetries?: number;
+  baseDelayMs?: number;
+  maxDelayMs?: number;
+  backoffMultiplier?: number;
+}
+
+const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
+  maxRetries: 3,
+  baseDelayMs: 1000,
+  maxDelayMs: 10000,
+  backoffMultiplier: 2,
+};
+
 // Error codes that are safe to retry
-const RETRYABLE_CODES = ['PGRST301', 'PGRST504', '503', '429', 'ECONNRESET'];
+const RETRYABLE_CODES = ['PGRST301', 'PGRST504', '503', '429', 'ECONNRESET', 'NETWORK_ERROR', 'ETIMEDOUT', 'ENOTFOUND', 'ABORTED'];
 
 // Map of Postgres/Supabase error codes to user-friendly messages
 const ERROR_MAP: Record<string, string> = {
@@ -312,4 +327,114 @@ export function formatValidationErrors(errors: Record<string, string[]>): string
   if (messages.length === 0) return 'Please check your input.';
   if (messages.length === 1) return messages[0];
   return `Please fix the following: ${messages.slice(0, 3).join(', ')}${messages.length > 3 ? '...' : ''}`;
+}
+
+/**
+ * Calculate delay for exponential backoff with jitter
+ */
+function calculateBackoffDelay(attempt: number, config: Required<RetryConfig>): number {
+  const exponentialDelay = config.baseDelayMs * Math.pow(config.backoffMultiplier, attempt);
+  const cappedDelay = Math.min(exponentialDelay, config.maxDelayMs);
+  // Add jitter (±25%) to prevent thundering herd
+  const jitter = cappedDelay * 0.25 * (Math.random() * 2 - 1);
+  return Math.round(cappedDelay + jitter);
+}
+
+/**
+ * Sleep for a specified duration
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+/**
+ * Execute an async operation with automatic retry for transient failures
+ * Uses exponential backoff with jitter
+ */
+export async function withRetry<T>(
+  operation: () => Promise<T>,
+  config?: RetryConfig,
+  context?: string
+): Promise<T> {
+  const finalConfig = { ...DEFAULT_RETRY_CONFIG, ...config };
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= finalConfig.maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      const sanitized = sanitizeError(error, context);
+
+      // Don't retry if error is not retryable
+      if (!sanitized.isRetryable) {
+        throw error;
+      }
+
+      // Don't retry if we've exhausted attempts
+      if (attempt >= finalConfig.maxRetries) {
+        if (import.meta.env.DEV) {
+          console.error(`[Retry${context ? ` - ${context}` : ''}] All ${finalConfig.maxRetries} retries exhausted`);
+        }
+        throw error;
+      }
+
+      // Calculate delay and wait before retrying
+      const delay = calculateBackoffDelay(attempt, finalConfig);
+      if (import.meta.env.DEV) {
+        console.log(`[Retry${context ? ` - ${context}` : ''}] Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+      }
+      await sleep(delay);
+    }
+  }
+
+  // This should never be reached, but TypeScript needs it
+  throw lastError;
+}
+
+/**
+ * Check if an error is retryable
+ */
+export function isRetryableError(error: unknown): boolean {
+  const sanitized = sanitizeError(error);
+  return sanitized.isRetryable;
+}
+
+/**
+ * Get retry configuration for specific error types
+ */
+export function getRetryConfigForError(error: unknown): RetryConfig {
+  const sanitized = sanitizeError(error);
+  
+  // Rate limiting - use longer delays
+  if (sanitized.code === '429') {
+    return {
+      maxRetries: 5,
+      baseDelayMs: 5000,
+      maxDelayMs: 30000,
+      backoffMultiplier: 2,
+    };
+  }
+  
+  // Network errors - quick retries
+  if (sanitized.code === 'NETWORK_ERROR' || sanitized.code === 'ECONNRESET') {
+    return {
+      maxRetries: 3,
+      baseDelayMs: 500,
+      maxDelayMs: 5000,
+      backoffMultiplier: 2,
+    };
+  }
+  
+  // Timeouts - moderate delays
+  if (sanitized.code === 'PGRST504' || sanitized.code === 'ETIMEDOUT') {
+    return {
+      maxRetries: 2,
+      baseDelayMs: 2000,
+      maxDelayMs: 10000,
+      backoffMultiplier: 2,
+    };
+  }
+  
+  return DEFAULT_RETRY_CONFIG;
 }
