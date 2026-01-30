@@ -547,7 +547,56 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      social_connections_public: {
+        Row: {
+          artist_id: string | null
+          connected_at: string | null
+          created_at: string | null
+          follower_count: number | null
+          id: string | null
+          is_connected: boolean | null
+          last_synced_at: string | null
+          platform: Database["public"]["Enums"]["social_platform"] | null
+          platform_username: string | null
+          profile_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          artist_id?: string | null
+          connected_at?: string | null
+          created_at?: string | null
+          follower_count?: number | null
+          id?: string | null
+          is_connected?: boolean | null
+          last_synced_at?: string | null
+          platform?: Database["public"]["Enums"]["social_platform"] | null
+          platform_username?: string | null
+          profile_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          artist_id?: string | null
+          connected_at?: string | null
+          created_at?: string | null
+          follower_count?: number | null
+          id?: string | null
+          is_connected?: boolean | null
+          last_synced_at?: string | null
+          platform?: Database["public"]["Enums"]["social_platform"] | null
+          platform_username?: string | null
+          profile_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_connections_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       get_user_role: {
