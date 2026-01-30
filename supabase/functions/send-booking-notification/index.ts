@@ -121,10 +121,10 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get recipient's email from profiles
+    // Get recipient's email and notification preferences from profiles
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('email')
+      .select('email, email_notifications_enabled')
       .eq('user_id', recipient_user_id)
       .single();
 
@@ -132,6 +132,9 @@ serve(async (req: Request) => {
       console.error('Error fetching recipient profile:', profileError);
       throw new Error('Recipient not found');
     }
+
+    // Check if user has opted out of email notifications
+    const emailOptedOut = profile.email_notifications_enabled === false;
 
     // Format the date for display
     const formattedDate = new Date(requested_date).toLocaleDateString('en-US', {
@@ -222,6 +225,15 @@ serve(async (req: Request) => {
 
     if (notificationError) {
       console.error('Error creating notification:', notificationError);
+    }
+
+    // Check if user has opted out of email notifications
+    if (emailOptedOut) {
+      console.log('User has opted out of email notifications, skipping email');
+      return new Response(
+        JSON.stringify({ success: true, email_sent: false, notification_created: true, reason: 'User opted out of email notifications' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     // Send email if Resend is configured
