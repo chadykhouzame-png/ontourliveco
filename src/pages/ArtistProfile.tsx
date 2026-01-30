@@ -167,7 +167,7 @@ const ArtistProfile = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
+      const { data: insertedData, error } = await supabase
         .from('booking_requests')
         .insert({
           artist_id: artist.id,
@@ -176,9 +176,28 @@ const ArtistProfile = () => {
           requested_time: bookingTime || null,
           message: bookingMessage.trim() || null,
           offer_amount: offerAmount ? parseInt(offerAmount) : null,
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Send notification to artist
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            type: 'new_offer',
+            booking_request_id: insertedData.id,
+            sender_name: venue.venue_name,
+            recipient_user_id: artist.user_id,
+            requested_date: format(bookingDate, 'yyyy-MM-dd'),
+            offer_amount: offerAmount ? parseInt(offerAmount) : undefined,
+            message: bookingMessage.trim() || undefined,
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send notification:', notifyError);
+      }
 
       toast({
         title: "Booking request sent!",
