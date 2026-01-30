@@ -234,22 +234,17 @@ const VenueProfile = () => {
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 {/* Capacity */}
-                {(venue.capacity_min || venue.capacity_max) && (
-                  <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30">
-                    <div className="w-10 h-10 rounded-xl bg-venue/20 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-venue" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Capacity</p>
-                      <p className="font-semibold">
-                        {venue.capacity_min && venue.capacity_max 
-                          ? `${venue.capacity_min} - ${venue.capacity_max}`
-                          : venue.capacity_min || venue.capacity_max
-                        }
-                      </p>
-                    </div>
+                <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30">
+                  <div className="w-10 h-10 rounded-xl bg-venue/20 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-venue" />
                   </div>
-                )}
+                  <div>
+                    <p className="text-sm text-muted-foreground">Capacity</p>
+                    <p className="font-semibold">
+                      {venue.capacity_min} - {venue.capacity_max} guests
+                    </p>
+                  </div>
+                </div>
 
                 {/* Booking Nights */}
                 {venue.booking_nights && venue.booking_nights.length > 0 && (
