@@ -100,6 +100,9 @@ const ArtistDashboard = () => {
   };
 
   const handleUpdateRequestStatus = async (requestId: string, status: BookingStatus) => {
+    const request = bookingRequests.find(r => r.id === requestId);
+    if (!request) return;
+
     const { error } = await supabase
       .from('booking_requests')
       .update({ status })
@@ -114,6 +117,29 @@ const ArtistDashboard = () => {
         toast({
           title: "Booking marked as completed",
           description: "You can now leave a review for this venue.",
+        });
+      } else if (status === 'accepted' || status === 'declined') {
+        // Send notification to venue
+        try {
+          await supabase.functions.invoke('send-booking-notification', {
+            body: {
+              type: status,
+              booking_request_id: requestId,
+              sender_name: artist?.artist_name || 'An artist',
+              recipient_user_id: request.venue?.user_id,
+              requested_date: request.requested_date,
+              offer_amount: request.offer_amount,
+            },
+          });
+        } catch (notifyError) {
+          console.error('Failed to send notification:', notifyError);
+        }
+        
+        toast({
+          title: status === 'accepted' ? "Booking accepted!" : "Booking declined",
+          description: status === 'accepted' 
+            ? "The venue has been notified." 
+            : "The venue has been notified of your decision.",
         });
       }
     }
@@ -148,6 +174,23 @@ const ArtistDashboard = () => {
         .eq('id', selectedBooking.id);
       
       if (error) throw error;
+      
+      // Send notification to venue
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            type: 'counter_offer',
+            booking_request_id: selectedBooking.id,
+            sender_name: artist?.artist_name || 'An artist',
+            recipient_user_id: selectedBooking.venue?.user_id,
+            requested_date: selectedBooking.requested_date,
+            offer_amount: selectedBooking.offer_amount,
+            counter_offer: parseInt(counterOfferAmount),
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send notification:', notifyError);
+      }
       
       setBookingRequests(prev => prev.map(req => 
         req.id === selectedBooking.id 
