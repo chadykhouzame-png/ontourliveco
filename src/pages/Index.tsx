@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Music, Building2, MapPin, Calendar, Star, MessageSquare, ArrowRight, Check, Mail, Menu } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { socialLinks } from "@/config/social";
-import ErrorTrigger from "@/components/ErrorTrigger";
+
 
 const Index = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -63,12 +63,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Dev-only Error Trigger for testing ErrorBoundary */}
-      {import.meta.env.DEV && (
-        <div className="fixed bottom-4 left-4 z-50">
-          <ErrorTrigger />
-        </div>
-      )}
+      
       
       {/* Navigation - iOS frosted glass style */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/30">
