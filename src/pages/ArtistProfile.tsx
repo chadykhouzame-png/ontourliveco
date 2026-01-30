@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { Artist, TravelDate, Venue, GENRE_LABELS } from '@/types/database';
 import { SocialStatsDisplay, SocialPlatform } from '@/components/SocialConnectButton';
+import { RatingDisplay } from '@/components/StarRating';
 
 type SocialConnection = {
   platform: SocialPlatform;
@@ -221,6 +222,14 @@ const ArtistProfile = () => {
                     <MapPin className="w-4 h-4" />
                     {artist.primary_city}
                   </p>
+                  {/* Rating Display */}
+                  <div className="mt-2">
+                    <RatingDisplay 
+                      rating={(artist as any).average_rating} 
+                      totalReviews={(artist as any).total_reviews || 0}
+                      size="md"
+                    />
+                  </div>
                 </div>
 
                 {/* Genres */}

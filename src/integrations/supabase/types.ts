@@ -17,6 +17,7 @@ export type Database = {
       artists: {
         Row: {
           artist_name: string
+          average_rating: number | null
           bio: string | null
           created_at: string
           fee_range_max: number | null
@@ -34,11 +35,13 @@ export type Database = {
           soundcloud_url: string | null
           spotify_url: string | null
           tiktok_url: string | null
+          total_reviews: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
           artist_name: string
+          average_rating?: number | null
           bio?: string | null
           created_at?: string
           fee_range_max?: number | null
@@ -56,11 +59,13 @@ export type Database = {
           soundcloud_url?: string | null
           spotify_url?: string | null
           tiktok_url?: string | null
+          total_reviews?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
           artist_name?: string
+          average_rating?: number | null
           bio?: string | null
           created_at?: string
           fee_range_max?: number | null
@@ -78,6 +83,7 @@ export type Database = {
           soundcloud_url?: string | null
           spotify_url?: string | null
           tiktok_url?: string | null
+          total_reviews?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -160,6 +166,87 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          booking_request_id: string
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          reviewee_artist_id: string | null
+          reviewee_type: string
+          reviewee_venue_id: string | null
+          reviewer_artist_id: string | null
+          reviewer_type: string
+          reviewer_venue_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_request_id: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          reviewee_artist_id?: string | null
+          reviewee_type: string
+          reviewee_venue_id?: string | null
+          reviewer_artist_id?: string | null
+          reviewer_type: string
+          reviewer_venue_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_request_id?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          reviewee_artist_id?: string | null
+          reviewee_type?: string
+          reviewee_venue_id?: string | null
+          reviewer_artist_id?: string | null
+          reviewer_type?: string
+          reviewer_venue_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_request_id_fkey"
+            columns: ["booking_request_id"]
+            isOneToOne: false
+            referencedRelation: "booking_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewee_artist_id_fkey"
+            columns: ["reviewee_artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewee_venue_id_fkey"
+            columns: ["reviewee_venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_artist_id_fkey"
+            columns: ["reviewer_artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_reviewer_venue_id_fkey"
+            columns: ["reviewer_venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       social_connections: {
         Row: {
@@ -290,6 +377,7 @@ export type Database = {
       }
       venues: {
         Row: {
+          average_rating: number | null
           booking_nights: string[] | null
           capacity_max: number | null
           capacity_min: number | null
@@ -306,12 +394,14 @@ export type Database = {
           profile_image_url: string | null
           review_status: string
           tiktok_url: string | null
+          total_reviews: number | null
           updated_at: string
           user_id: string
           venue_name: string
           venue_type: Database["public"]["Enums"]["venue_type"]
         }
         Insert: {
+          average_rating?: number | null
           booking_nights?: string[] | null
           capacity_max?: number | null
           capacity_min?: number | null
@@ -328,12 +418,14 @@ export type Database = {
           profile_image_url?: string | null
           review_status?: string
           tiktok_url?: string | null
+          total_reviews?: number | null
           updated_at?: string
           user_id: string
           venue_name: string
           venue_type?: Database["public"]["Enums"]["venue_type"]
         }
         Update: {
+          average_rating?: number | null
           booking_nights?: string[] | null
           capacity_max?: number | null
           capacity_min?: number | null
@@ -350,6 +442,7 @@ export type Database = {
           profile_image_url?: string | null
           review_status?: string
           tiktok_url?: string | null
+          total_reviews?: number | null
           updated_at?: string
           user_id?: string
           venue_name?: string

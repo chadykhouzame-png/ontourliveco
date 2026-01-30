@@ -29,7 +29,7 @@ export type VenueType =
   | 'private_event' 
   | 'other';
 
-export type BookingStatus = 'pending' | 'accepted' | 'declined' | 'cancelled';
+export type BookingStatus = 'pending' | 'accepted' | 'declined' | 'cancelled' | 'completed';
 
 export type AppRole = 'artist' | 'venue' | 'admin';
 
@@ -137,4 +137,5 @@ export const BOOKING_STATUS_LABELS: Record<BookingStatus, string> = {
   accepted: 'Accepted',
   declined: 'Declined',
   cancelled: 'Cancelled',
+  completed: 'Completed',
 };

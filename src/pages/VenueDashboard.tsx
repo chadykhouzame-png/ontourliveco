@@ -5,17 +5,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, Search, Calendar, MessageSquare, Settings, LogOut } from 'lucide-react';
+import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
-import { BookingRequest, Venue, BOOKING_STATUS_LABELS } from '@/types/database';
+import { BookingRequest, Venue, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
+import { RatingDisplay } from '@/components/StarRating';
+import ReviewFormDialog from '@/components/ReviewFormDialog';
+import { useToast } from '@/hooks/use-toast';
 
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   
   const [venue, setVenue] = useState<Venue | null>(null);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
+  const [existingReviews, setExistingReviews] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Review dialog state
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<BookingRequest | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -48,7 +57,16 @@ const VenueDashboard = () => {
         .eq('venue_id', venueData.id)
         .order('created_at', { ascending: false });
       
-      setBookingRequests(requests || []);
+      setBookingRequests((requests || []) as BookingRequest[]);
+      
+      // Get existing reviews by this venue
+      const { data: reviews } = await supabase
+        .from('reviews')
+        .select('booking_request_id')
+        .eq('reviewer_type', 'venue')
+        .eq('reviewer_venue_id', venueData.id);
+      
+      setExistingReviews((reviews || []).map(r => r.booking_request_id));
       setIsLoading(false);
     };
     
@@ -58,6 +76,34 @@ const VenueDashboard = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleMarkCompleted = async (requestId: string) => {
+    const { error } = await supabase
+      .from('booking_requests')
+      .update({ status: 'completed' as BookingStatus })
+      .eq('id', requestId);
+    
+    if (!error) {
+      setBookingRequests(prev => prev.map(req => 
+        req.id === requestId ? { ...req, status: 'completed' as BookingStatus } : req
+      ));
+      toast({
+        title: "Booking marked as completed",
+        description: "You can now leave a review for the artist.",
+      });
+    }
+  };
+
+  const handleOpenReviewDialog = (booking: BookingRequest) => {
+    setSelectedBooking(booking);
+    setReviewDialogOpen(true);
+  };
+
+  const handleReviewSubmitted = () => {
+    if (selectedBooking) {
+      setExistingReviews(prev => [...prev, selectedBooking.id]);
+    }
   };
 
   if (authLoading || isLoading) {
@@ -70,7 +116,9 @@ const VenueDashboard = () => {
 
   const pendingRequests = bookingRequests.filter(r => r.status === 'pending');
   const acceptedRequests = bookingRequests.filter(r => r.status === 'accepted');
+  const completedRequests = bookingRequests.filter(r => r.status === 'completed');
   const upcomingBookings = acceptedRequests.filter(r => new Date(r.requested_date) >= new Date());
+  const pastAcceptedBookings = acceptedRequests.filter(r => new Date(r.requested_date) < new Date());
 
   return (
     <div className="min-h-screen bg-background">
@@ -202,9 +250,38 @@ const VenueDashboard = () => {
                         </Badge>
                       </div>
                       {request.offer_amount && (
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground mb-3">
                           Offered: ${request.offer_amount}
                         </p>
+                      )}
+                      {request.status === 'accepted' && new Date(request.requested_date) < new Date() && (
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleMarkCompleted(request.id)}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Mark as Completed
+                        </Button>
+                      )}
+                      {request.status === 'completed' && (
+                        <div className="flex gap-2">
+                          {existingReviews.includes(request.id) ? (
+                            <Badge variant="secondary" className="gap-1">
+                              <Star className="w-3 h-3" />
+                              Review submitted
+                            </Badge>
+                          ) : (
+                            <Button 
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleOpenReviewDialog(request)}
+                            >
+                              <Star className="w-4 h-4 mr-1" />
+                              Leave Review
+                            </Button>
+                          )}
+                        </div>
                       )}
                     </div>
                   ))}
@@ -235,6 +312,21 @@ const VenueDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Review Dialog */}
+      {selectedBooking && venue && (
+        <ReviewFormDialog
+          open={reviewDialogOpen}
+          onOpenChange={setReviewDialogOpen}
+          bookingRequestId={selectedBooking.id}
+          reviewerType="venue"
+          reviewerId={venue.id}
+          revieweeType="artist"
+          revieweeId={selectedBooking.artist_id}
+          revieweeName={selectedBooking.artist?.artist_name || 'the artist'}
+          onReviewSubmitted={handleReviewSubmitted}
+        />
+      )}
     </div>
   );
 };
