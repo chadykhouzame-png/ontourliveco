@@ -11,7 +11,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 export function NotificationSettings() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const { showError } = useErrorHandler();
+  const { executeWithRetry } = useErrorHandler();
   const [emailEnabled, setEmailEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -24,17 +24,23 @@ export function NotificationSettings() {
 
   const fetchPreferences = async () => {
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('email_notifications_enabled')
-        .eq('user_id', user?.id)
-        .single();
+      const data = await executeWithRetry(
+        async () => {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('email_notifications_enabled')
+            .eq('user_id', user?.id)
+            .single();
 
-      if (error) throw error;
+          if (error) throw error;
+          return data;
+        },
+        'fetching notification preferences'
+      );
       
       setEmailEnabled(data?.email_notifications_enabled ?? true);
-    } catch (error) {
-      showError(error, 'fetching notification preferences');
+    } catch {
+      // Error already shown by executeWithRetry
     } finally {
       setIsLoading(false);
     }
@@ -47,22 +53,27 @@ export function NotificationSettings() {
     setEmailEnabled(enabled);
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ email_notifications_enabled: enabled })
-        .eq('user_id', user.id);
+      await executeWithRetry(
+        async () => {
+          const { error } = await supabase
+            .from('profiles')
+            .update({ email_notifications_enabled: enabled })
+            .eq('user_id', user.id);
 
-      if (error) throw error;
+          if (error) throw error;
+        },
+        'updating notification preferences'
+      );
 
       toast({
         title: enabled ? 'Email notifications enabled' : 'Email notifications disabled',
         description: enabled 
-        ? "You'll receive email updates for bookings and requests."
+          ? "You'll receive email updates for bookings and requests."
           : "You'll only receive in-app notifications.",
       });
-    } catch (error) {
+    } catch {
       setEmailEnabled(!enabled); // Revert on error
-      showError(error, 'updating notification preferences');
+      // Error already shown by executeWithRetry
     } finally {
       setIsSaving(false);
     }
