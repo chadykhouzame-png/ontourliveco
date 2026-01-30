@@ -5,12 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Music, Instagram, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Genre, GENRE_LABELS } from '@/types/database';
+import CityAutocomplete from '@/components/CityAutocomplete';
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
@@ -181,11 +181,11 @@ const ArtistSetup = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="primaryCity">Primary City *</Label>
-                  <Input
+                  <CityAutocomplete
                     id="primaryCity"
                     placeholder="Sydney, Australia"
                     value={primaryCity}
-                    onChange={(e) => setPrimaryCity(e.target.value)}
+                    onChange={setPrimaryCity}
                     required
                   />
                 </div>

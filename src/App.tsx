@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import JoinArtist from "./pages/JoinArtist";
 import JoinVenue from "./pages/JoinVenue";
+import SelectRole from "./pages/SelectRole";
 import ArtistSetup from "./pages/ArtistSetup";
 import VenueSetup from "./pages/VenueSetup";
 import ArtistTravel from "./pages/ArtistTravel";
@@ -32,6 +33,7 @@ const App = () => (
             {/* Auth Routes */}
             <Route path="/join/artist" element={<JoinArtist />} />
             <Route path="/join/venue" element={<JoinVenue />} />
+            <Route path="/select-role" element={<SelectRole />} />
             
             {/* Artist Routes */}
             <Route path="/artist/setup" element={<ArtistSetup />} />
