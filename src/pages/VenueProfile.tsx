@@ -9,6 +9,7 @@ import { Building2, MapPin, Users, Music, Calendar, Instagram, ExternalLink, Arr
 import { Venue, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
+import { cn } from '@/lib/utils';
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -104,20 +105,20 @@ const VenueProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
+      {/* iOS Glass Header */}
+      <header className="sticky top-0 z-50 glass border-b border-border/50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-black tracking-tighter">
             <span className="text-primary">ON</span>
             <span className="text-foreground">TOUR</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {user ? (
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <Button variant="ghost" size="icon" onClick={handleSignOut} className="ios-press">
                 <LogOut className="w-4 h-4" />
               </Button>
             ) : (
-              <Button onClick={() => navigate('/join/artist')}>
+              <Button onClick={() => navigate('/join/artist')} className="ios-press">
                 Join as Artist
               </Button>
             )}
@@ -125,34 +126,34 @@ const VenueProfile = () => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8 stagger-children">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6"
+          className="mb-6 ios-press"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Hero */}
-            <Card className="bg-card border-border overflow-hidden">
-              <div className="h-32 bg-gradient-to-r from-venue/30 to-venue/10" />
+          <div className="lg:col-span-2 space-y-5">
+            {/* Hero Card */}
+            <Card className="overflow-hidden">
+              <div className="h-32 bg-gradient-to-br from-venue/40 via-venue/20 to-transparent" />
               <CardContent className="relative pt-0">
-                <div className="w-24 h-24 rounded-2xl bg-venue/20 flex items-center justify-center -mt-12 border-4 border-card">
+                <div className="w-24 h-24 rounded-2xl bg-venue/20 backdrop-blur-sm flex items-center justify-center -mt-12 border-4 border-card shadow-ios">
                   <Building2 className="w-12 h-12 text-venue" />
                 </div>
                 <div className="mt-4">
-                  <h1 className="text-3xl font-bold">{venue.venue_name}</h1>
+                  <h1 className="text-3xl font-bold tracking-tight">{venue.venue_name}</h1>
                   <p className="text-muted-foreground flex items-center gap-2 mt-1">
                     <MapPin className="w-4 h-4" />
                     {venue.city}
                   </p>
                   {/* Rating Display */}
-                  <div className="mt-2">
+                  <div className="mt-3">
                     <RatingDisplay 
                       rating={(venue as any).average_rating} 
                       totalReviews={(venue as any).total_reviews || 0}
@@ -163,7 +164,7 @@ const VenueProfile = () => {
 
                 {/* Venue Type Badge */}
                 <div className="mt-4">
-                  <Badge className="bg-venue/20 text-venue border-0">
+                  <Badge className="bg-venue/20 text-venue border-0 rounded-full px-3">
                     {VENUE_TYPE_LABELS[venue.venue_type]}
                   </Badge>
                 </div>
@@ -172,21 +173,21 @@ const VenueProfile = () => {
 
             {/* Description */}
             {venue.description && (
-              <Card className="bg-card border-border">
+              <Card>
                 <CardHeader>
-                  <CardTitle>About</CardTitle>
+                  <CardTitle className="text-lg">About</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{venue.description}</p>
+                  <p className="text-muted-foreground leading-relaxed">{venue.description}</p>
                 </CardContent>
               </Card>
             )}
 
             {/* Music Preferences */}
             {venue.music_preferences && venue.music_preferences.length > 0 && (
-              <Card className="bg-card border-border">
+              <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-lg">
                     <Music className="w-5 h-5 text-venue" />
                     Music Preferences
                   </CardTitle>
@@ -194,7 +195,7 @@ const VenueProfile = () => {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {venue.music_preferences.map((genre) => (
-                      <Badge key={genre} variant="outline" className="border-venue/30 text-venue">
+                      <Badge key={genre} variant="outline" className="border-venue/30 text-venue rounded-full px-3">
                         {GENRE_LABELS[genre]}
                       </Badge>
                     ))}
@@ -205,12 +206,12 @@ const VenueProfile = () => {
 
             {/* Equipment Notes */}
             {venue.equipment_notes && (
-              <Card className="bg-card border-border">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Equipment & Notes</CardTitle>
+                  <CardTitle className="text-lg">Equipment & Notes</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{venue.equipment_notes}</p>
+                  <p className="text-muted-foreground leading-relaxed">{venue.equipment_notes}</p>
                 </CardContent>
               </Card>
             )}
@@ -223,22 +224,22 @@ const VenueProfile = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Venue Details */}
-            <Card className="bg-card border-border">
+            <Card>
               <CardHeader>
-                <CardTitle>Venue Details</CardTitle>
+                <CardTitle className="text-lg">Venue Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Capacity */}
                 {(venue.capacity_min || venue.capacity_max) && (
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-venue/10 flex items-center justify-center">
+                  <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30">
+                    <div className="w-10 h-10 rounded-xl bg-venue/10 flex items-center justify-center">
                       <Users className="w-5 h-5 text-venue" />
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Capacity</p>
-                      <p className="font-medium">
+                      <p className="font-semibold">
                         {venue.capacity_min && venue.capacity_max 
                           ? `${venue.capacity_min} - ${venue.capacity_max}`
                           : venue.capacity_min || venue.capacity_max
@@ -250,15 +251,15 @@ const VenueProfile = () => {
 
                 {/* Booking Nights */}
                 {venue.booking_nights && venue.booking_nights.length > 0 && (
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-venue/10 flex items-center justify-center">
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary/30">
+                    <div className="w-10 h-10 rounded-xl bg-venue/10 flex items-center justify-center">
                       <Calendar className="w-5 h-5 text-venue" />
                     </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Booking Nights</p>
-                      <div className="flex flex-wrap gap-1 mt-1">
+                    <div className="flex-1">
+                      <p className="text-sm text-muted-foreground mb-2">Booking Nights</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {venue.booking_nights.map((night) => (
-                          <Badge key={night} variant="secondary" className="text-xs">
+                          <Badge key={night} variant="secondary" className="text-xs rounded-full">
                             {night}
                           </Badge>
                         ))}
@@ -271,19 +272,19 @@ const VenueProfile = () => {
 
             {/* Social Links */}
             {venue.instagram_url && (
-              <Card className="bg-card border-border">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Links</CardTitle>
+                  <CardTitle className="text-lg">Links</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <a 
                     href={venue.instagram_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                    className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-200 ios-press"
                   >
                     <Instagram className="w-5 h-5" />
-                    <span className="flex-1">Instagram</span>
+                    <span className="flex-1 font-medium">Instagram</span>
                     <ExternalLink className="w-4 h-4 text-muted-foreground" />
                   </a>
                 </CardContent>

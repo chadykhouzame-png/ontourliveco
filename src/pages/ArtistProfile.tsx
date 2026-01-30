@@ -220,20 +220,20 @@ const ArtistProfile = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
+      {/* iOS Glass Header */}
+      <header className="sticky top-0 z-50 glass border-b border-border/50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-black tracking-tighter">
             <span className="text-primary">ON</span>
             <span className="text-foreground">TOUR</span>
           </Link>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {user ? (
-              <Button variant="ghost" size="icon" onClick={handleSignOut}>
+              <Button variant="ghost" size="icon" onClick={handleSignOut} className="ios-press">
                 <LogOut className="w-4 h-4" />
               </Button>
             ) : (
-              <Button onClick={() => navigate('/join/venue')}>
+              <Button onClick={() => navigate('/join/venue')} className="ios-press">
                 Join as Venue
               </Button>
             )}
@@ -241,34 +241,34 @@ const ArtistProfile = () => {
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-6 py-8 stagger-children">
         <Button
           variant="ghost"
           onClick={() => navigate(-1)}
-          className="mb-6"
+          className="mb-6 ios-press"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Hero */}
-            <Card className="bg-card border-border overflow-hidden">
-              <div className="h-32 bg-gradient-to-r from-artist/30 to-artist/10" />
+          <div className="lg:col-span-2 space-y-5">
+            {/* Hero Card */}
+            <Card className="overflow-hidden">
+              <div className="h-32 bg-gradient-to-br from-artist/40 via-artist/20 to-transparent" />
               <CardContent className="relative pt-0">
-                <div className="w-24 h-24 rounded-2xl bg-artist/20 flex items-center justify-center -mt-12 border-4 border-card">
+                <div className="w-24 h-24 rounded-2xl bg-artist/20 backdrop-blur-sm flex items-center justify-center -mt-12 border-4 border-card shadow-ios">
                   <Music className="w-12 h-12 text-artist" />
                 </div>
                 <div className="mt-4">
-                  <h1 className="text-3xl font-bold">{artist.artist_name}</h1>
+                  <h1 className="text-3xl font-bold tracking-tight">{artist.artist_name}</h1>
                   <p className="text-muted-foreground flex items-center gap-2 mt-1">
                     <MapPin className="w-4 h-4" />
                     {artist.primary_city}
                   </p>
                   {/* Rating Display */}
-                  <div className="mt-2">
+                  <div className="mt-3">
                     <RatingDisplay 
                       rating={(artist as any).average_rating} 
                       totalReviews={(artist as any).total_reviews || 0}
@@ -281,7 +281,7 @@ const ArtistProfile = () => {
                 {artist.genres && artist.genres.length > 0 && (
                   <div className="mt-4 flex flex-wrap gap-2">
                     {artist.genres.map((genre) => (
-                      <Badge key={genre} className="bg-artist/20 text-artist border-0">
+                      <Badge key={genre} className="bg-artist/20 text-artist border-0 rounded-full px-3">
                         {GENRE_LABELS[genre]}
                       </Badge>
                     ))}
@@ -292,21 +292,21 @@ const ArtistProfile = () => {
 
             {/* Bio */}
             {artist.bio && (
-              <Card className="bg-card border-border">
+              <Card>
                 <CardHeader>
-                  <CardTitle>About</CardTitle>
+                  <CardTitle className="text-lg">About</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{artist.bio}</p>
+                  <p className="text-muted-foreground leading-relaxed">{artist.bio}</p>
                 </CardContent>
               </Card>
             )}
 
             {/* Social Stats */}
             {socialConnections.length > 0 && (
-              <Card className="bg-card border-border">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Social Stats</CardTitle>
+                  <CardTitle className="text-lg">Social Stats</CardTitle>
                   <CardDescription>Verified follower counts</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -317,20 +317,20 @@ const ArtistProfile = () => {
 
             {/* Social Links (legacy URLs) */}
             {(artist.instagram_url || artist.soundcloud_url || artist.spotify_url) && (
-              <Card className="bg-card border-border">
+              <Card>
                 <CardHeader>
-                  <CardTitle>Links</CardTitle>
+                  <CardTitle className="text-lg">Links</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-2">
                   {artist.instagram_url && (
                     <a 
                       href={artist.instagram_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-200 ios-press"
                     >
                       <Instagram className="w-5 h-5" />
-                      <span className="flex-1">Instagram</span>
+                      <span className="flex-1 font-medium">Instagram</span>
                       <ExternalLink className="w-4 h-4 text-muted-foreground" />
                     </a>
                   )}
@@ -339,10 +339,10 @@ const ArtistProfile = () => {
                       href={artist.soundcloud_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-200 ios-press"
                     >
                       <Music className="w-5 h-5" />
-                      <span className="flex-1">SoundCloud</span>
+                      <span className="flex-1 font-medium">SoundCloud</span>
                       <ExternalLink className="w-4 h-4 text-muted-foreground" />
                     </a>
                   )}
@@ -351,10 +351,10 @@ const ArtistProfile = () => {
                       href={artist.spotify_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
+                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-200 ios-press"
                     >
                       <Music className="w-5 h-5" />
-                      <span className="flex-1">Spotify</span>
+                      <span className="flex-1 font-medium">Spotify</span>
                       <ExternalLink className="w-4 h-4 text-muted-foreground" />
                     </a>
                   )}
@@ -370,11 +370,11 @@ const ArtistProfile = () => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Travel Dates */}
-            <Card className="bg-card border-border">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-lg">
                   <CalendarIcon className="w-5 h-5 text-artist" />
                   Upcoming Travel
                 </CardTitle>
@@ -387,7 +387,7 @@ const ArtistProfile = () => {
               </CardHeader>
               <CardContent>
                 {travelDates.length === 0 ? (
-                  <p className="text-muted-foreground text-sm text-center py-4">
+                  <p className="text-muted-foreground text-sm text-center py-6">
                     No upcoming travel dates
                   </p>
                 ) : (
@@ -396,8 +396,10 @@ const ArtistProfile = () => {
                       <div 
                         key={td.id}
                         className={cn(
-                          "p-3 rounded-lg border",
-                          td.is_available ? "border-artist/30 bg-artist/5" : "border-border"
+                          "p-4 rounded-xl border transition-all duration-200",
+                          td.is_available 
+                            ? "border-artist/30 bg-artist/5 shadow-sm" 
+                            : "border-border/50 bg-secondary/30"
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -409,12 +411,12 @@ const ArtistProfile = () => {
                             <span className="font-medium">{td.city}</span>
                           </div>
                           {td.is_available && (
-                            <Badge variant="outline" className="text-xs border-artist text-artist">
+                            <Badge variant="outline" className="text-xs border-artist text-artist rounded-full">
                               Available
                             </Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1">
+                        <p className="text-sm text-muted-foreground mt-2">
                           {format(new Date(td.start_date), 'MMM d')} – {format(new Date(td.end_date), 'MMM d, yyyy')}
                         </p>
                       </div>
@@ -428,12 +430,12 @@ const ArtistProfile = () => {
             {userRole === 'venue' && venue ? (
               <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
                 <DialogTrigger asChild>
-                  <Button className="w-full bg-venue hover:bg-venue/90" size="lg">
+                  <Button className="w-full bg-venue hover:bg-venue/90 ios-press shadow-ios" size="lg">
                     <Send className="w-4 h-4 mr-2" />
                     Send Booking Request
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-card">
+                <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Book {artist.artist_name}</DialogTitle>
                     <DialogDescription>
@@ -442,10 +444,10 @@ const ArtistProfile = () => {
                   </DialogHeader>
                   
                   {/* Venue Rating Display */}
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
                     <div>
-                      <p className="text-sm font-medium">{venue.venue_name}</p>
-                      <p className="text-xs text-muted-foreground">{venue.city}</p>
+                      <p className="font-medium">{venue.venue_name}</p>
+                      <p className="text-sm text-muted-foreground">{venue.city}</p>
                     </div>
                     <RatingDisplay 
                       rating={(venue as any).average_rating} 
@@ -453,7 +455,7 @@ const ArtistProfile = () => {
                       size="sm"
                     />
                   </div>
-                  <div className="space-y-4 py-4">
+                  <div className="space-y-4 py-2">
                     <div className="space-y-2">
                       <Label>Date *</Label>
                       <Popover>
@@ -466,58 +468,66 @@ const ArtistProfile = () => {
                             )}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
-                            {bookingDate ? format(bookingDate, "PPP") : "Pick a date"}
+                            {bookingDate ? format(bookingDate, 'PPP') : 'Select a date'}
                           </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0 bg-popover" align="start">
+                        <PopoverContent className="w-auto p-0" align="start">
                           <Calendar
                             mode="single"
                             selected={bookingDate}
                             onSelect={setBookingDate}
-                            initialFocus
-                            className="pointer-events-auto"
                             disabled={(date) => date < new Date()}
+                            initialFocus
                           />
                         </PopoverContent>
                       </Popover>
                     </div>
-
+                    
                     <div className="space-y-2">
                       <Label>Time (optional)</Label>
-                      <Input
-                        placeholder="e.g., 9 PM - 2 AM"
+                      <Input 
+                        type="time" 
                         value={bookingTime}
                         onChange={(e) => setBookingTime(e.target.value)}
                       />
                     </div>
-
+                    
                     <div className="space-y-2">
                       <Label>Offer Amount (optional)</Label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
-                        <Input
+                        <Input 
                           type="number"
-                          placeholder="500"
+                          placeholder="0"
                           value={offerAmount}
                           onChange={(e) => setOfferAmount(e.target.value)}
                           className="pl-7"
                         />
                       </div>
                     </div>
-
+                    
                     <div className="space-y-2">
                       <Label>Message (optional)</Label>
-                      <Textarea
-                        placeholder="Tell them about the event, vibe, what you're looking for..."
+                      <Textarea 
+                        placeholder="Tell them about your event..."
                         value={bookingMessage}
                         onChange={(e) => setBookingMessage(e.target.value)}
-                        className="min-h-[100px]"
+                        rows={3}
                       />
                     </div>
-
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
                     <Button 
+                      variant="outline" 
+                      className="flex-1 ios-press"
+                      onClick={() => setShowBookingDialog(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-venue hover:bg-venue/90 ios-press"
                       onClick={handleSendBookingRequest}
-                      className="w-full bg-venue hover:bg-venue/90"
                       disabled={isSubmitting || !bookingDate}
                     >
                       {isSubmitting ? 'Sending...' : 'Send Request'}
@@ -526,12 +536,15 @@ const ArtistProfile = () => {
                 </DialogContent>
               </Dialog>
             ) : !user ? (
-              <Card className="bg-card border-border">
+              <Card className="border-dashed">
                 <CardContent className="py-6 text-center">
-                  <p className="text-muted-foreground mb-4">
+                  <p className="text-muted-foreground text-sm mb-4">
                     Want to book this artist?
                   </p>
-                  <Button onClick={() => navigate('/join/venue')}>
+                  <Button 
+                    onClick={() => navigate('/join/venue')}
+                    className="w-full ios-press"
+                  >
                     Join as a Venue
                   </Button>
                 </CardContent>
