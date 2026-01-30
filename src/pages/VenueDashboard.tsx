@@ -26,7 +26,7 @@ const VenueDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { showErrorWithTitle } = useErrorHandler();
+  const { showErrorWithTitle, executeWithRetry } = useErrorHandler();
   
   const [venue, setVenue] = useState<Venue | null>(null);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
@@ -59,51 +59,77 @@ const VenueDashboard = () => {
     const fetchData = async () => {
       if (!user) return;
       
-      // Get venue profile
-      const { data: venueData } = await supabase
-        .from('venues')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      if (!venueData) {
-        navigate('/venue/setup');
-        return;
+      try {
+        // Get venue profile with retry
+        const venueData = await executeWithRetry(async () => {
+          const { data, error } = await supabase
+            .from('venues')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          
+          if (error) throw error;
+          return data;
+        }, 'fetching venue profile');
+        
+        if (!venueData) {
+          navigate('/venue/setup');
+          return;
+        }
+        
+        setVenue(venueData as Venue);
+        
+        // Fetch remaining data in parallel with retry
+        const [requests, entRequests, reviews] = await Promise.all([
+          // Get booking requests with artist info
+          executeWithRetry(async () => {
+            const { data, error } = await supabase
+              .from('booking_requests')
+              .select('*, artist:artists(*)')
+              .eq('venue_id', venueData.id)
+              .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            return data || [];
+          }, 'fetching booking requests'),
+          
+          // Get entertainment requests
+          executeWithRetry(async () => {
+            const { data, error } = await supabase
+              .from('entertainment_requests')
+              .select('*')
+              .eq('venue_id', venueData.id)
+              .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            return data || [];
+          }, 'fetching entertainment requests'),
+          
+          // Get existing reviews by this venue
+          executeWithRetry(async () => {
+            const { data, error } = await supabase
+              .from('reviews')
+              .select('booking_request_id')
+              .eq('reviewer_type', 'venue')
+              .eq('reviewer_venue_id', venueData.id);
+            
+            if (error) throw error;
+            return data || [];
+          }, 'fetching reviews'),
+        ]);
+        
+        setBookingRequests(requests as BookingRequest[]);
+        setEntertainmentRequests(entRequests as EntertainmentRequest[]);
+        setExistingReviews(reviews.map(r => r.booking_request_id));
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setVenue(venueData as Venue);
-      
-      // Get booking requests with artist info
-      const { data: requests } = await supabase
-        .from('booking_requests')
-        .select('*, artist:artists(*)')
-        .eq('venue_id', venueData.id)
-        .order('created_at', { ascending: false });
-      
-      setBookingRequests((requests || []) as BookingRequest[]);
-      
-      // Get entertainment requests
-      const { data: entRequests } = await supabase
-        .from('entertainment_requests')
-        .select('*')
-        .eq('venue_id', venueData.id)
-        .order('created_at', { ascending: false });
-      
-      setEntertainmentRequests((entRequests || []) as EntertainmentRequest[]);
-      
-      // Get existing reviews by this venue
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select('booking_request_id')
-        .eq('reviewer_type', 'venue')
-        .eq('reviewer_venue_id', venueData.id);
-      
-      setExistingReviews((reviews || []).map(r => r.booking_request_id));
-      setIsLoading(false);
     };
     
     fetchData();
-  }, [user, navigate]);
+  }, [user, navigate, executeWithRetry]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -111,12 +137,16 @@ const VenueDashboard = () => {
   };
 
   const handleMarkCompleted = async (requestId: string) => {
-    const { error } = await supabase
-      .from('booking_requests')
-      .update({ status: 'completed' as BookingStatus })
-      .eq('id', requestId);
-    
-    if (!error) {
+    try {
+      await executeWithRetry(async () => {
+        const { error } = await supabase
+          .from('booking_requests')
+          .update({ status: 'completed' as BookingStatus })
+          .eq('id', requestId);
+        
+        if (error) throw error;
+      }, 'marking booking complete');
+      
       setBookingRequests(prev => prev.map(req => 
         req.id === requestId ? { ...req, status: 'completed' as BookingStatus } : req
       ));
@@ -124,6 +154,8 @@ const VenueDashboard = () => {
         title: "Booking marked as completed",
         description: "You can now leave a review for the artist.",
       });
+    } catch (error) {
+      showErrorWithTitle(error, "Error marking booking complete", 'mark-complete');
     }
   };
 
@@ -160,15 +192,17 @@ const VenueDashboard = () => {
     if (!venue) return;
     
     try {
-      const { error } = await supabase
-        .from('booking_requests')
-        .update({ 
-          status: 'accepted' as BookingStatus,
-          offer_amount: booking.counter_offer 
-        })
-        .eq('id', booking.id);
-      
-      if (error) throw error;
+      await executeWithRetry(async () => {
+        const { error } = await supabase
+          .from('booking_requests')
+          .update({ 
+            status: 'accepted' as BookingStatus,
+            offer_amount: booking.counter_offer 
+          })
+          .eq('id', booking.id);
+        
+        if (error) throw error;
+      }, 'accepting counter-offer');
       
       // Send notification to artist
       try {
@@ -216,15 +250,17 @@ const VenueDashboard = () => {
     
     try {
       // Update the offer and clear the artist's counter-offer so they can respond again
-      const { error } = await supabase
-        .from('booking_requests')
-        .update({ 
-          offer_amount: parseInt(newOfferAmount),
-          counter_offer: null  // Clear previous counter so artist can respond to new offer
-        })
-        .eq('id', selectedBooking.id);
-      
-      if (error) throw error;
+      await executeWithRetry(async () => {
+        const { error } = await supabase
+          .from('booking_requests')
+          .update({ 
+            offer_amount: parseInt(newOfferAmount),
+            counter_offer: null  // Clear previous counter so artist can respond to new offer
+          })
+          .eq('id', selectedBooking.id);
+        
+        if (error) throw error;
+      }, 'updating offer');
       
       // Send notification to artist - use counter_offer type if responding to a counter
       try {

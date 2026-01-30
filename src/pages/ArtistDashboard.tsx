@@ -26,7 +26,7 @@ const ArtistDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
-  const { showErrorWithTitle } = useErrorHandler();
+  const { showErrorWithTitle, executeWithRetry } = useErrorHandler();
   
   const [artist, setArtist] = useState<Artist | null>(null);
   const [travelDates, setTravelDates] = useState<TravelDate[]>([]);
@@ -56,52 +56,78 @@ const ArtistDashboard = () => {
     const fetchData = async () => {
       if (!user) return;
       
-      // Get artist profile
-      const { data: artistData } = await supabase
-        .from('artists')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      
-      if (!artistData) {
-        navigate('/artist/setup');
-        return;
+      try {
+        // Get artist profile with retry
+        const artistData = await executeWithRetry(async () => {
+          const { data, error } = await supabase
+            .from('artists')
+            .select('*')
+            .eq('user_id', user.id)
+            .maybeSingle();
+          
+          if (error) throw error;
+          return data;
+        }, 'fetching artist profile');
+        
+        if (!artistData) {
+          navigate('/artist/setup');
+          return;
+        }
+        
+        setArtist(artistData as Artist);
+        
+        // Fetch remaining data in parallel with retry
+        const [dates, requests, reviews] = await Promise.all([
+          // Get travel dates
+          executeWithRetry(async () => {
+            const { data, error } = await supabase
+              .from('travel_dates')
+              .select('*')
+              .eq('artist_id', artistData.id)
+              .gte('end_date', new Date().toISOString().split('T')[0])
+              .order('start_date', { ascending: true });
+            
+            if (error) throw error;
+            return data || [];
+          }, 'fetching travel dates'),
+          
+          // Get booking requests with venue info
+          executeWithRetry(async () => {
+            const { data, error } = await supabase
+              .from('booking_requests')
+              .select('*, venue:venues(*)')
+              .eq('artist_id', artistData.id)
+              .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            return data || [];
+          }, 'fetching booking requests'),
+          
+          // Get existing reviews by this artist
+          executeWithRetry(async () => {
+            const { data, error } = await supabase
+              .from('reviews')
+              .select('booking_request_id')
+              .eq('reviewer_type', 'artist')
+              .eq('reviewer_artist_id', artistData.id);
+            
+            if (error) throw error;
+            return data || [];
+          }, 'fetching reviews'),
+        ]);
+        
+        setTravelDates(dates as TravelDate[]);
+        setBookingRequests(requests as BookingRequest[]);
+        setExistingReviews(reviews.map(r => r.booking_request_id));
+      } catch (error) {
+        console.error('Failed to fetch dashboard data:', error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setArtist(artistData as Artist);
-      
-      // Get travel dates
-      const { data: dates } = await supabase
-        .from('travel_dates')
-        .select('*')
-        .eq('artist_id', artistData.id)
-        .gte('end_date', new Date().toISOString().split('T')[0])
-        .order('start_date', { ascending: true });
-      
-      setTravelDates(dates || []);
-      
-      // Get booking requests with venue info
-      const { data: requests } = await supabase
-        .from('booking_requests')
-        .select('*, venue:venues(*)')
-        .eq('artist_id', artistData.id)
-        .order('created_at', { ascending: false });
-      
-      setBookingRequests((requests || []) as BookingRequest[]);
-      
-      // Get existing reviews by this artist
-      const { data: reviews } = await supabase
-        .from('reviews')
-        .select('booking_request_id')
-        .eq('reviewer_type', 'artist')
-        .eq('reviewer_artist_id', artistData.id);
-      
-      setExistingReviews((reviews || []).map(r => r.booking_request_id));
-      setIsLoading(false);
     };
     
     fetchData();
-  }, [user, navigate]);
+  }, [user, navigate, executeWithRetry]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -112,12 +138,17 @@ const ArtistDashboard = () => {
     const request = bookingRequests.find(r => r.id === requestId);
     if (!request) return;
 
-    const { error } = await supabase
-      .from('booking_requests')
-      .update({ status })
-      .eq('id', requestId);
-    
-    if (!error) {
+    try {
+      await executeWithRetry(async () => {
+        const { error } = await supabase
+          .from('booking_requests')
+          .update({ status })
+          .eq('id', requestId);
+        
+        if (error) throw error;
+      }, 'updating booking status');
+      
+      // Update local state on success
       setBookingRequests(prev => prev.map(req => 
         req.id === requestId ? { ...req, status } : req
       ));
@@ -128,7 +159,7 @@ const ArtistDashboard = () => {
           description: "You can now leave a review for this venue.",
         });
       } else if (status === 'accepted' || status === 'declined') {
-        // Send notification to venue
+        // Send notification to venue (fire and forget)
         try {
           await supabase.functions.invoke('send-booking-notification', {
             body: {
@@ -159,6 +190,8 @@ const ArtistDashboard = () => {
             : "The venue has been notified of your decision.",
         });
       }
+    } catch (error) {
+      showErrorWithTitle(error, "Error updating booking", 'update-booking-status');
     }
   };
 
@@ -185,12 +218,14 @@ const ArtistDashboard = () => {
     setIsSubmittingCounter(true);
     
     try {
-      const { error } = await supabase
-        .from('booking_requests')
-        .update({ counter_offer: parseInt(counterOfferAmount) })
-        .eq('id', selectedBooking.id);
-      
-      if (error) throw error;
+      await executeWithRetry(async () => {
+        const { error } = await supabase
+          .from('booking_requests')
+          .update({ counter_offer: parseInt(counterOfferAmount) })
+          .eq('id', selectedBooking.id);
+        
+        if (error) throw error;
+      }, 'submitting counter-offer');
       
       // Send notification to venue
       try {
