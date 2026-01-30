@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { setSentryUser } from '@/lib/sentry';
 
 type UserRole = 'artist' | 'venue' | 'admin' | null;
 
@@ -43,6 +44,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+        
+        // Update Sentry user context
+        setSentryUser(session?.user ? { id: session.user.id, email: session.user.email } : null);
         
         // Defer role fetch to prevent deadlock
         if (session?.user) {
