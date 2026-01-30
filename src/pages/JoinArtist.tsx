@@ -170,17 +170,25 @@ const JoinArtist = () => {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
+            <div className="mt-6 text-center space-y-2">
               <button
                 type="button"
                 onClick={() => setIsLogin(!isLogin)}
-                className="text-sm text-muted-foreground hover:text-foreground"
+                className="text-sm text-muted-foreground hover:text-foreground block w-full"
               >
                 {isLogin 
                   ? "Don't have an account? Sign up" 
                   : 'Already have an account? Sign in'
                 }
               </button>
+              {isLogin && (
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-muted-foreground hover:text-primary block"
+                >
+                  Forgot your password?
+                </Link>
+              )}
             </div>
 
             <div className="mt-4 text-center">
