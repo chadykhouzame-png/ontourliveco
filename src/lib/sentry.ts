@@ -9,9 +9,9 @@
 
 import * as Sentry from '@sentry/react';
 
-// Replace with your Sentry DSN to enable Sentry tracking
-// Leave empty to disable Sentry (will fall back to database-only tracking)
-const SENTRY_DSN = '';
+// Sentry DSN from environment variable
+// The DSN is a public key and safe to include in client-side code
+const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN || '';
 
 // Performance thresholds (in milliseconds)
 const SLOW_PAGE_LOAD_THRESHOLD = 3000;
