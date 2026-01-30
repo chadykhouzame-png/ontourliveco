@@ -1,22 +1,24 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "https://esm.sh/resend@2.0.0";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-interface BookingNotificationRequest {
-  type: 'new_offer' | 'counter_offer' | 'accepted' | 'declined';
-  booking_request_id: string;
-  sender_name: string;
-  recipient_user_id: string;
-  requested_date: string;
-  offer_amount?: number;
-  counter_offer?: number;
-  message?: string;
-}
+// Input validation schema
+const BookingNotificationSchema = z.object({
+  type: z.enum(['new_offer', 'counter_offer', 'accepted', 'declined']),
+  booking_request_id: z.string().uuid(),
+  sender_name: z.string().min(1).max(200),
+  recipient_user_id: z.string().uuid(),
+  requested_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  offer_amount: z.number().positive().optional(),
+  counter_offer: z.number().positive().optional(),
+  message: z.string().max(2000).optional(),
+});
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -25,22 +27,55 @@ serve(async (req: Request) => {
   }
 
   try {
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (!resendApiKey) {
-      console.log('RESEND_API_KEY not configured, skipping email');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // --- JWT AUTHENTICATION ---
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      console.error('Missing or invalid Authorization header');
       return new Response(
-        JSON.stringify({ success: true, email_sent: false, reason: 'RESEND_API_KEY not configured' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ error: 'Unauthorized - Missing authentication' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const resend = new Resend(resendApiKey);
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Create client with user's auth token for verification
+    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
 
-    const body: BookingNotificationRequest = await req.json();
-    console.log('Received booking notification request:', body);
+    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser();
+    
+    if (userError || !user) {
+      console.error('JWT verification failed:', userError);
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized - Invalid token' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const userId = user.id;
+    console.log('Authenticated user:', userId);
+
+    // --- INPUT VALIDATION ---
+    const rawBody = await req.json();
+    const parseResult = BookingNotificationSchema.safeParse(rawBody);
+    
+    if (!parseResult.success) {
+      console.error('Input validation failed:', parseResult.error.errors);
+      return new Response(
+        JSON.stringify({ error: 'Invalid input', details: parseResult.error.errors }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const body = parseResult.data;
+    console.log('Validated booking notification request:', body);
+
+    // Use service role client for database operations
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const {
       type,
@@ -52,6 +87,39 @@ serve(async (req: Request) => {
       counter_offer,
       message,
     } = body;
+
+    // --- AUTHORIZATION: Verify user is part of this booking ---
+    const { data: booking, error: bookingError } = await supabase
+      .from('booking_requests')
+      .select(`
+        id,
+        artist_id,
+        venue_id,
+        artists!inner(user_id),
+        venues!inner(user_id)
+      `)
+      .eq('id', booking_request_id)
+      .single();
+
+    if (bookingError || !booking) {
+      console.error('Booking not found:', bookingError);
+      return new Response(
+        JSON.stringify({ error: 'Booking request not found' }),
+        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check if user is either the artist or venue in this booking
+    const artistUserId = (booking.artists as any)?.user_id;
+    const venueUserId = (booking.venues as any)?.user_id;
+    
+    if (userId !== artistUserId && userId !== venueUserId) {
+      console.error('Authorization failed - user not part of booking');
+      return new Response(
+        JSON.stringify({ error: 'Forbidden - You are not authorized for this booking' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Get recipient's email from profiles
     const { data: profile, error: profileError } = await supabase
@@ -156,7 +224,18 @@ serve(async (req: Request) => {
       console.error('Error creating notification:', notificationError);
     }
 
-    // Send email
+    // Send email if Resend is configured
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendApiKey) {
+      console.log('RESEND_API_KEY not configured, skipping email');
+      return new Response(
+        JSON.stringify({ success: true, email_sent: false, notification_created: true, reason: 'RESEND_API_KEY not configured' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const resend = new Resend(resendApiKey);
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -204,7 +283,6 @@ serve(async (req: Request) => {
 
     if (emailError) {
       console.error('Error sending email:', emailError);
-      // Don't throw - notification was still created
       return new Response(
         JSON.stringify({ success: true, email_sent: false, notification_created: true, error: emailError.message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -218,10 +296,11 @@ serve(async (req: Request) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in send-booking-notification function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
