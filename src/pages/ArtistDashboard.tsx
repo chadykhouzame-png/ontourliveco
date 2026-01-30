@@ -283,7 +283,7 @@ const ArtistDashboard = () => {
             <p className="text-muted-foreground">Welcome back, {artist?.artist_name}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
-            <Button onClick={() => navigate('/search?type=venues')} className="bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20">
+            <Button onClick={() => navigate('/search/venues')} className="bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20">
               <Building2 className="w-4 h-4 mr-2" />
               Browse Venues
             </Button>
