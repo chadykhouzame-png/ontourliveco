@@ -131,14 +131,59 @@
     @apply bg-card/60 backdrop-blur-lg border border-border/30;
   }
 
-  /* iOS-style pressed state */
+  /* Haptic-style press effect - primary interaction */
+  .haptic {
+    @apply transition-all duration-100 ease-out;
+    transform-origin: center;
+  }
+
+  .haptic:active {
+    transform: scale(0.96);
+    transition-duration: 50ms;
+  }
+
+  .haptic:not(:active) {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-duration: 300ms;
+  }
+
+  /* Subtle haptic for smaller elements */
+  .haptic-sm {
+    @apply transition-all duration-100 ease-out;
+  }
+
+  .haptic-sm:active {
+    transform: scale(0.92);
+    transition-duration: 40ms;
+  }
+
+  .haptic-sm:not(:active) {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition-duration: 250ms;
+  }
+
+  /* iOS-style pressed state (legacy, for compatibility) */
   .ios-press {
-    @apply transition-all duration-150 active:scale-[0.97] active:opacity-80;
+    @apply haptic;
   }
 
   /* iOS-style hover for desktop */
   .ios-hover {
     @apply transition-all duration-200 hover:bg-secondary/50;
+  }
+
+  /* Haptic hover - combines hover glow with press effect */
+  .haptic-hover {
+    @apply haptic;
+  }
+
+  .haptic-hover:hover {
+    @apply shadow-lg;
+    filter: brightness(1.05);
+  }
+
+  .haptic-hover:active {
+    filter: brightness(0.95);
   }
 
   /* iOS pill button style */
@@ -151,9 +196,13 @@
     @apply rounded-xl bg-secondary/50 p-1;
   }
 
-  /* iOS list row style */
+  /* iOS list row style - with haptic feedback */
   .list-row {
-    @apply flex items-center gap-4 px-4 py-3 bg-card rounded-xl;
+    @apply flex items-center gap-4 px-4 py-3 bg-card rounded-xl haptic cursor-pointer;
+  }
+
+  .list-row:hover {
+    @apply bg-secondary/30;
   }
 
   /* iOS card with subtle shadow */
@@ -161,9 +210,34 @@
     @apply bg-card rounded-2xl border border-border/50 shadow-lg shadow-black/20;
   }
 
+  /* Interactive card with haptic */
+  .ios-card-interactive {
+    @apply ios-card haptic cursor-pointer;
+  }
+
+  .ios-card-interactive:hover {
+    @apply border-border shadow-xl;
+  }
+
   /* iOS section header */
   .section-header {
     @apply text-sm font-semibold text-muted-foreground uppercase tracking-wide px-4 py-2;
+  }
+
+  /* Tap highlight for touch devices */
+  .tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+    @apply relative overflow-hidden;
+  }
+
+  .tap-highlight::after {
+    content: '';
+    @apply absolute inset-0 bg-white/0 transition-colors duration-150;
+    pointer-events: none;
+  }
+
+  .tap-highlight:active::after {
+    @apply bg-white/10;
   }
 }
 
