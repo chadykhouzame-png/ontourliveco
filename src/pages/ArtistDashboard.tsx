@@ -381,13 +381,20 @@ const ArtistDashboard = () => {
                             {request.requested_time && ` at ${request.requested_time}`}
                           </p>
                         </div>
-                        <Badge variant={
-                          request.status === 'pending' ? 'outline' :
-                          request.status === 'accepted' ? 'default' :
-                          'secondary'
-                        }>
-                          {BOOKING_STATUS_LABELS[request.status]}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {request.status === 'pending' && request.counter_offer && (
+                            <Badge variant="outline" className="border-artist/50 text-artist">
+                              Negotiating
+                            </Badge>
+                          )}
+                          <Badge variant={
+                            request.status === 'pending' ? 'outline' :
+                            request.status === 'accepted' ? 'default' :
+                            'secondary'
+                          }>
+                            {BOOKING_STATUS_LABELS[request.status]}
+                          </Badge>
+                        </div>
                       </div>
                       {request.message && (
                         <p className="text-sm text-muted-foreground mb-3">

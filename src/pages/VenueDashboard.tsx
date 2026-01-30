@@ -202,24 +202,31 @@ const VenueDashboard = () => {
     setIsSubmittingOffer(true);
     
     try {
+      // Update the offer and clear the artist's counter-offer so they can respond again
       const { error } = await supabase
         .from('booking_requests')
-        .update({ offer_amount: parseInt(newOfferAmount) })
+        .update({ 
+          offer_amount: parseInt(newOfferAmount),
+          counter_offer: null  // Clear previous counter so artist can respond to new offer
+        })
         .eq('id', selectedBooking.id);
       
       if (error) throw error;
       
-      // Send notification to artist
+      // Send notification to artist - use counter_offer type if responding to a counter
       try {
         await supabase.functions.invoke('send-booking-notification', {
           body: {
-            type: 'new_offer',
+            type: selectedBooking.counter_offer ? 'counter_offer' : 'new_offer',
             booking_request_id: selectedBooking.id,
             sender_name: venue.venue_name,
             recipient_user_id: selectedBooking.artist?.user_id,
             requested_date: selectedBooking.requested_date,
-            offer_amount: parseInt(newOfferAmount),
-            message: `Updated offer in response to your counter-offer of $${selectedBooking.counter_offer?.toLocaleString()}`,
+            offer_amount: selectedBooking.offer_amount,
+            counter_offer: parseInt(newOfferAmount),
+            message: selectedBooking.counter_offer 
+              ? `Counter-offer in response to your $${selectedBooking.counter_offer?.toLocaleString()} request`
+              : undefined,
           },
         });
       } catch (notifyError) {
@@ -228,7 +235,7 @@ const VenueDashboard = () => {
       
       setBookingRequests(prev => prev.map(req => 
         req.id === selectedBooking.id 
-          ? { ...req, offer_amount: parseInt(newOfferAmount) } 
+          ? { ...req, offer_amount: parseInt(newOfferAmount), counter_offer: undefined } 
           : req
       ));
       
@@ -390,13 +397,20 @@ const VenueDashboard = () => {
                             {format(new Date(request.requested_date), 'EEEE, MMMM d, yyyy')}
                           </p>
                         </div>
-                        <Badge variant={
-                          request.status === 'pending' ? 'outline' :
-                          request.status === 'accepted' ? 'default' :
-                          'secondary'
-                        }>
-                          {BOOKING_STATUS_LABELS[request.status]}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                          {request.status === 'pending' && request.counter_offer && (
+                            <Badge variant="outline" className="border-artist/50 text-artist">
+                              Negotiating
+                            </Badge>
+                          )}
+                          <Badge variant={
+                            request.status === 'pending' ? 'outline' :
+                            request.status === 'accepted' ? 'default' :
+                            'secondary'
+                          }>
+                            {BOOKING_STATUS_LABELS[request.status]}
+                          </Badge>
+                        </div>
                       </div>
                       {/* Offer and Counter-offer display */}
                       <div className="flex flex-wrap gap-3 mb-3">
