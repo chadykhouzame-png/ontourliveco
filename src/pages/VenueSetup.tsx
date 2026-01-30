@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, Instagram, ArrowRight } from 'lucide-react';
+import { Building2, Instagram, ArrowRight, Speaker } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { Genre, VenueType, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
@@ -49,6 +49,7 @@ const VenueSetup = () => {
   const [bookingNights, setBookingNights] = useState<string[]>([]);
   const [instagramUrl, setInstagramUrl] = useState('');
   const [tiktokUrl, setTiktokUrl] = useState('');
+  const [equipmentNotes, setEquipmentNotes] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [existingVenue, setExistingVenue] = useState(false);
 
@@ -84,6 +85,7 @@ const VenueSetup = () => {
         setBookingNights(data.booking_nights || []);
         setInstagramUrl(data.instagram_url || '');
         setTiktokUrl((data as any).tiktok_url || '');
+        setEquipmentNotes(data.equipment_notes || '');
       }
     };
     
@@ -158,6 +160,15 @@ const VenueSetup = () => {
       });
       return;
     }
+
+    if (!equipmentNotes.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Equipment notes required",
+        description: "Please describe the equipment available for artists (DJ booth, sound system, etc.).",
+      });
+      return;
+    }
     
     setIsLoading(true);
 
@@ -177,6 +188,7 @@ const VenueSetup = () => {
         booking_nights: bookingNights,
         instagram_url: instagramUrl.trim(),
         tiktok_url: tiktokUrl.trim() || null,
+        equipment_notes: equipmentNotes.trim(),
         is_profile_complete: true,
       };
 
@@ -345,6 +357,24 @@ const VenueSetup = () => {
                   onChange={(e) => setDescription(e.target.value)}
                   className="min-h-[100px]"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="equipmentNotes" className="flex items-center gap-2">
+                  <Speaker className="w-4 h-4" />
+                  Equipment & Tech Specs *
+                </Label>
+                <Textarea
+                  id="equipmentNotes"
+                  placeholder="Describe your DJ booth setup, sound system, CDJs/turntables, mixer model, monitors, lighting..."
+                  value={equipmentNotes}
+                  onChange={(e) => setEquipmentNotes(e.target.value)}
+                  className="min-h-[100px]"
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Help artists prepare by listing available equipment (e.g., "2x CDJ-3000, DJM-900NXS2, JBL PRX speakers, no turntables")
+                </p>
               </div>
             </CardContent>
           </Card>

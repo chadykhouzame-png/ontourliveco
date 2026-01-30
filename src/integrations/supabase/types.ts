@@ -607,7 +607,7 @@ export type Database = {
           city: string
           created_at: string
           description: string | null
-          equipment_notes: string | null
+          equipment_notes: string
           first_name: string | null
           id: string
           instagram_url: string | null
@@ -631,7 +631,7 @@ export type Database = {
           city: string
           created_at?: string
           description?: string | null
-          equipment_notes?: string | null
+          equipment_notes?: string
           first_name?: string | null
           id?: string
           instagram_url?: string | null
@@ -655,7 +655,7 @@ export type Database = {
           city?: string
           created_at?: string
           description?: string | null
-          equipment_notes?: string | null
+          equipment_notes?: string
           first_name?: string | null
           id?: string
           instagram_url?: string | null
