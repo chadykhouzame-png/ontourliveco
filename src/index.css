@@ -1,100 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* iOS-inspired Dark Design System
+   Clean, minimal, with frosted glass effects and smooth interactions
+   All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* Dark theme as default - nightlife aesthetic */
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
+    /* iOS Dark Mode inspired palette */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 98%;
+    /* Frosted glass card effect */
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 100%;
 
-    /* Electric lime accent - nightlife energy */
-    --primary: 65 100% 50%;
-    --primary-foreground: 0 0% 4%;
+    /* iOS blue accent */
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 98%;
+    /* Elevated surfaces */
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 65 100% 50%;
-    --accent-foreground: 0 0% 4%;
+    --accent: 211 100% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 65 100% 50%;
+    /* Subtle borders like iOS */
+    --border: 0 0% 20%;
+    --input: 0 0% 15%;
+    --ring: 211 100% 50%;
 
-    --radius: 0.5rem;
+    /* Larger iOS-style radius */
+    --radius: 1rem;
 
-    /* Artist side - warm gradient */
-    --artist: 280 70% 50%;
-    --artist-foreground: 0 0% 98%;
+    /* Artist side - vibrant purple (iOS style) */
+    --artist: 280 80% 60%;
+    --artist-foreground: 0 0% 100%;
     
-    /* Venue side - cool gradient */
-    --venue: 200 100% 50%;
-    --venue-foreground: 0 0% 98%;
+    /* Venue side - iOS teal */
+    --venue: 195 100% 50%;
+    --venue-foreground: 0 0% 100%;
 
-    --sidebar-background: 0 0% 7%;
-    --sidebar-foreground: 0 0% 70%;
-    --sidebar-primary: 65 100% 50%;
-    --sidebar-primary-foreground: 0 0% 4%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 65%;
+    --sidebar-primary: 211 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 65 100% 50%;
+    --sidebar-ring: 211 100% 50%;
   }
 
   .dark {
-    --background: 0 0% 4%;
-    --foreground: 0 0% 98%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 7%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 7%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 65 100% 50%;
-    --primary-foreground: 0 0% 4%;
+    --primary: 211 100% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 60%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 55%;
 
-    --accent: 65 100% 50%;
-    --accent-foreground: 0 0% 4%;
+    --accent: 211 100% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 65 100% 50%;
+    --border: 0 0% 20%;
+    --input: 0 0% 15%;
+    --ring: 211 100% 50%;
 
-    --sidebar-background: 0 0% 7%;
-    --sidebar-foreground: 0 0% 70%;
-    --sidebar-primary: 65 100% 50%;
-    --sidebar-primary-foreground: 0 0% 4%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 65%;
+    --sidebar-primary: 211 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 65 100% 50%;
+    --sidebar-ring: 211 100% 50%;
   }
 }
 
@@ -103,7 +110,106 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@layer components {
+  /* iOS Frosted Glass Effect */
+  .glass {
+    @apply bg-card/80 backdrop-blur-xl border border-border/50;
+  }
+
+  .glass-subtle {
+    @apply bg-card/60 backdrop-blur-lg border border-border/30;
+  }
+
+  /* iOS-style pressed state */
+  .ios-press {
+    @apply transition-all duration-150 active:scale-[0.97] active:opacity-80;
+  }
+
+  /* iOS-style hover for desktop */
+  .ios-hover {
+    @apply transition-all duration-200 hover:bg-secondary/50;
+  }
+
+  /* iOS pill button style */
+  .pill {
+    @apply rounded-full px-4 py-2;
+  }
+
+  /* iOS segmented control style */
+  .segment {
+    @apply rounded-xl bg-secondary/50 p-1;
+  }
+
+  /* iOS list row style */
+  .list-row {
+    @apply flex items-center gap-4 px-4 py-3 bg-card rounded-xl;
+  }
+
+  /* iOS card with subtle shadow */
+  .ios-card {
+    @apply bg-card rounded-2xl border border-border/50 shadow-lg shadow-black/20;
+  }
+
+  /* iOS section header */
+  .section-header {
+    @apply text-sm font-semibold text-muted-foreground uppercase tracking-wide px-4 py-2;
+  }
+}
+
+@layer utilities {
+  /* iOS spring animation */
+  .spring {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  /* iOS bounce animation */
+  .bounce-subtle {
+    animation: bounce-subtle 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes bounce-subtle {
+    0% { transform: scale(0.95); opacity: 0; }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Fade in up animation */
+  .fade-in-up {
+    animation: fade-in-up 0.4s ease-out forwards;
+  }
+
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Staggered children animation */
+  .stagger-children > * {
+    animation: fade-in-up 0.4s ease-out forwards;
+    opacity: 0;
+  }
+
+  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-children > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger-children > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger-children > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger-children > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger-children > *:nth-child(6) { animation-delay: 250ms; }
 }

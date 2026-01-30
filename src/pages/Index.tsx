@@ -58,22 +58,22 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border">
+      {/* Navigation - iOS frosted glass style */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="text-2xl font-black tracking-tighter">
+          <div className="text-2xl font-bold tracking-tight">
             <span className="text-primary">ON</span>
             <span className="text-foreground">TOUR</span>
           </div>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors text-sm">How It Works</a>
-            <a href="#for-artists" className="text-muted-foreground hover:text-foreground transition-colors text-sm">For Artists</a>
-            <a href="#for-venues" className="text-muted-foreground hover:text-foreground transition-colors text-sm">For Venues</a>
-            <Link to="/search" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Search</Link>
+            <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium">How It Works</a>
+            <a href="#for-artists" className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium">For Artists</a>
+            <a href="#for-venues" className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium">For Venues</a>
+            <Link to="/search" className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium">Search</Link>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Link to="/search">
-              <Button variant="outline" size="sm">Browse Artists</Button>
+              <Button variant="secondary" size="sm" className="rounded-full px-5">Browse Artists</Button>
             </Link>
           </div>
         </div>
@@ -88,53 +88,59 @@ const Index = () => {
         
         <div className="relative z-10 max-w-7xl mx-auto px-6 min-h-[calc(100vh-80px)] flex flex-col justify-center">
           {/* Main headline */}
-          <div className="text-center mb-16">
+          <div className="text-center mb-16 animate-fade-in">
             <p className="text-primary font-medium tracking-widest uppercase text-sm mb-4">
               The Booking Platform for Live Entertainment
             </p>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-6">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
               CONNECT.
               <br />
-              <span className="text-primary">BOOK.</span>
+              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">BOOK.</span>
               <br />
               PERFORM.
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               On Tour connects venues with artists already on the move — 
               turning travel dates into booked gigs.
             </p>
           </div>
 
           {/* Split CTA */}
-          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto w-full">
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto w-full stagger-children">
             {/* Artist Side */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-artist/20 to-artist/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Card className="relative bg-card/50 border-border hover:border-artist/50 transition-all duration-300 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-artist/30 to-artist/5 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+              <Card className="relative bg-card/60 backdrop-blur-xl border-border/30 hover:border-artist/50 transition-all duration-300 overflow-hidden rounded-3xl group-hover:scale-[1.02]">
                 <CardContent className="p-8">
-                  <div className="w-14 h-14 bg-artist/20 rounded-xl flex items-center justify-center mb-6">
+                  <div className="w-14 h-14 bg-artist/20 rounded-2xl flex items-center justify-center mb-6">
                     <Music className="w-7 h-7 text-artist" />
                   </div>
-                  <h2 className="text-2xl font-bold mb-3">I'm an Artist</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-2xl font-semibold mb-3">I'm an Artist</h2>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
                     Going on tour? Get booked while you travel. Set your dates once — venues find you.
                   </p>
                   <ul className="space-y-3 mb-8 text-sm">
                     <li className="flex items-center gap-3">
-                      <Check className="w-4 h-4 text-primary" />
+                      <div className="w-5 h-5 rounded-full bg-artist/20 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-artist" />
+                      </div>
                       <span>Share your travel dates</span>
                     </li>
                     <li className="flex items-center gap-3">
-                      <Check className="w-4 h-4 text-primary" />
+                      <div className="w-5 h-5 rounded-full bg-artist/20 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-artist" />
+                      </div>
                       <span>Showcase your EPK & socials</span>
                     </li>
                     <li className="flex items-center gap-3">
-                      <Check className="w-4 h-4 text-primary" />
+                      <div className="w-5 h-5 rounded-full bg-artist/20 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-artist" />
+                      </div>
                       <span>Get discovered by venues</span>
                     </li>
                   </ul>
                   <Link to="/join/artist">
-                    <Button className="w-full bg-artist hover:bg-artist/90 text-artist-foreground">
+                    <Button className="w-full bg-artist hover:bg-artist/90 text-artist-foreground rounded-xl">
                       Join as Artist
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
@@ -145,32 +151,38 @@ const Index = () => {
 
             {/* Venue Side */}
             <div className="group relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-venue/20 to-venue/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <Card className="relative bg-card/50 border-border hover:border-venue/50 transition-all duration-300 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-venue/30 to-venue/5 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+              <Card className="relative bg-card/60 backdrop-blur-xl border-border/30 hover:border-venue/50 transition-all duration-300 overflow-hidden rounded-3xl group-hover:scale-[1.02]">
                 <CardContent className="p-8">
-                  <div className="w-14 h-14 bg-venue/20 rounded-xl flex items-center justify-center mb-6">
+                  <div className="w-14 h-14 bg-venue/20 rounded-2xl flex items-center justify-center mb-6">
                     <Building2 className="w-7 h-7 text-venue" />
                   </div>
-                  <h2 className="text-2xl font-bold mb-3">I'm a Venue</h2>
-                  <p className="text-muted-foreground mb-6">
+                  <h2 className="text-2xl font-semibold mb-3">I'm a Venue</h2>
+                  <p className="text-muted-foreground mb-6 leading-relaxed">
                     See who's in town. Fill your dates. No more chasing DMs or last-minute scrambles.
                   </p>
                   <ul className="space-y-3 mb-8 text-sm">
                     <li className="flex items-center gap-3">
-                      <Check className="w-4 h-4 text-primary" />
+                      <div className="w-5 h-5 rounded-full bg-venue/20 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-venue" />
+                      </div>
                       <span>Browse artists by city + date</span>
                     </li>
                     <li className="flex items-center gap-3">
-                      <Check className="w-4 h-4 text-primary" />
+                      <div className="w-5 h-5 rounded-full bg-venue/20 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-venue" />
+                      </div>
                       <span>View profiles & reviews</span>
                     </li>
                     <li className="flex items-center gap-3">
-                      <Check className="w-4 h-4 text-primary" />
+                      <div className="w-5 h-5 rounded-full bg-venue/20 flex items-center justify-center">
+                        <Check className="w-3 h-3 text-venue" />
+                      </div>
                       <span>Book with confidence</span>
                     </li>
                   </ul>
                   <Link to="/join/venue">
-                    <Button className="w-full bg-venue hover:bg-venue/90 text-venue-foreground">
+                    <Button className="w-full bg-venue hover:bg-venue/90 text-venue-foreground rounded-xl">
                       Join as Venue
                       <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
