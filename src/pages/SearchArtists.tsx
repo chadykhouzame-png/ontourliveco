@@ -32,7 +32,7 @@ const GENRES: Genre[] = [
 const SearchArtists = () => {
   const navigate = useNavigate();
   const { user, userRole, signOut, isLoading: authLoading } = useAuth();
-  const { showError } = useErrorHandler();
+  const { showError, executeWithRetry } = useErrorHandler();
   
   const [city, setCity] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
@@ -53,15 +53,16 @@ const SearchArtists = () => {
     setHasSearched(true);
 
     try {
-      // Get all artists with their travel dates
-      let query = supabase
-        .from('artists')
-        .select('*, travel_dates(*)')
-        .eq('is_profile_complete', true);
+      // Get all artists with their travel dates with retry logic
+      const data = await executeWithRetry(async () => {
+        const { data, error } = await supabase
+          .from('artists')
+          .select('*, travel_dates(*)')
+          .eq('is_profile_complete', true);
 
-      const { data, error } = await query;
-
-      if (error) throw error;
+        if (error) throw error;
+        return data;
+      }, 'searching artists');
 
       let results = (data || []) as ArtistWithTravel[];
 

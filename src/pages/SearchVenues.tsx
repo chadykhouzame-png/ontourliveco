@@ -54,7 +54,7 @@ const VENUE_TYPES: VenueType[] = [
 const SearchVenues = () => {
   const navigate = useNavigate();
   const { user, userRole, signOut } = useAuth();
-  const { showError } = useErrorHandler();
+  const { showError, executeWithRetry } = useErrorHandler();
   
   const [city, setCity] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
@@ -98,14 +98,16 @@ const SearchVenues = () => {
     setHasSearched(true);
 
     try {
-      let query = supabase
-        .from('venues')
-        .select('*')
-        .eq('is_profile_complete', true);
+      // Get venues with retry logic
+      const data = await executeWithRetry(async () => {
+        const { data, error } = await supabase
+          .from('venues')
+          .select('*')
+          .eq('is_profile_complete', true);
 
-      const { data, error } = await query;
-
-      if (error) throw error;
+        if (error) throw error;
+        return data;
+      }, 'searching venues');
 
       let results = (data || []) as Venue[];
 
@@ -153,16 +155,21 @@ const SearchVenues = () => {
         });
       }
 
-      // Fetch entertainment requests for found venues
+      // Fetch entertainment requests for found venues with retry
       const venueIds = results.map(v => v.id);
       if (venueIds.length > 0) {
         const today = new Date().toISOString().split('T')[0];
-        const { data: requestsData } = await supabase
-          .from('entertainment_requests')
-          .select('*')
-          .in('venue_id', venueIds)
-          .eq('status', 'open')
-          .gte('requested_date', today);
+        const requestsData = await executeWithRetry(async () => {
+          const { data, error } = await supabase
+            .from('entertainment_requests')
+            .select('*')
+            .in('venue_id', venueIds)
+            .eq('status', 'open')
+            .gte('requested_date', today);
+          
+          if (error) throw error;
+          return data;
+        }, 'fetching entertainment requests');
 
         // Group requests by venue_id
         const requestsMap = new Map<string, EntertainmentRequest[]>();
