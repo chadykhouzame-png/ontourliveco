@@ -3,6 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle, Music, Plus, DollarSign } from 'lucide-react';
@@ -31,6 +34,11 @@ const VenueDashboard = () => {
   
   // Entertainment request dialog state
   const [entertainmentDialogOpen, setEntertainmentDialogOpen] = useState(false);
+  
+  // Update offer dialog state
+  const [updateOfferDialogOpen, setUpdateOfferDialogOpen] = useState(false);
+  const [newOfferAmount, setNewOfferAmount] = useState('');
+  const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -131,6 +139,116 @@ const VenueDashboard = () => {
       .order('created_at', { ascending: false });
     
     setEntertainmentRequests((entRequests || []) as EntertainmentRequest[]);
+  };
+
+  const handleOpenUpdateOffer = (booking: BookingRequest) => {
+    setSelectedBooking(booking);
+    setNewOfferAmount(booking.counter_offer?.toString() || '');
+    setUpdateOfferDialogOpen(true);
+  };
+
+  const handleAcceptCounterOffer = async (booking: BookingRequest) => {
+    if (!venue) return;
+    
+    try {
+      const { error } = await supabase
+        .from('booking_requests')
+        .update({ 
+          status: 'accepted' as BookingStatus,
+          offer_amount: booking.counter_offer 
+        })
+        .eq('id', booking.id);
+      
+      if (error) throw error;
+      
+      // Send notification to artist
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            type: 'accepted',
+            booking_request_id: booking.id,
+            sender_name: venue.venue_name,
+            recipient_user_id: booking.artist?.user_id,
+            requested_date: booking.requested_date,
+            offer_amount: booking.counter_offer,
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send notification:', notifyError);
+      }
+      
+      setBookingRequests(prev => prev.map(req => 
+        req.id === booking.id 
+          ? { ...req, status: 'accepted' as BookingStatus, offer_amount: booking.counter_offer } 
+          : req
+      ));
+      
+      toast({
+        title: "Counter-offer accepted!",
+        description: `You've agreed to $${booking.counter_offer?.toLocaleString()}. The artist has been notified.`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error accepting counter-offer",
+        description: error.message || "Something went wrong.",
+      });
+    }
+  };
+
+  const handleSubmitUpdatedOffer = async () => {
+    if (!selectedBooking || !newOfferAmount || !venue) return;
+    
+    setIsSubmittingOffer(true);
+    
+    try {
+      const { error } = await supabase
+        .from('booking_requests')
+        .update({ offer_amount: parseInt(newOfferAmount) })
+        .eq('id', selectedBooking.id);
+      
+      if (error) throw error;
+      
+      // Send notification to artist
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            type: 'new_offer',
+            booking_request_id: selectedBooking.id,
+            sender_name: venue.venue_name,
+            recipient_user_id: selectedBooking.artist?.user_id,
+            requested_date: selectedBooking.requested_date,
+            offer_amount: parseInt(newOfferAmount),
+            message: `Updated offer in response to your counter-offer of $${selectedBooking.counter_offer?.toLocaleString()}`,
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send notification:', notifyError);
+      }
+      
+      setBookingRequests(prev => prev.map(req => 
+        req.id === selectedBooking.id 
+          ? { ...req, offer_amount: parseInt(newOfferAmount) } 
+          : req
+      ));
+      
+      toast({
+        title: "Offer updated!",
+        description: `Your new offer of $${parseInt(newOfferAmount).toLocaleString()} has been sent to the artist.`,
+      });
+      
+      setUpdateOfferDialogOpen(false);
+      setNewOfferAmount('');
+      setSelectedBooking(null);
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error updating offer",
+        description: error.message || "Something went wrong.",
+      });
+    } finally {
+      setIsSubmittingOffer(false);
+    }
   };
 
   if (authLoading || isLoading) {
@@ -299,6 +417,27 @@ const VenueDashboard = () => {
                           </div>
                         )}
                       </div>
+                      {/* Counter-offer response buttons */}
+                      {request.status === 'pending' && request.counter_offer && (
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <Button 
+                            size="sm"
+                            className="bg-venue hover:bg-venue/90"
+                            onClick={() => handleAcceptCounterOffer(request)}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Accept ${request.counter_offer.toLocaleString()}
+                          </Button>
+                          <Button 
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleOpenUpdateOffer(request)}
+                          >
+                            <DollarSign className="w-4 h-4 mr-1" />
+                            Update Offer
+                          </Button>
+                        </div>
+                      )}
                       {request.status === 'accepted' && new Date(request.requested_date) < new Date() && (
                         <Button 
                           size="sm"
@@ -393,6 +532,77 @@ const VenueDashboard = () => {
           onRequestCreated={handleEntertainmentRequestCreated}
         />
       )}
+
+      {/* Update Offer Dialog */}
+      <Dialog open={updateOfferDialogOpen} onOpenChange={setUpdateOfferDialogOpen}>
+        <DialogContent className="glass border-border/50 rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-venue/20 flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-venue" />
+              </div>
+              Update Your Offer
+            </DialogTitle>
+            <DialogDescription>
+              Respond to {selectedBooking?.artist?.artist_name || 'the artist'}'s counter-offer
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedBooking && (
+            <div className="space-y-4 pt-2">
+              {/* Show current offer history */}
+              <div className="space-y-2">
+                {selectedBooking.offer_amount && (
+                  <div className="p-3 rounded-xl bg-venue/10 border border-venue/20">
+                    <p className="text-sm text-muted-foreground">Your current offer</p>
+                    <p className="text-lg font-semibold text-venue">
+                      ${selectedBooking.offer_amount.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+                {selectedBooking.counter_offer && (
+                  <div className="p-3 rounded-xl bg-artist/10 border border-artist/20">
+                    <p className="text-sm text-muted-foreground">Artist's counter-offer</p>
+                    <p className="text-lg font-semibold text-artist">
+                      ${selectedBooking.counter_offer.toLocaleString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="newOffer">Your new offer ($)</Label>
+                <Input
+                  id="newOffer"
+                  type="number"
+                  placeholder="Enter your updated offer"
+                  value={newOfferAmount}
+                  onChange={(e) => setNewOfferAmount(e.target.value)}
+                  min="0"
+                  className="text-lg"
+                />
+              </div>
+              
+              <div className="flex gap-3 pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setUpdateOfferDialogOpen(false)}
+                  className="flex-1 haptic glass-subtle"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmitUpdatedOffer}
+                  disabled={!newOfferAmount || isSubmittingOffer}
+                  className="flex-1 bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20"
+                >
+                  {isSubmittingOffer ? 'Sending...' : 'Send Updated Offer'}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
