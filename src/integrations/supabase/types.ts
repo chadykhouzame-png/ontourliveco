@@ -33,6 +33,7 @@ export type Database = {
           show_fee_range: boolean | null
           soundcloud_url: string | null
           spotify_url: string | null
+          tiktok_url: string | null
           updated_at: string
           user_id: string
         }
@@ -54,6 +55,7 @@ export type Database = {
           show_fee_range?: boolean | null
           soundcloud_url?: string | null
           spotify_url?: string | null
+          tiktok_url?: string | null
           updated_at?: string
           user_id: string
         }
@@ -75,6 +77,7 @@ export type Database = {
           show_fee_range?: boolean | null
           soundcloud_url?: string | null
           spotify_url?: string | null
+          tiktok_url?: string | null
           updated_at?: string
           user_id?: string
         }

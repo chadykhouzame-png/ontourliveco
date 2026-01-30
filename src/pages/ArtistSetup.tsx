@@ -34,6 +34,7 @@ const ArtistSetup = () => {
   const [bio, setBio] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
   const [instagramUrl, setInstagramUrl] = useState('');
+  const [tiktokUrl, setTiktokUrl] = useState('');
   const [soundcloudUrl, setSoundcloudUrl] = useState('');
   const [spotifyUrl, setSpotifyUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +67,7 @@ const ArtistSetup = () => {
         setBio(data.bio || '');
         setSelectedGenres((data.genres as Genre[]) || []);
         setInstagramUrl(data.instagram_url || '');
+        setTiktokUrl((data as any).tiktok_url || '');
         setSoundcloudUrl(data.soundcloud_url || '');
         setSpotifyUrl(data.spotify_url || '');
       }
@@ -117,6 +119,7 @@ const ArtistSetup = () => {
         bio: bio.trim() || null,
         genres: selectedGenres,
         instagram_url: instagramUrl.trim(),
+        tiktok_url: tiktokUrl.trim() || null,
         soundcloud_url: soundcloudUrl.trim() || null,
         spotify_url: spotifyUrl.trim() || null,
         is_profile_complete: true,
@@ -297,6 +300,16 @@ const ArtistSetup = () => {
                   value={instagramUrl}
                   onChange={(e) => setInstagramUrl(e.target.value)}
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tiktok">TikTok URL (optional)</Label>
+                <Input
+                  id="tiktok"
+                  placeholder="https://tiktok.com/@yourprofile"
+                  value={tiktokUrl}
+                  onChange={(e) => setTiktokUrl(e.target.value)}
                 />
               </div>
 
