@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, DollarSign, Building2 } from 'lucide-react';
+import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, DollarSign, Building2, Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { TravelDate, BookingRequest, Artist, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -400,10 +400,18 @@ const ArtistDashboard = () => {
                           >
                             {request.venue?.venue_name || 'Unknown Venue'}
                           </Link>
-                          <p className="text-sm text-muted-foreground">
-                            {format(new Date(request.requested_date), 'EEEE, MMMM d, yyyy')}
-                            {request.requested_time && ` at ${request.requested_time}`}
-                          </p>
+                          <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                            <span>
+                              {format(new Date(request.requested_date), 'EEEE, MMMM d, yyyy')}
+                              {request.requested_time && ` at ${request.requested_time}`}
+                            </span>
+                            {request.venue?.capacity_min && request.venue?.capacity_max && (
+                              <span className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                {request.venue.capacity_min}-{request.venue.capacity_max}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div className="flex items-center gap-2">
                           {request.status === 'pending' && request.counter_offer && (
