@@ -5,13 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle } from 'lucide-react';
+import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle, Music, Plus } from 'lucide-react';
 import { format } from 'date-fns';
-import { BookingRequest, Venue, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
+import { BookingRequest, Venue, EntertainmentRequest, BOOKING_STATUS_LABELS, BookingStatus, ENTERTAINMENT_REQUEST_STATUS_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import ReviewFormDialog from '@/components/ReviewFormDialog';
+import EntertainmentRequestDialog from '@/components/EntertainmentRequestDialog';
+import NotificationBell from '@/components/NotificationBell';
 import { useToast } from '@/hooks/use-toast';
-
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
@@ -19,12 +20,16 @@ const VenueDashboard = () => {
   
   const [venue, setVenue] = useState<Venue | null>(null);
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
+  const [entertainmentRequests, setEntertainmentRequests] = useState<EntertainmentRequest[]>([]);
   const [existingReviews, setExistingReviews] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Review dialog state
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<BookingRequest | null>(null);
+  
+  // Entertainment request dialog state
+  const [entertainmentDialogOpen, setEntertainmentDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -58,6 +63,15 @@ const VenueDashboard = () => {
         .order('created_at', { ascending: false });
       
       setBookingRequests((requests || []) as BookingRequest[]);
+      
+      // Get entertainment requests
+      const { data: entRequests } = await supabase
+        .from('entertainment_requests')
+        .select('*')
+        .eq('venue_id', venueData.id)
+        .order('created_at', { ascending: false });
+      
+      setEntertainmentRequests((entRequests || []) as EntertainmentRequest[]);
       
       // Get existing reviews by this venue
       const { data: reviews } = await supabase
@@ -106,6 +120,18 @@ const VenueDashboard = () => {
     }
   };
 
+  const handleEntertainmentRequestCreated = async () => {
+    if (!venue) return;
+    // Refresh entertainment requests
+    const { data: entRequests } = await supabase
+      .from('entertainment_requests')
+      .select('*')
+      .eq('venue_id', venue.id)
+      .order('created_at', { ascending: false });
+    
+    setEntertainmentRequests((entRequests || []) as EntertainmentRequest[]);
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -133,6 +159,7 @@ const VenueDashboard = () => {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {venue?.venue_name}
             </span>
+            <NotificationBell />
             <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="w-4 h-4" />
             </Button>
@@ -151,9 +178,12 @@ const VenueDashboard = () => {
               <Settings className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
-            <Button onClick={() => navigate('/search')} className="bg-venue hover:bg-venue/90">
-              <Search className="w-4 h-4 mr-2" />
-              Find Artists
+            <Button 
+              onClick={() => setEntertainmentDialogOpen(true)} 
+              className="bg-venue hover:bg-venue/90"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Fill a Slot
             </Button>
           </div>
         </div>
@@ -325,6 +355,18 @@ const VenueDashboard = () => {
           revieweeId={selectedBooking.artist_id}
           revieweeName={selectedBooking.artist?.artist_name || 'the artist'}
           onReviewSubmitted={handleReviewSubmitted}
+        />
+      )}
+
+      {/* Entertainment Request Dialog */}
+      {venue && (
+        <EntertainmentRequestDialog
+          open={entertainmentDialogOpen}
+          onOpenChange={setEntertainmentDialogOpen}
+          venueId={venue.id}
+          venueName={venue.venue_name}
+          venueGenres={venue.music_preferences}
+          onRequestCreated={handleEntertainmentRequestCreated}
         />
       )}
     </div>
