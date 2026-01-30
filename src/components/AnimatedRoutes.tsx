@@ -15,6 +15,7 @@ import ArtistTravel from '@/pages/ArtistTravel';
 import ArtistDashboard from '@/pages/ArtistDashboard';
 import VenueDashboard from '@/pages/VenueDashboard';
 import SearchArtists from '@/pages/SearchArtists';
+import SearchVenues from '@/pages/SearchVenues';
 import ArtistProfile from '@/pages/ArtistProfile';
 import VenueProfile from '@/pages/VenueProfile';
 import ForgotPassword from '@/pages/ForgotPassword';
@@ -55,6 +56,7 @@ const AnimatedRoutes = () => {
         
         {/* Search */}
         <Route path="/search" element={<ProtectedRoute><SearchArtists /></ProtectedRoute>} />
+        <Route path="/search/venues" element={<ProtectedRoute><SearchVenues /></ProtectedRoute>} />
         
         {/* Catch-all */}
         <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
