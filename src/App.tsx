@@ -17,6 +17,7 @@ import ArtistDashboard from "./pages/ArtistDashboard";
 import VenueDashboard from "./pages/VenueDashboard";
 import SearchArtists from "./pages/SearchArtists";
 import ArtistProfile from "./pages/ArtistProfile";
+import VenueProfile from "./pages/VenueProfile";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
             {/* Venue Routes */}
             <Route path="/venue/setup" element={<VenueSetup />} />
             <Route path="/venue/dashboard" element={<VenueDashboard />} />
+            <Route path="/venue/:id" element={<VenueProfile />} />
             
             {/* Search */}
             <Route path="/search" element={<SearchArtists />} />
