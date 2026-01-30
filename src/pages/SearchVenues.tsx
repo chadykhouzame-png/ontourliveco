@@ -8,12 +8,25 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search as SearchIcon, MapPin, Building2, Music, Instagram, Filter, X, LogOut, Users, Star, Calendar } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Building2, Music, Instagram, Filter, X, LogOut, Users, Star, Calendar, Megaphone } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { Venue, Genre, VenueType, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { format } from 'date-fns';
+
+interface EntertainmentRequest {
+  id: string;
+  venue_id: string;
+  requested_date: string;
+  start_time: string;
+  end_time: string | null;
+  preferred_genres: Genre[] | null;
+  budget_min: number | null;
+  budget_max: number | null;
+  status: string;
+}
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
@@ -41,8 +54,10 @@ const SearchVenues = () => {
   const [filterByRating, setFilterByRating] = useState(false);
   
   const [venues, setVenues] = useState<Venue[]>([]);
+  const [entertainmentRequests, setEntertainmentRequests] = useState<Map<string, EntertainmentRequest[]>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showActiveOnly, setShowActiveOnly] = useState(false);
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -104,6 +119,34 @@ const SearchVenues = () => {
         });
       }
 
+      // Fetch entertainment requests for found venues
+      const venueIds = results.map(v => v.id);
+      if (venueIds.length > 0) {
+        const today = new Date().toISOString().split('T')[0];
+        const { data: requestsData } = await supabase
+          .from('entertainment_requests')
+          .select('*')
+          .in('venue_id', venueIds)
+          .eq('status', 'open')
+          .gte('requested_date', today);
+
+        // Group requests by venue_id
+        const requestsMap = new Map<string, EntertainmentRequest[]>();
+        (requestsData || []).forEach((req) => {
+          const existing = requestsMap.get(req.venue_id) || [];
+          existing.push(req as EntertainmentRequest);
+          requestsMap.set(req.venue_id, existing);
+        });
+        setEntertainmentRequests(requestsMap);
+
+        // Filter to show only venues with active requests if toggle is on
+        if (showActiveOnly) {
+          results = results.filter(venue => requestsMap.has(venue.id));
+        }
+      } else {
+        setEntertainmentRequests(new Map());
+      }
+
       setVenues(results);
     } catch (error) {
       showError(error, 'searching venues');
@@ -136,7 +179,9 @@ const SearchVenues = () => {
     setFilterByCapacity(false);
     setMinRating(0);
     setFilterByRating(false);
+    setShowActiveOnly(false);
     setVenues([]);
+    setEntertainmentRequests(new Map());
     setHasSearched(false);
   };
 
@@ -151,6 +196,7 @@ const SearchVenues = () => {
     selectedVenueTypes.length > 0,
     filterByCapacity,
     filterByRating && minRating > 0,
+    showActiveOnly,
   ].filter(Boolean).length;
 
   return (
@@ -375,6 +421,32 @@ const SearchVenues = () => {
                   </div>
                 )}
               </div>
+
+              {/* Active Seeking Filter */}
+              <div className="pt-4 border-t border-border">
+                <div className="flex items-center justify-between">
+                  <Label className="flex items-center gap-2">
+                    <Megaphone className="w-4 h-4 text-artist" />
+                    Actively Seeking Artists
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={showActiveOnly}
+                      onCheckedChange={setShowActiveOnly}
+                      id="filter-active"
+                    />
+                    <Label htmlFor="filter-active" className="text-sm cursor-pointer">
+                      Show only
+                    </Label>
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {showActiveOnly 
+                    ? "Showing venues with open entertainment requests"
+                    : "Toggle to show only venues actively seeking artists"
+                  }
+                </p>
+              </div>
             </div>
           )}
 
@@ -412,6 +484,13 @@ const SearchVenues = () => {
                   <X className="w-3 h-3 cursor-pointer" onClick={() => { setFilterByRating(false); setMinRating(0); }} />
                 </Badge>
               )}
+              {showActiveOnly && (
+                <Badge variant="secondary" className="gap-1 flex items-center bg-artist/20 text-artist border-0">
+                  <Megaphone className="w-3 h-3" />
+                  Seeking Artists
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setShowActiveOnly(false)} />
+                </Badge>
+              )}
               <Button variant="ghost" size="sm" onClick={clearFilters}>
                 Clear all
               </Button>
@@ -432,88 +511,122 @@ const SearchVenues = () => {
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {venues.map((venue) => (
-            <Link key={venue.id} to={`/venue/${venue.id}`}>
-              <Card className="bg-card border-border hover:border-venue/50 transition-all cursor-pointer h-full">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    {venue.profile_image_url ? (
-                      <img 
-                        src={venue.profile_image_url} 
-                        alt={venue.venue_name}
-                        className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
-                      />
-                    ) : (
-                      <div className="w-16 h-16 rounded-xl bg-venue/20 flex items-center justify-center flex-shrink-0">
-                        <Building2 className="w-8 h-8 text-venue" />
+          {venues.map((venue) => {
+            const venueRequests = entertainmentRequests.get(venue.id) || [];
+            const hasActiveRequests = venueRequests.length > 0;
+            
+            return (
+              <Link key={venue.id} to={`/venue/${venue.id}`}>
+                <Card className={cn(
+                  "bg-card border-border hover:border-venue/50 transition-all cursor-pointer h-full",
+                  hasActiveRequests && "ring-2 ring-artist/30 border-artist/50"
+                )}>
+                  <CardContent className="p-6">
+                    {/* Active Request Banner */}
+                    {hasActiveRequests && (
+                      <div className="mb-4 -mt-2 -mx-2 px-3 py-2 bg-gradient-to-r from-artist/20 to-artist/10 rounded-lg border border-artist/20">
+                        <div className="flex items-center gap-2 text-artist">
+                          <Megaphone className="w-4 h-4" />
+                          <span className="text-sm font-medium">
+                            Seeking {venueRequests.length === 1 ? 'an artist' : `${venueRequests.length} artists`}
+                          </span>
+                        </div>
+                        <div className="mt-1 text-xs text-artist/80">
+                          {venueRequests.slice(0, 2).map((req, idx) => (
+                            <span key={req.id}>
+                              {idx > 0 && ' • '}
+                              {format(new Date(req.requested_date), 'MMM d')}
+                              {req.budget_min && req.budget_max && (
+                                <span> (${req.budget_min}-${req.budget_max})</span>
+                              )}
+                            </span>
+                          ))}
+                          {venueRequests.length > 2 && (
+                            <span> +{venueRequests.length - 2} more</span>
+                          )}
+                        </div>
                       </div>
                     )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg truncate">{venue.venue_name}</h3>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {venue.city}
-                      </p>
-                      <RatingDisplay 
-                        rating={(venue as any).average_rating} 
-                        totalReviews={(venue as any).total_reviews || 0}
-                        size="sm"
-                        className="mt-1"
-                      />
-                    </div>
-                  </div>
 
-                  {/* Venue Type & Capacity */}
-                  <div className="mt-4 flex items-center gap-3">
-                    <Badge className="bg-venue/20 text-venue border-0">
-                      {VENUE_TYPE_LABELS[venue.venue_type]}
-                    </Badge>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Users className="w-3.5 h-3.5" />
-                      <span>{venue.capacity_min} - {venue.capacity_max}</span>
-                    </div>
-                  </div>
-
-                  {/* Music Preferences */}
-                  {venue.music_preferences && venue.music_preferences.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-1">
-                      {venue.music_preferences.slice(0, 3).map((genre) => (
-                        <Badge key={genre} variant="secondary" className="text-xs">
-                          {GENRE_LABELS[genre]}
-                        </Badge>
-                      ))}
-                      {venue.music_preferences.length > 3 && (
-                        <Badge variant="secondary" className="text-xs">
-                          +{venue.music_preferences.length - 3}
-                        </Badge>
+                    <div className="flex items-start gap-4">
+                      {venue.profile_image_url ? (
+                        <img 
+                          src={venue.profile_image_url} 
+                          alt={venue.venue_name}
+                          className="w-16 h-16 rounded-xl object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-xl bg-venue/20 flex items-center justify-center flex-shrink-0">
+                          <Building2 className="w-8 h-8 text-venue" />
+                        </div>
                       )}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-lg truncate">{venue.venue_name}</h3>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {venue.city}
+                        </p>
+                        <RatingDisplay 
+                          rating={(venue as any).average_rating} 
+                          totalReviews={(venue as any).total_reviews || 0}
+                          size="sm"
+                          className="mt-1"
+                        />
+                      </div>
                     </div>
-                  )}
 
-                  {/* Booking Nights */}
-                  {venue.booking_nights && venue.booking_nights.length > 0 && (
-                    <div className="mt-3 flex items-center gap-2 text-muted-foreground">
-                      <Calendar className="w-4 h-4" />
-                      <span className="text-sm truncate">
-                        {venue.booking_nights.slice(0, 3).join(', ')}
-                        {venue.booking_nights.length > 3 && ` +${venue.booking_nights.length - 3}`}
-                      </span>
+                    {/* Venue Type & Capacity */}
+                    <div className="mt-4 flex items-center gap-3">
+                      <Badge className="bg-venue/20 text-venue border-0">
+                        {VENUE_TYPE_LABELS[venue.venue_type]}
+                      </Badge>
+                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                        <Users className="w-3.5 h-3.5" />
+                        <span>{venue.capacity_min} - {venue.capacity_max}</span>
+                      </div>
                     </div>
-                  )}
 
-                  {/* Social Link */}
-                  {venue.instagram_url && (
-                    <div className="mt-2 flex items-center gap-2 text-muted-foreground">
-                      <Instagram className="w-4 h-4" />
-                      <span className="text-sm truncate">
-                        {venue.instagram_url.replace('https://instagram.com/', '@')}
-                      </span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
+                    {/* Music Preferences */}
+                    {venue.music_preferences && venue.music_preferences.length > 0 && (
+                      <div className="mt-3 flex flex-wrap gap-1">
+                        {venue.music_preferences.slice(0, 3).map((genre) => (
+                          <Badge key={genre} variant="secondary" className="text-xs">
+                            {GENRE_LABELS[genre]}
+                          </Badge>
+                        ))}
+                        {venue.music_preferences.length > 3 && (
+                          <Badge variant="secondary" className="text-xs">
+                            +{venue.music_preferences.length - 3}
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Booking Nights */}
+                    {venue.booking_nights && venue.booking_nights.length > 0 && (
+                      <div className="mt-3 flex items-center gap-2 text-muted-foreground">
+                        <Calendar className="w-4 h-4" />
+                        <span className="text-sm truncate">
+                          {venue.booking_nights.slice(0, 3).join(', ')}
+                          {venue.booking_nights.length > 3 && ` +${venue.booking_nights.length - 3}`}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Social Link */}
+                    {venue.instagram_url && (
+                      <div className="mt-2 flex items-center gap-2 text-muted-foreground">
+                        <Instagram className="w-4 h-4" />
+                        <span className="text-sm truncate">
+                          {venue.instagram_url.replace('https://instagram.com/', '@')}
+                        </span>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </Link>
+            );
+          })}
         </div>
 
         {!hasSearched && (
