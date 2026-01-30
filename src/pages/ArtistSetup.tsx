@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, ArrowRight } from 'lucide-react';
+import { Music, ArrowRight, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Genre, GENRE_LABELS } from '@/types/database';
 import CityAutocomplete from '@/components/CityAutocomplete';
@@ -42,6 +43,9 @@ const ArtistSetup = () => {
   const [reviewStatus, setReviewStatus] = useState('pending');
   const [bio, setBio] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
+  const [feeRangeMin, setFeeRangeMin] = useState<string>('');
+  const [feeRangeMax, setFeeRangeMax] = useState<string>('');
+  const [showFeeRange, setShowFeeRange] = useState(false);
   const [artistId, setArtistId] = useState<string | null>(null);
   const [socialConnections, setSocialConnections] = useState<SocialConnection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -92,6 +96,9 @@ const ArtistSetup = () => {
         setReviewStatus((data as any).review_status || 'pending');
         setBio(data.bio || '');
         setSelectedGenres((data.genres as Genre[]) || []);
+        setFeeRangeMin(data.fee_range_min?.toString() || '');
+        setFeeRangeMax(data.fee_range_max?.toString() || '');
+        setShowFeeRange(data.show_fee_range || false);
         
         // Fetch social connections
         fetchSocialConnections(data.id);
@@ -142,6 +149,9 @@ const ArtistSetup = () => {
         profile_image_url: profileImageUrl,
         bio: bio.trim() || null,
         genres: selectedGenres,
+        fee_range_min: feeRangeMin ? parseInt(feeRangeMin) : null,
+        fee_range_max: feeRangeMax ? parseInt(feeRangeMax) : null,
+        show_fee_range: showFeeRange,
         is_profile_complete: true,
       };
 
@@ -299,6 +309,57 @@ const ArtistSetup = () => {
                     {GENRE_LABELS[genre]}
                   </button>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-card border-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="w-5 h-5 text-artist" />
+                Your Rates
+              </CardTitle>
+              <CardDescription>
+                Set your fee range so venues know what to expect. You can choose to show this publicly or keep it private.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="feeMin">Minimum Fee ($)</Label>
+                  <Input
+                    id="feeMin"
+                    type="number"
+                    placeholder="500"
+                    value={feeRangeMin}
+                    onChange={(e) => setFeeRangeMin(e.target.value)}
+                    min="0"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="feeMax">Maximum Fee ($)</Label>
+                  <Input
+                    id="feeMax"
+                    type="number"
+                    placeholder="2000"
+                    value={feeRangeMax}
+                    onChange={(e) => setFeeRangeMax(e.target.value)}
+                    min="0"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 border border-border/50">
+                <div>
+                  <p className="font-medium">Show rates publicly</p>
+                  <p className="text-sm text-muted-foreground">
+                    When enabled, venues can see your fee range on your profile
+                  </p>
+                </div>
+                <Switch
+                  checked={showFeeRange}
+                  onCheckedChange={setShowFeeRange}
+                />
               </div>
             </CardContent>
           </Card>

@@ -94,6 +94,7 @@ export interface BookingRequest {
   requested_time?: string;
   message?: string;
   offer_amount?: number;
+  counter_offer?: number;
   status: BookingStatus;
   created_at: string;
   updated_at: string;

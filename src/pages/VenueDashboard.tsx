@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle, Music, Plus } from 'lucide-react';
+import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle, Music, Plus, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingRequest, Venue, EntertainmentRequest, BOOKING_STATUS_LABELS, BookingStatus, ENTERTAINMENT_REQUEST_STATUS_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -279,11 +279,25 @@ const VenueDashboard = () => {
                           {BOOKING_STATUS_LABELS[request.status]}
                         </Badge>
                       </div>
-                      {request.offer_amount && (
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Offered: ${request.offer_amount}
-                        </p>
-                      )}
+                      {/* Offer and Counter-offer display */}
+                      <div className="flex flex-wrap gap-3 mb-3">
+                        {request.offer_amount && (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-venue/10 border border-venue/20">
+                            <DollarSign className="w-4 h-4 text-venue" />
+                            <span className="text-sm font-medium text-venue">
+                              Your offer: ${request.offer_amount.toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                        {request.counter_offer && (
+                          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-artist/10 border border-artist/20">
+                            <DollarSign className="w-4 h-4 text-artist" />
+                            <span className="text-sm font-medium text-artist">
+                              Counter: ${request.counter_offer.toLocaleString()}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                       {request.status === 'accepted' && new Date(request.requested_date) < new Date() && (
                         <Button 
                           size="sm"
