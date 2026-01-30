@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Building2, MapPin, Users, Music, Calendar, Instagram, ExternalLink, ArrowLeft, LogOut } from 'lucide-react';
 import { Venue, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
+import { ReviewsList, Review } from '@/components/ReviewsList';
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,6 +16,7 @@ const VenueProfile = () => {
   const { user, signOut } = useAuth();
   
   const [venue, setVenue] = useState<Venue | null>(null);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +35,50 @@ const VenueProfile = () => {
       }
       
       setVenue(venueData as Venue);
+      
+      // Fetch reviews for this venue
+      const { data: reviewsData } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          rating,
+          comment,
+          created_at,
+          reviewer_type,
+          reviewer_artist_id,
+          reviewer_venue_id
+        `)
+        .eq('reviewee_venue_id', id)
+        .order('created_at', { ascending: false });
+      
+      if (reviewsData && reviewsData.length > 0) {
+        // Fetch reviewer names
+        const artistIds = reviewsData
+          .filter(r => r.reviewer_type === 'artist' && r.reviewer_artist_id)
+          .map(r => r.reviewer_artist_id!);
+        
+        const { data: artists } = artistIds.length > 0 
+          ? await supabase.from('artists').select('id, artist_name').in('id', artistIds)
+          : { data: [] as { id: string; artist_name: string }[] };
+        
+        const artistMap = new Map<string, string>(
+          (artists || []).map(a => [a.id, a.artist_name])
+        );
+        
+        const formattedReviews: Review[] = reviewsData.map(r => ({
+          id: r.id,
+          rating: r.rating,
+          comment: r.comment,
+          created_at: r.created_at,
+          reviewer_name: r.reviewer_type === 'artist' 
+            ? (artistMap.get(r.reviewer_artist_id!) || 'Artist')
+            : 'Venue',
+          reviewer_type: r.reviewer_type as 'artist' | 'venue',
+        }));
+        
+        setReviews(formattedReviews);
+      }
+      
       setIsLoading(false);
     };
     
@@ -168,6 +214,12 @@ const VenueProfile = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Reviews Section */}
+            <ReviewsList 
+              reviews={reviews} 
+              emptyMessage="No reviews yet for this venue"
+            />
           </div>
 
           {/* Sidebar */}

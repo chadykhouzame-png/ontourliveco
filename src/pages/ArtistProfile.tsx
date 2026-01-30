@@ -18,6 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Artist, TravelDate, Venue, GENRE_LABELS } from '@/types/database';
 import { SocialStatsDisplay, SocialPlatform } from '@/components/SocialConnectButton';
 import { RatingDisplay } from '@/components/StarRating';
+import { ReviewsList, Review } from '@/components/ReviewsList';
 
 type SocialConnection = {
   platform: SocialPlatform;
@@ -37,6 +38,7 @@ const ArtistProfile = () => {
   const [travelDates, setTravelDates] = useState<TravelDate[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [socialConnections, setSocialConnections] = useState<SocialConnection[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Booking form
@@ -91,6 +93,49 @@ const ArtistProfile = () => {
         .order('start_date', { ascending: true });
       
       setTravelDates(dates || []);
+      
+      // Fetch reviews for this artist
+      const { data: reviewsData } = await supabase
+        .from('reviews')
+        .select(`
+          id,
+          rating,
+          comment,
+          created_at,
+          reviewer_type,
+          reviewer_artist_id,
+          reviewer_venue_id
+        `)
+        .eq('reviewee_artist_id', id)
+        .order('created_at', { ascending: false });
+      
+      if (reviewsData && reviewsData.length > 0) {
+        // Fetch reviewer names (venues who reviewed this artist)
+        const venueIds = reviewsData
+          .filter(r => r.reviewer_type === 'venue' && r.reviewer_venue_id)
+          .map(r => r.reviewer_venue_id!);
+        
+        const { data: venues } = venueIds.length > 0 
+          ? await supabase.from('venues').select('id, venue_name').in('id', venueIds)
+          : { data: [] as { id: string; venue_name: string }[] };
+        
+        const venueMap = new Map<string, string>(
+          (venues || []).map(v => [v.id, v.venue_name])
+        );
+        
+        const formattedReviews: Review[] = reviewsData.map(r => ({
+          id: r.id,
+          rating: r.rating,
+          comment: r.comment,
+          created_at: r.created_at,
+          reviewer_name: r.reviewer_type === 'venue' 
+            ? (venueMap.get(r.reviewer_venue_id!) || 'Venue')
+            : 'Artist',
+          reviewer_type: r.reviewer_type as 'artist' | 'venue',
+        }));
+        
+        setReviews(formattedReviews);
+      }
       
       // Get venue if user is a venue
       if (user && userRole === 'venue') {
@@ -316,6 +361,12 @@ const ArtistProfile = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Reviews Section */}
+            <ReviewsList 
+              reviews={reviews} 
+              emptyMessage="No reviews yet for this artist"
+            />
           </div>
 
           {/* Sidebar */}
