@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,13 +8,25 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search as SearchIcon, MapPin, Building2, Music, Instagram, Filter, X, LogOut, Users, Star, Calendar, Megaphone } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Building2, Music, Instagram, Filter, X, LogOut, Users, Star, Calendar, Megaphone, ArrowUpDown } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { Venue, Genre, VenueType, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { format } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type SortOption = 'name_asc' | 'name_desc' | 'rating_desc' | 'rating_asc' | 'capacity_desc' | 'capacity_asc';
+
+const SORT_OPTIONS: { value: SortOption; label: string }[] = [
+  { value: 'name_asc', label: 'Name (A-Z)' },
+  { value: 'name_desc', label: 'Name (Z-A)' },
+  { value: 'rating_desc', label: 'Highest Rated' },
+  { value: 'rating_asc', label: 'Lowest Rated' },
+  { value: 'capacity_desc', label: 'Largest Capacity' },
+  { value: 'capacity_asc', label: 'Smallest Capacity' },
+];
 
 interface EntertainmentRequest {
   id: string;
@@ -58,6 +70,28 @@ const SearchVenues = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('name_asc');
+
+  const sortedVenues = useMemo(() => {
+    return [...venues].sort((a, b) => {
+      switch (sortBy) {
+        case 'name_asc':
+          return a.venue_name.localeCompare(b.venue_name);
+        case 'name_desc':
+          return b.venue_name.localeCompare(a.venue_name);
+        case 'rating_desc':
+          return ((b as any).average_rating || 0) - ((a as any).average_rating || 0);
+        case 'rating_asc':
+          return ((a as any).average_rating || 0) - ((b as any).average_rating || 0);
+        case 'capacity_desc':
+          return (b.capacity_max || 0) - (a.capacity_max || 0);
+        case 'capacity_asc':
+          return (a.capacity_min || 0) - (b.capacity_min || 0);
+        default:
+          return 0;
+      }
+    });
+  }, [venues, sortBy]);
 
   const handleSearch = async () => {
     setIsLoading(true);
@@ -498,20 +532,37 @@ const SearchVenues = () => {
           )}
         </div>
 
-        {/* Results */}
+        {/* Results Header with Sort */}
         {hasSearched && (
-          <div className="mb-4">
+          <div className="mb-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <p className="text-muted-foreground">
               {venues.length === 0 
                 ? 'No venues found matching your criteria'
                 : `${venues.length} ${venues.length === 1 ? 'venue' : 'venues'} found`
               }
             </p>
+            {venues.length > 0 && (
+              <div className="flex items-center gap-2">
+                <ArrowUpDown className="w-4 h-4 text-muted-foreground" />
+                <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {venues.map((venue) => {
+          {sortedVenues.map((venue) => {
             const venueRequests = entertainmentRequests.get(venue.id) || [];
             const hasActiveRequests = venueRequests.length > 0;
             
