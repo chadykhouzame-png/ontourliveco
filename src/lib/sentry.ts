@@ -339,6 +339,38 @@ export function addBreadcrumb(breadcrumb: Sentry.Breadcrumb): void {
 }
 
 /**
+ * Trigger a test error to verify Sentry integration
+ * Call from browser console: window.testSentry()
+ */
+export function triggerTestError(): void {
+  const testError = new Error('[Sentry Test] This is a test error to verify Sentry integration');
+  
+  if (!isSentryEnabled) {
+    console.warn('[Sentry Test] Sentry is not enabled (no DSN configured)');
+    console.log('[Sentry Test] Error would have been:', testError.message);
+    return;
+  }
+  
+  if (import.meta.env.DEV) {
+    console.warn('[Sentry Test] Running in development mode - errors not sent to Sentry');
+    console.log('[Sentry Test] In production, this error would be captured:', testError.message);
+    return;
+  }
+  
+  captureException(testError, {
+    tags: { test: 'true', source: 'manual_trigger' },
+    level: 'error',
+  });
+  
+  console.log('[Sentry Test] Error sent to Sentry successfully!');
+}
+
+// Expose test function globally for console access
+if (typeof window !== 'undefined') {
+  (window as unknown as { testSentry: typeof triggerTestError }).testSentry = triggerTestError;
+}
+
+/**
  * Create a React profiler wrapper for component performance tracking
  */
 export function withProfiler<P extends object>(
