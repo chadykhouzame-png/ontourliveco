@@ -11,6 +11,8 @@ import { Music, Instagram, ArrowRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Genre, GENRE_LABELS } from '@/types/database';
 import CityAutocomplete from '@/components/CityAutocomplete';
+import ProfileImageUpload from '@/components/ProfileImageUpload';
+import ReviewStatusBadge from '@/components/ReviewStatusBadge';
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
@@ -23,8 +25,12 @@ const ArtistSetup = () => {
   const { user, userRole, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [artistName, setArtistName] = useState('');
   const [primaryCity, setPrimaryCity] = useState('');
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [reviewStatus, setReviewStatus] = useState('pending');
   const [bio, setBio] = useState('');
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
   const [instagramUrl, setInstagramUrl] = useState('');
@@ -51,8 +57,12 @@ const ArtistSetup = () => {
       
       if (data) {
         setExistingArtist(true);
+        setFirstName((data as any).first_name || '');
+        setLastName((data as any).last_name || '');
         setArtistName(data.artist_name);
         setPrimaryCity(data.primary_city);
+        setProfileImageUrl(data.profile_image_url);
+        setReviewStatus((data as any).review_status || 'pending');
         setBio(data.bio || '');
         setSelectedGenres((data.genres as Genre[]) || []);
         setInstagramUrl(data.instagram_url || '');
@@ -76,11 +86,11 @@ const ArtistSetup = () => {
     e.preventDefault();
     
     if (!user) return;
-    if (!artistName.trim() || !primaryCity.trim()) {
+    if (!firstName.trim() || !lastName.trim() || !artistName.trim() || !primaryCity.trim()) {
       toast({
         variant: "destructive",
         title: "Required fields missing",
-        description: "Please fill in your artist name and primary city.",
+        description: "Please fill in your name, artist name, and primary city.",
       });
       return;
     }
@@ -99,8 +109,11 @@ const ArtistSetup = () => {
     try {
       const artistData = {
         user_id: user.id,
+        first_name: firstName.trim(),
+        last_name: lastName.trim(),
         artist_name: artistName.trim(),
         primary_city: primaryCity.trim(),
+        profile_image_url: profileImageUrl,
         bio: bio.trim() || null,
         genres: selectedGenres,
         instagram_url: instagramUrl.trim(),
@@ -164,10 +177,46 @@ const ArtistSetup = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <Card className="bg-card border-border">
             <CardHeader>
-              <CardTitle>Basic Info</CardTitle>
-              <CardDescription>How venues will find you</CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Basic Info</CardTitle>
+                  <CardDescription>How venues will find you</CardDescription>
+                </div>
+                <ReviewStatusBadge status={reviewStatus} />
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
+              <div className="flex justify-center">
+                <ProfileImageUpload
+                  currentImageUrl={profileImageUrl}
+                  onImageUploaded={setProfileImageUrl}
+                  variant="artist"
+                />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">First Name *</Label>
+                  <Input
+                    id="firstName"
+                    placeholder="John"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Last Name *</Label>
+                  <Input
+                    id="lastName"
+                    placeholder="Smith"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="artistName">Artist / Stage Name *</Label>
