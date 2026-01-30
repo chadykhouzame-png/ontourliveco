@@ -100,25 +100,25 @@ export default function NotificationBell() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative haptic">
           <Bell className="w-5 h-5" />
           {unreadCount > 0 && (
             <Badge
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary"
+              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-primary animate-pulse"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </Badge>
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="flex items-center justify-between p-3 border-b border-border">
+      <PopoverContent className="w-80 p-0 glass border-border/50 rounded-2xl overflow-hidden" align="end">
+        <div className="flex items-center justify-between p-4 border-b border-border/30 bg-secondary/20">
           <h4 className="font-semibold">Notifications</h4>
           {unreadCount > 0 && (
             <Button
               variant="ghost"
               size="sm"
-              className="text-xs text-muted-foreground"
+              className="text-xs text-muted-foreground haptic-sm"
               onClick={markAllAsRead}
             >
               Mark all as read
@@ -132,12 +132,12 @@ export default function NotificationBell() {
               <p className="text-sm">No notifications yet</p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
+            <div className="divide-y divide-border/30">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={cn(
-                    'p-3 cursor-pointer transition-colors hover:bg-secondary/50',
+                    'p-4 cursor-pointer transition-all duration-200 hover:bg-secondary/50 haptic',
                     !notification.is_read && 'bg-primary/5'
                   )}
                   onClick={() => markAsRead(notification.id)}

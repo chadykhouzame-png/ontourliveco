@@ -148,8 +148,8 @@ const VenueDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
+      {/* Header - Frosted Glass */}
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-black tracking-tighter">
             <span className="text-primary">ON</span>
@@ -160,7 +160,7 @@ const VenueDashboard = () => {
               {venue?.venue_name}
             </span>
             <NotificationBell />
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
+            <Button variant="ghost" size="icon" className="haptic" onClick={handleSignOut}>
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
@@ -174,13 +174,13 @@ const VenueDashboard = () => {
             <p className="text-muted-foreground">Welcome back, {venue?.venue_name}</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/venue/setup')}>
+            <Button variant="outline" onClick={() => navigate('/venue/setup')} className="haptic glass-subtle">
               <Settings className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
             <Button 
               onClick={() => setEntertainmentDialogOpen(true)} 
-              className="bg-venue hover:bg-venue/90"
+              className="bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20"
             >
               <Plus className="w-4 h-4 mr-2" />
               Fill a Slot
@@ -190,8 +190,8 @@ const VenueDashboard = () => {
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Upcoming Bookings */}
-          <Card className="bg-card border-border">
-            <CardHeader>
+          <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+            <CardHeader className="border-b border-border/30 bg-secondary/20">
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="w-5 h-5 text-venue" />
                 Upcoming Events
@@ -217,7 +217,7 @@ const VenueDashboard = () => {
                   {upcomingBookings.slice(0, 5).map((booking) => (
                     <div 
                       key={booking.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/30"
+                      className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30 haptic"
                     >
                       <div>
                         <p className="font-medium">{booking.artist?.artist_name || 'Unknown Artist'}</p>
@@ -235,8 +235,8 @@ const VenueDashboard = () => {
           </Card>
 
           {/* Sent Requests */}
-          <Card className="bg-card border-border">
-            <CardHeader>
+          <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+            <CardHeader className="border-b border-border/30 bg-secondary/20">
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-artist" />
                 Sent Requests
@@ -262,7 +262,7 @@ const VenueDashboard = () => {
                   {bookingRequests.slice(0, 5).map((request) => (
                     <div 
                       key={request.id}
-                      className="p-4 rounded-lg border border-border"
+                      className="p-4 rounded-xl border border-border/50 bg-secondary/20 backdrop-blur-sm haptic"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
@@ -322,18 +322,20 @@ const VenueDashboard = () => {
         </div>
 
         {/* Quick Search */}
-        <Card className="bg-card border-border mt-6">
-          <CardContent className="py-8">
+        <Card className="glass border-border/50 rounded-2xl overflow-hidden mt-6">
+          <CardContent className="py-10">
             <div className="text-center">
-              <Search className="w-12 h-12 mx-auto mb-4 text-primary" />
+              <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-venue/20 flex items-center justify-center">
+                <Search className="w-8 h-8 text-venue" />
+              </div>
               <h3 className="text-xl font-semibold mb-2">Find Your Next Artist</h3>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
                 Search by city, date, and genre to find artists who are in town and available
               </p>
               <Button 
                 onClick={() => navigate('/search')} 
                 size="lg"
-                className="bg-venue hover:bg-venue/90"
+                className="bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20"
               >
                 <Search className="w-4 h-4 mr-2" />
                 Search Artists

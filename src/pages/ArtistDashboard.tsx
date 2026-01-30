@@ -141,8 +141,8 @@ const ArtistDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-card">
+      {/* Header - Frosted Glass */}
+      <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/" className="text-2xl font-black tracking-tighter">
             <span className="text-primary">ON</span>
@@ -153,7 +153,7 @@ const ArtistDashboard = () => {
               {artist?.artist_name}
             </span>
             <NotificationBell />
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
+            <Button variant="ghost" size="icon" className="haptic" onClick={handleSignOut}>
               <LogOut className="w-4 h-4" />
             </Button>
           </div>
@@ -167,11 +167,11 @@ const ArtistDashboard = () => {
             <p className="text-muted-foreground">Welcome back, {artist?.artist_name}</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/artist/setup')}>
+            <Button variant="outline" onClick={() => navigate('/artist/setup')} className="haptic glass-subtle">
               <Settings className="w-4 h-4 mr-2" />
               Edit Profile
             </Button>
-            <Button onClick={() => navigate('/artist/travel')} className="bg-artist hover:bg-artist/90">
+            <Button onClick={() => navigate('/artist/travel')} className="bg-artist hover:bg-artist/90 haptic shadow-lg shadow-artist/20">
               <Plus className="w-4 h-4 mr-2" />
               Add Travel
             </Button>
@@ -180,8 +180,8 @@ const ArtistDashboard = () => {
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Upcoming Travel */}
-          <Card className="bg-card border-border">
-            <CardHeader>
+          <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+            <CardHeader className="border-b border-border/30 bg-secondary/20">
               <CardTitle className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-artist" />
                 Upcoming Travel
@@ -207,7 +207,7 @@ const ArtistDashboard = () => {
                   {upcomingDates.slice(0, 5).map((td) => (
                     <div 
                       key={td.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-secondary/30"
+                      className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30 haptic"
                     >
                       <div className="flex items-center gap-3">
                         <MapPin className="w-4 h-4 text-artist" />
@@ -238,8 +238,8 @@ const ArtistDashboard = () => {
           </Card>
 
           {/* Booking Requests */}
-          <Card className="bg-card border-border">
-            <CardHeader>
+          <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+            <CardHeader className="border-b border-border/30 bg-secondary/20">
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-venue" />
                 Booking Requests
@@ -265,7 +265,7 @@ const ArtistDashboard = () => {
                   {bookingRequests.slice(0, 5).map((request) => (
                     <div 
                       key={request.id}
-                      className="p-4 rounded-lg border border-border"
+                      className="p-4 rounded-xl border border-border/50 bg-secondary/20 backdrop-blur-sm haptic"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
