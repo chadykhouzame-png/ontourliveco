@@ -1,8 +1,46 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Music, Building2, MapPin, Calendar, Star, MessageSquare, ArrowRight, Check, Instagram, Mail } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Index = () => {
+  const { user, userRole, isLoading } = useAuth();
+
+  // Redirect logged-in users to their dashboard
+  if (!isLoading && user) {
+    if (userRole === 'artist') {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Welcome back!</h2>
+            <Link to="/artist/dashboard">
+              <Button className="bg-artist hover:bg-artist/90">
+                Go to Dashboard
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      );
+    }
+    if (userRole === 'venue') {
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Welcome back!</h2>
+            <Link to="/venue/dashboard">
+              <Button className="bg-venue hover:bg-venue/90">
+                Go to Dashboard
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      );
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Navigation */}
@@ -16,8 +54,13 @@ const Index = () => {
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors text-sm">How It Works</a>
             <a href="#for-artists" className="text-muted-foreground hover:text-foreground transition-colors text-sm">For Artists</a>
             <a href="#for-venues" className="text-muted-foreground hover:text-foreground transition-colors text-sm">For Venues</a>
+            <Link to="/search" className="text-muted-foreground hover:text-foreground transition-colors text-sm">Search</Link>
           </div>
-          <Button size="sm">Get Early Access</Button>
+          <div className="flex gap-2">
+            <Link to="/search">
+              <Button variant="outline" size="sm">Browse Artists</Button>
+            </Link>
+          </div>
         </div>
       </nav>
 
@@ -75,10 +118,12 @@ const Index = () => {
                       <span>Get discovered by venues</span>
                     </li>
                   </ul>
-                  <Button className="w-full bg-artist hover:bg-artist/90 text-artist-foreground">
-                    Join as Artist
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
+                  <Link to="/join/artist">
+                    <Button className="w-full bg-artist hover:bg-artist/90 text-artist-foreground">
+                      Join as Artist
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>
@@ -109,10 +154,12 @@ const Index = () => {
                       <span>Book with confidence</span>
                     </li>
                   </ul>
-                  <Button className="w-full bg-venue hover:bg-venue/90 text-venue-foreground">
-                    Join as Venue
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
+                  <Link to="/join/venue">
+                    <Button className="w-full bg-venue hover:bg-venue/90 text-venue-foreground">
+                      Join as Venue
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             </div>
@@ -273,17 +320,22 @@ const Index = () => {
       <section className="py-24">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6">
-            Be First on the Platform
+            Ready to Get Started?
           </h2>
           <p className="text-xl text-muted-foreground mb-10">
-            We're launching soon. Get early access and be part of the movement 
-            that's changing how entertainment gets booked.
+            Join On Tour today and change how you book entertainment forever.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="text-lg px-8">
-              Get Early Access
-              <ArrowRight className="ml-2" />
-            </Button>
+            <Link to="/join/artist">
+              <Button size="lg" className="text-lg px-8 bg-artist hover:bg-artist/90">
+                Join as Artist
+              </Button>
+            </Link>
+            <Link to="/join/venue">
+              <Button size="lg" className="text-lg px-8 bg-venue hover:bg-venue/90">
+                Join as Venue
+              </Button>
+            </Link>
           </div>
         </div>
       </section>

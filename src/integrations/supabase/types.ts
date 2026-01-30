@@ -14,16 +14,312 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      artists: {
+        Row: {
+          artist_name: string
+          bio: string | null
+          created_at: string
+          fee_range_max: number | null
+          fee_range_min: number | null
+          genres: Database["public"]["Enums"]["genre"][] | null
+          id: string
+          instagram_url: string | null
+          is_profile_complete: boolean | null
+          primary_city: string
+          profile_image_url: string | null
+          show_fee_range: boolean | null
+          soundcloud_url: string | null
+          spotify_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          artist_name: string
+          bio?: string | null
+          created_at?: string
+          fee_range_max?: number | null
+          fee_range_min?: number | null
+          genres?: Database["public"]["Enums"]["genre"][] | null
+          id?: string
+          instagram_url?: string | null
+          is_profile_complete?: boolean | null
+          primary_city: string
+          profile_image_url?: string | null
+          show_fee_range?: boolean | null
+          soundcloud_url?: string | null
+          spotify_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          artist_name?: string
+          bio?: string | null
+          created_at?: string
+          fee_range_max?: number | null
+          fee_range_min?: number | null
+          genres?: Database["public"]["Enums"]["genre"][] | null
+          id?: string
+          instagram_url?: string | null
+          is_profile_complete?: boolean | null
+          primary_city?: string
+          profile_image_url?: string | null
+          show_fee_range?: boolean | null
+          soundcloud_url?: string | null
+          spotify_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      booking_requests: {
+        Row: {
+          artist_id: string
+          created_at: string
+          id: string
+          message: string | null
+          offer_amount: number | null
+          requested_date: string
+          requested_time: string | null
+          status: Database["public"]["Enums"]["booking_status"] | null
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          offer_amount?: number | null
+          requested_date: string
+          requested_time?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          offer_amount?: number | null
+          requested_date?: string
+          requested_time?: string | null
+          status?: Database["public"]["Enums"]["booking_status"] | null
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_requests_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_requests_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      travel_dates: {
+        Row: {
+          artist_id: string
+          city: string
+          created_at: string
+          end_date: string
+          id: string
+          is_available: boolean | null
+          notes: string | null
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          artist_id: string
+          city: string
+          created_at?: string
+          end_date: string
+          id?: string
+          is_available?: boolean | null
+          notes?: string | null
+          start_date: string
+          updated_at?: string
+        }
+        Update: {
+          artist_id?: string
+          city?: string
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_available?: boolean | null
+          notes?: string | null
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "travel_dates_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      venues: {
+        Row: {
+          booking_nights: string[] | null
+          capacity_max: number | null
+          capacity_min: number | null
+          city: string
+          created_at: string
+          description: string | null
+          equipment_notes: string | null
+          id: string
+          instagram_url: string | null
+          is_profile_complete: boolean | null
+          music_preferences: Database["public"]["Enums"]["genre"][] | null
+          profile_image_url: string | null
+          updated_at: string
+          user_id: string
+          venue_name: string
+          venue_type: Database["public"]["Enums"]["venue_type"]
+        }
+        Insert: {
+          booking_nights?: string[] | null
+          capacity_max?: number | null
+          capacity_min?: number | null
+          city: string
+          created_at?: string
+          description?: string | null
+          equipment_notes?: string | null
+          id?: string
+          instagram_url?: string | null
+          is_profile_complete?: boolean | null
+          music_preferences?: Database["public"]["Enums"]["genre"][] | null
+          profile_image_url?: string | null
+          updated_at?: string
+          user_id: string
+          venue_name: string
+          venue_type?: Database["public"]["Enums"]["venue_type"]
+        }
+        Update: {
+          booking_nights?: string[] | null
+          capacity_max?: number | null
+          capacity_min?: number | null
+          city?: string
+          created_at?: string
+          description?: string | null
+          equipment_notes?: string | null
+          id?: string
+          instagram_url?: string | null
+          is_profile_complete?: boolean | null
+          music_preferences?: Database["public"]["Enums"]["genre"][] | null
+          profile_image_url?: string | null
+          updated_at?: string
+          user_id?: string
+          venue_name?: string
+          venue_type?: Database["public"]["Enums"]["venue_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "artist" | "venue" | "admin"
+      booking_status: "pending" | "accepted" | "declined" | "cancelled"
+      genre:
+        | "house"
+        | "techno"
+        | "disco"
+        | "hip_hop"
+        | "rnb"
+        | "afrobeats"
+        | "amapiano"
+        | "latin"
+        | "pop"
+        | "rock"
+        | "jazz"
+        | "soul"
+        | "funk"
+        | "drum_and_bass"
+        | "uk_garage"
+        | "reggae"
+        | "dancehall"
+        | "other"
+      venue_type:
+        | "bar"
+        | "club"
+        | "restaurant"
+        | "hotel"
+        | "rooftop"
+        | "lounge"
+        | "festival"
+        | "private_event"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +446,40 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["artist", "venue", "admin"],
+      booking_status: ["pending", "accepted", "declined", "cancelled"],
+      genre: [
+        "house",
+        "techno",
+        "disco",
+        "hip_hop",
+        "rnb",
+        "afrobeats",
+        "amapiano",
+        "latin",
+        "pop",
+        "rock",
+        "jazz",
+        "soul",
+        "funk",
+        "drum_and_bass",
+        "uk_garage",
+        "reggae",
+        "dancehall",
+        "other",
+      ],
+      venue_type: [
+        "bar",
+        "club",
+        "restaurant",
+        "hotel",
+        "rooftop",
+        "lounge",
+        "festival",
+        "private_event",
+        "other",
+      ],
+    },
   },
 } as const
