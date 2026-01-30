@@ -11,6 +11,40 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// --- RATE LIMITING ---
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_USER = 3; // Max welcome emails per user per hour
+
+// In-memory rate limit store (resets on function cold start)
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(userId: string): { allowed: boolean; remaining: number; resetAt: number } {
+  const now = Date.now();
+  const entry = rateLimitStore.get(userId);
+  
+  // Clean up expired entries periodically
+  if (Math.random() < 0.1) {
+    for (const [key, value] of rateLimitStore.entries()) {
+      if (now > value.resetAt) {
+        rateLimitStore.delete(key);
+      }
+    }
+  }
+  
+  if (!entry || now > entry.resetAt) {
+    // New window
+    rateLimitStore.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true, remaining: MAX_REQUESTS_PER_USER - 1, resetAt: now + RATE_LIMIT_WINDOW_MS };
+  }
+  
+  if (entry.count >= MAX_REQUESTS_PER_USER) {
+    return { allowed: false, remaining: 0, resetAt: entry.resetAt };
+  }
+  
+  entry.count++;
+  return { allowed: true, remaining: MAX_REQUESTS_PER_USER - entry.count, resetAt: entry.resetAt };
+}
+
 // Input validation schema
 const WelcomeEmailSchema = z.object({
   email: z.string().email().max(254),
@@ -61,6 +95,27 @@ serve(async (req: Request) => {
     }
 
     console.log('Authenticated user:', user.id);
+
+    // --- RATE LIMITING CHECK ---
+    const rateLimit = checkRateLimit(user.id);
+    if (!rateLimit.allowed) {
+      console.warn(`Rate limit exceeded for user: ${user.id}`);
+      const retryAfterSeconds = Math.ceil((rateLimit.resetAt - Date.now()) / 1000);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many requests. Please try again later.',
+          retryAfter: retryAfterSeconds 
+        }),
+        { 
+          status: 429, 
+          headers: { 
+            ...corsHeaders, 
+            'Content-Type': 'application/json',
+            'Retry-After': String(retryAfterSeconds)
+          } 
+        }
+      );
+    }
 
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     if (!resendApiKey) {
