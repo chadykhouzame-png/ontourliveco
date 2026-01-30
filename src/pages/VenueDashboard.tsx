@@ -18,7 +18,9 @@ import NotificationBell from '@/components/NotificationBell';
 import VisitingArtists from '@/components/VisitingArtists';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { NegotiationHistory, addNegotiationEvent } from '@/components/NegotiationHistory';
+import { useNegotiationLimit, MAX_NEGOTIATION_ROUNDS } from '@/hooks/useNegotiationLimit';
 import { useToast } from '@/hooks/use-toast';
+import { AlertTriangle } from 'lucide-react';
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
@@ -41,6 +43,9 @@ const VenueDashboard = () => {
   const [updateOfferDialogOpen, setUpdateOfferDialogOpen] = useState(false);
   const [newOfferAmount, setNewOfferAmount] = useState('');
   const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
+  
+  // Negotiation limit check
+  const { hasReachedLimit, remainingRounds, roundCount } = useNegotiationLimit(selectedBooking?.id);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -618,35 +623,57 @@ const VenueDashboard = () => {
                 )}
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="newOffer">Your new offer ($)</Label>
-                <Input
-                  id="newOffer"
-                  type="number"
-                  placeholder="Enter your updated offer"
-                  value={newOfferAmount}
-                  onChange={(e) => setNewOfferAmount(e.target.value)}
-                  min="0"
-                  className="text-lg"
-                />
-              </div>
-              
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setUpdateOfferDialogOpen(false)}
-                  className="flex-1 haptic glass-subtle"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSubmitUpdatedOffer}
-                  disabled={!newOfferAmount || isSubmittingOffer}
-                  className="flex-1 bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20"
-                >
-                  {isSubmittingOffer ? 'Sending...' : 'Send Updated Offer'}
-                </Button>
-              </div>
+              {/* Negotiation limit warning */}
+              {hasReachedLimit ? (
+                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30">
+                  <div className="flex items-center gap-2 text-destructive mb-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    <span className="font-semibold">Negotiation Limit Reached</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    You've reached the maximum of {MAX_NEGOTIATION_ROUNDS} negotiation rounds. 
+                    Please accept the artist's counter-offer or cancel this booking to proceed.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {roundCount > 0 && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      {remainingRounds} negotiation round{remainingRounds !== 1 ? 's' : ''} remaining
+                    </p>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="newOffer">Your new offer ($)</Label>
+                    <Input
+                      id="newOffer"
+                      type="number"
+                      placeholder="Enter your updated offer"
+                      value={newOfferAmount}
+                      onChange={(e) => setNewOfferAmount(e.target.value)}
+                      min="0"
+                      className="text-lg"
+                    />
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setUpdateOfferDialogOpen(false)}
+                      className="flex-1 haptic glass-subtle"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSubmitUpdatedOffer}
+                      disabled={!newOfferAmount || isSubmittingOffer}
+                      className="flex-1 bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20"
+                    >
+                      {isSubmittingOffer ? 'Sending...' : 'Send Updated Offer'}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </DialogContent>

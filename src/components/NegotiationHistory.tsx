@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
-import { DollarSign, ArrowRight, CheckCircle, XCircle, MessageSquare } from 'lucide-react';
+import { DollarSign, ArrowRight, CheckCircle, XCircle, MessageSquare, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
-
+import { MAX_NEGOTIATION_ROUNDS } from '@/hooks/useNegotiationLimit';
 interface NegotiationEvent {
   id: string;
   booking_request_id: string;

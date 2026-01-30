@@ -17,7 +17,9 @@ import NotificationBell from '@/components/NotificationBell';
 import ArtistCalendar from '@/components/ArtistCalendar';
 import { NotificationSettings } from '@/components/NotificationSettings';
 import { NegotiationHistory, addNegotiationEvent } from '@/components/NegotiationHistory';
+import { useNegotiationLimit, MAX_NEGOTIATION_ROUNDS } from '@/hooks/useNegotiationLimit';
 import { useToast } from '@/hooks/use-toast';
+import { AlertTriangle } from 'lucide-react';
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
@@ -38,6 +40,9 @@ const ArtistDashboard = () => {
   const [counterOfferDialogOpen, setCounterOfferDialogOpen] = useState(false);
   const [counterOfferAmount, setCounterOfferAmount] = useState('');
   const [isSubmittingCounter, setIsSubmittingCounter] = useState(false);
+  
+  // Negotiation limit check
+  const { hasReachedLimit, remainingRounds, roundCount } = useNegotiationLimit(selectedBooking?.id);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -575,35 +580,57 @@ const ArtistDashboard = () => {
                 </div>
               )}
               
-              <div className="space-y-2">
-                <Label htmlFor="counterOffer">Your counter-offer ($)</Label>
-                <Input
-                  id="counterOffer"
-                  type="number"
-                  placeholder="Enter your fee"
-                  value={counterOfferAmount}
-                  onChange={(e) => setCounterOfferAmount(e.target.value)}
-                  min="0"
-                  className="text-lg"
-                />
-              </div>
-              
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setCounterOfferDialogOpen(false)}
-                  className="flex-1 haptic glass-subtle"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleSubmitCounterOffer}
-                  disabled={!counterOfferAmount || isSubmittingCounter}
-                  className="flex-1 bg-artist hover:bg-artist/90 haptic shadow-lg shadow-artist/20"
-                >
-                  {isSubmittingCounter ? 'Sending...' : 'Send Counter-Offer'}
-                </Button>
-              </div>
+              {/* Negotiation limit warning */}
+              {hasReachedLimit ? (
+                <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/30">
+                  <div className="flex items-center gap-2 text-destructive mb-2">
+                    <AlertTriangle className="w-5 h-5" />
+                    <span className="font-semibold">Negotiation Limit Reached</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    You've reached the maximum of {MAX_NEGOTIATION_ROUNDS} negotiation rounds. 
+                    Please accept or decline this booking to proceed.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {roundCount > 0 && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      {remainingRounds} negotiation round{remainingRounds !== 1 ? 's' : ''} remaining
+                    </p>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="counterOffer">Your counter-offer ($)</Label>
+                    <Input
+                      id="counterOffer"
+                      type="number"
+                      placeholder="Enter your fee"
+                      value={counterOfferAmount}
+                      onChange={(e) => setCounterOfferAmount(e.target.value)}
+                      min="0"
+                      className="text-lg"
+                    />
+                  </div>
+                  
+                  <div className="flex gap-3 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setCounterOfferDialogOpen(false)}
+                      className="flex-1 haptic glass-subtle"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSubmitCounterOffer}
+                      disabled={!counterOfferAmount || isSubmittingCounter}
+                      className="flex-1 bg-artist hover:bg-artist/90 haptic shadow-lg shadow-artist/20"
+                    >
+                      {isSubmittingCounter ? 'Sending...' : 'Send Counter-Offer'}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </DialogContent>
