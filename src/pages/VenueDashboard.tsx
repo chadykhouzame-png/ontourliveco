@@ -12,6 +12,7 @@ import { RatingDisplay } from '@/components/StarRating';
 import ReviewFormDialog from '@/components/ReviewFormDialog';
 import EntertainmentRequestDialog from '@/components/EntertainmentRequestDialog';
 import NotificationBell from '@/components/NotificationBell';
+import VisitingArtists from '@/components/VisitingArtists';
 import { useToast } from '@/hooks/use-toast';
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -334,6 +335,13 @@ const VenueDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Visiting Artists Section */}
+        {venue?.city && (
+          <div className="mt-6">
+            <VisitingArtists venueCity={venue.city} />
+          </div>
+        )}
 
         {/* Quick Search */}
         <Card className="glass border-border/50 rounded-2xl overflow-hidden mt-6">

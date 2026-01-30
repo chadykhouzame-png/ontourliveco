@@ -14,6 +14,7 @@ import { TravelDate, BookingRequest, Artist, BOOKING_STATUS_LABELS, BookingStatu
 import { RatingDisplay } from '@/components/StarRating';
 import ReviewFormDialog from '@/components/ReviewFormDialog';
 import NotificationBell from '@/components/NotificationBell';
+import ArtistCalendar from '@/components/ArtistCalendar';
 import { useToast } from '@/hooks/use-toast';
 
 const ArtistDashboard = () => {
@@ -228,6 +229,11 @@ const ArtistDashboard = () => {
               Add Travel
             </Button>
           </div>
+        </div>
+
+        {/* Calendar Overview */}
+        <div className="mb-6">
+          <ArtistCalendar travelDates={travelDates} bookingRequests={bookingRequests} />
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
