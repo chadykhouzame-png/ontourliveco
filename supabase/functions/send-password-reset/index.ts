@@ -11,10 +11,23 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MINUTES = 15; // Time window in minutes
+const MAX_REQUESTS_PER_EMAIL = 3; // Max requests per email in the time window
+const MAX_REQUESTS_PER_IP = 10; // Max requests per IP in the time window
+
 // Input validation schema - strict email validation
 const PasswordResetSchema = z.object({
   email: z.string().email().max(254), // RFC 5321 max email length
 });
+
+// Get client IP from request headers
+function getClientIP(req: Request): string {
+  return req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+         req.headers.get('x-real-ip') ||
+         req.headers.get('cf-connecting-ip') ||
+         'unknown';
+}
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -29,6 +42,10 @@ serve(async (req: Request) => {
       { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
@@ -63,12 +80,79 @@ serve(async (req: Request) => {
     }
 
     const { email } = parseResult.data;
-    console.log('Password reset requested for:', email);
+    const clientIP = getClientIP(req);
+    const normalizedEmail = email.toLowerCase().trim();
+    
+    console.log('Password reset requested for:', normalizedEmail, 'from IP:', clientIP);
+
+    // --- RATE LIMITING ---
+    const windowStart = new Date();
+    windowStart.setMinutes(windowStart.getMinutes() - RATE_LIMIT_WINDOW_MINUTES);
+
+    // Check email-based rate limit
+    const { count: emailCount, error: emailCountError } = await supabase
+      .from('password_reset_rate_limits')
+      .select('*', { count: 'exact', head: true })
+      .eq('email', normalizedEmail)
+      .gte('requested_at', windowStart.toISOString());
+
+    if (emailCountError) {
+      console.error('Error checking email rate limit:', emailCountError);
+    }
+
+    if (emailCount !== null && emailCount >= MAX_REQUESTS_PER_EMAIL) {
+      console.warn(`Rate limit exceeded for email: ${normalizedEmail}`);
+      // Return success response to not reveal rate limiting
+      return new Response(
+        JSON.stringify({ success: true, message: 'If an account exists, a reset email will be sent' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Check IP-based rate limit (only if IP is known)
+    if (clientIP !== 'unknown') {
+      const { count: ipCount, error: ipCountError } = await supabase
+        .from('password_reset_rate_limits')
+        .select('*', { count: 'exact', head: true })
+        .eq('ip_address', clientIP)
+        .gte('requested_at', windowStart.toISOString());
+
+      if (ipCountError) {
+        console.error('Error checking IP rate limit:', ipCountError);
+      }
+
+      if (ipCount !== null && ipCount >= MAX_REQUESTS_PER_IP) {
+        console.warn(`Rate limit exceeded for IP: ${clientIP}`);
+        return new Response(
+          JSON.stringify({ success: true, message: 'If an account exists, a reset email will be sent' }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+    }
+
+    // Record this request for rate limiting
+    const { error: insertError } = await supabase
+      .from('password_reset_rate_limits')
+      .insert({
+        email: normalizedEmail,
+        ip_address: clientIP !== 'unknown' ? clientIP : null,
+        requested_at: new Date().toISOString(),
+      });
+
+    if (insertError) {
+      console.error('Error recording rate limit entry:', insertError);
+      // Continue anyway - don't block the request if we can't record it
+    }
+
+    // Clean up old entries occasionally (1% chance per request)
+    if (Math.random() < 0.01) {
+      supabase.rpc('cleanup_old_rate_limits').then(({ error }) => {
+        if (error) console.error('Error cleaning up rate limits:', error);
+        else console.log('Rate limit cleanup completed');
+      });
+    }
 
     const resend = new Resend(resendApiKey);
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Generate password reset link using Supabase Auth
     const { data, error: resetError } = await supabase.auth.admin.generateLink({
