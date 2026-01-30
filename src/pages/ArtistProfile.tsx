@@ -255,7 +255,7 @@ const ArtistProfile = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-5">
             {/* Hero Card */}
-            <Card className="overflow-hidden">
+            <Card className="glass border-border/50 rounded-2xl overflow-hidden">
               <div className="h-32 bg-gradient-to-br from-artist/40 via-artist/20 to-transparent" />
               <CardContent className="relative pt-0">
                 <div className="w-24 h-24 rounded-2xl bg-artist/20 backdrop-blur-sm flex items-center justify-center -mt-12 border-4 border-card shadow-ios">
@@ -292,11 +292,11 @@ const ArtistProfile = () => {
 
             {/* Bio */}
             {artist.bio && (
-              <Card>
-                <CardHeader>
+              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-border/30 bg-secondary/20">
                   <CardTitle className="text-lg">About</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-4">
                   <p className="text-muted-foreground leading-relaxed">{artist.bio}</p>
                 </CardContent>
               </Card>
@@ -304,12 +304,12 @@ const ArtistProfile = () => {
 
             {/* Social Stats */}
             {socialConnections.length > 0 && (
-              <Card>
-                <CardHeader>
+              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-border/30 bg-secondary/20">
                   <CardTitle className="text-lg">Social Stats</CardTitle>
                   <CardDescription>Verified follower counts</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-4">
                   <SocialStatsDisplay connections={socialConnections} />
                 </CardContent>
               </Card>
@@ -317,17 +317,17 @@ const ArtistProfile = () => {
 
             {/* Social Links (legacy URLs) */}
             {(artist.instagram_url || artist.soundcloud_url || artist.spotify_url) && (
-              <Card>
-                <CardHeader>
+              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-border/30 bg-secondary/20">
                   <CardTitle className="text-lg">Links</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 pt-4">
                   {artist.instagram_url && (
                     <a 
                       href={artist.instagram_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-200 ios-press"
+                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30 hover:bg-secondary/50 transition-all duration-200 haptic"
                     >
                       <Instagram className="w-5 h-5" />
                       <span className="flex-1 font-medium">Instagram</span>
@@ -339,7 +339,7 @@ const ArtistProfile = () => {
                       href={artist.soundcloud_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-200 ios-press"
+                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30 hover:bg-secondary/50 transition-all duration-200 haptic"
                     >
                       <Music className="w-5 h-5" />
                       <span className="flex-1 font-medium">SoundCloud</span>
@@ -351,7 +351,7 @@ const ArtistProfile = () => {
                       href={artist.spotify_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 hover:bg-secondary transition-all duration-200 ios-press"
+                      className="flex items-center gap-3 p-4 rounded-xl bg-secondary/30 backdrop-blur-sm border border-border/30 hover:bg-secondary/50 transition-all duration-200 haptic"
                     >
                       <Music className="w-5 h-5" />
                       <span className="flex-1 font-medium">Spotify</span>
@@ -372,10 +372,12 @@ const ArtistProfile = () => {
           {/* Sidebar */}
           <div className="space-y-5">
             {/* Travel Dates */}
-            <Card>
-              <CardHeader>
+            <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+              <CardHeader className="border-b border-border/30 bg-secondary/20">
                 <CardTitle className="flex items-center gap-2 text-lg">
-                  <CalendarIcon className="w-5 h-5 text-artist" />
+                  <div className="w-8 h-8 rounded-xl bg-artist/20 flex items-center justify-center">
+                    <CalendarIcon className="w-4 h-4 text-artist" />
+                  </div>
                   Upcoming Travel
                 </CardTitle>
                 <CardDescription>
@@ -385,7 +387,7 @@ const ArtistProfile = () => {
                   }
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-4">
                 {travelDates.length === 0 ? (
                   <p className="text-muted-foreground text-sm text-center py-6">
                     No upcoming travel dates
@@ -396,10 +398,10 @@ const ArtistProfile = () => {
                       <div 
                         key={td.id}
                         className={cn(
-                          "p-4 rounded-xl border transition-all duration-200",
+                          "p-4 rounded-xl border backdrop-blur-sm transition-all duration-200 haptic",
                           td.is_available 
                             ? "border-artist/30 bg-artist/5 shadow-sm" 
-                            : "border-border/50 bg-secondary/30"
+                            : "border-border/30 bg-secondary/30"
                         )}
                       >
                         <div className="flex items-center justify-between">
@@ -430,12 +432,12 @@ const ArtistProfile = () => {
             {userRole === 'venue' && venue ? (
               <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
                 <DialogTrigger asChild>
-                  <Button className="w-full bg-venue hover:bg-venue/90 ios-press shadow-ios" size="lg">
+                  <Button className="w-full bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20" size="lg">
                     <Send className="w-4 h-4 mr-2" />
                     Send Booking Request
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="glass border-border/50 rounded-2xl">
                   <DialogHeader>
                     <DialogTitle>Book {artist.artist_name}</DialogTitle>
                     <DialogDescription>
