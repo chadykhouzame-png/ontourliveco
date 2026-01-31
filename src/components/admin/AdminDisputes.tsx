@@ -58,7 +58,13 @@ const AdminDisputes = () => {
   });
 
   const updateDispute = useMutation({
-    mutationFn: async ({ id, status, resolution }: { id: string; status: string; resolution?: string }) => {
+    mutationFn: async ({ id, status, resolution, disputeTitle, disputeType }: { 
+      id: string; 
+      status: string; 
+      resolution?: string;
+      disputeTitle: string;
+      disputeType: string;
+    }) => {
       const updateData: Record<string, unknown> = { status };
       if (resolution) updateData.resolution = resolution;
       if (status === 'resolved' || status === 'dismissed') {
@@ -67,6 +73,25 @@ const AdminDisputes = () => {
       
       const { error } = await supabase.from('disputes').update(updateData).eq('id', id);
       if (error) throw error;
+
+      // Send email notification for status changes
+      if (status === 'resolved' || status === 'dismissed' || status === 'in_review') {
+        try {
+          await supabase.functions.invoke('send-dispute-notification', {
+            body: {
+              type: status === 'in_review' ? 'in_review' : status,
+              dispute_id: id,
+              dispute_title: disputeTitle,
+              dispute_type: disputeType,
+              resolution: resolution,
+            },
+          });
+          console.log('Dispute notification email sent');
+        } catch (notifyError) {
+          console.error('Failed to send dispute notification:', notifyError);
+          // Don't throw - the dispute was updated successfully, just log the notification failure
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['disputes'] });
@@ -136,6 +161,8 @@ const AdminDisputes = () => {
       id: selectedDispute.id,
       status: newStatus,
       resolution: resolution || undefined,
+      disputeTitle: selectedDispute.title,
+      disputeType: selectedDispute.dispute_type,
     });
   };
 
