@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle, Music, Plus, DollarSign, BarChart3 } from 'lucide-react';
+import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle, Music, Plus, DollarSign, BarChart3, Shield } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingRequest, Venue, EntertainmentRequest, BOOKING_STATUS_LABELS, BookingStatus, ENTERTAINMENT_REQUEST_STATUS_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -33,6 +33,7 @@ const VenueDashboard = () => {
   const [entertainmentRequests, setEntertainmentRequests] = useState<EntertainmentRequest[]>([]);
   const [existingReviews, setExistingReviews] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   
   // Review dialog state
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
@@ -54,6 +55,24 @@ const VenueDashboard = () => {
       navigate('/join/venue');
     }
   }, [user, authLoading, navigate]);
+
+  // Check if user has admin role
+  useEffect(() => {
+    const checkAdminRole = async () => {
+      if (!user) return;
+      
+      const { data } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      setIsAdmin(!!data);
+    };
+    
+    checkAdminRole();
+  }, [user]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -338,6 +357,17 @@ const VenueDashboard = () => {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {venue?.venue_name}
             </span>
+            {isAdmin && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="haptic text-primary" 
+                onClick={() => navigate('/admin')}
+              >
+                <Shield className="w-4 h-4 mr-2" />
+                <span className="hidden sm:inline">Admin</span>
+              </Button>
+            )}
             <NotificationBell />
             <Button variant="ghost" size="icon" className="haptic" onClick={handleSignOut}>
               <LogOut className="w-4 h-4" />
