@@ -443,6 +443,36 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_views: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          profile_type: string
+          viewed_at: string
+          viewer_id: string | null
+          viewer_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          profile_type: string
+          viewed_at?: string
+          viewer_id?: string | null
+          viewer_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          profile_type?: string
+          viewed_at?: string
+          viewer_id?: string | null
+          viewer_type?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
