@@ -1,19 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { format } from 'date-fns';
 
 interface DisputeSubmitDialogProps {
   targetType: 'artist' | 'venue';
   targetId: string;
   targetName: string;
   userId: string;
+}
+
+interface BookingRequest {
+  id: string;
+  requested_date: string;
+  status: string;
+  offer_amount: number | null;
+  artist_name?: string;
+  venue_name?: string;
 }
 
 const DISPUTE_TYPES = [
@@ -30,7 +40,100 @@ const DisputeSubmitDialog = ({ targetType, targetId, targetName, userId }: Dispu
   const [disputeType, setDisputeType] = useState('');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [selectedBookingId, setSelectedBookingId] = useState<string>('');
+  const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      fetchRelevantBookings();
+    }
+  }, [open, targetType, targetId, userId]);
+
+  const fetchRelevantBookings = async () => {
+    setIsLoadingBookings(true);
+    try {
+      if (targetType === 'artist') {
+        // User is reporting an artist - find bookings where user's venue booked this artist
+        const { data: userVenues } = await supabase
+          .from('venues')
+          .select('id')
+          .eq('user_id', userId);
+
+        if (userVenues && userVenues.length > 0) {
+          const venueIds = userVenues.map(v => v.id);
+          const { data: bookings } = await supabase
+            .from('booking_requests')
+            .select(`
+              id,
+              requested_date,
+              status,
+              offer_amount,
+              artists!inner(artist_name)
+            `)
+            .eq('artist_id', targetId)
+            .in('venue_id', venueIds)
+            .order('requested_date', { ascending: false })
+            .limit(20);
+
+          if (bookings) {
+            setBookingRequests(bookings.map(b => ({
+              id: b.id,
+              requested_date: b.requested_date,
+              status: b.status || 'pending',
+              offer_amount: b.offer_amount,
+              artist_name: (b.artists as any)?.artist_name,
+            })));
+          }
+        }
+      } else {
+        // User is reporting a venue - find bookings where user's artist was booked by this venue
+        const { data: userArtists } = await supabase
+          .from('artists')
+          .select('id')
+          .eq('user_id', userId);
+
+        if (userArtists && userArtists.length > 0) {
+          const artistIds = userArtists.map(a => a.id);
+          const { data: bookings } = await supabase
+            .from('booking_requests')
+            .select(`
+              id,
+              requested_date,
+              status,
+              offer_amount,
+              venues!inner(venue_name)
+            `)
+            .eq('venue_id', targetId)
+            .in('artist_id', artistIds)
+            .order('requested_date', { ascending: false })
+            .limit(20);
+
+          if (bookings) {
+            setBookingRequests(bookings.map(b => ({
+              id: b.id,
+              requested_date: b.requested_date,
+              status: b.status || 'pending',
+              offer_amount: b.offer_amount,
+              venue_name: (b.venues as any)?.venue_name,
+            })));
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch bookings:', error);
+    } finally {
+      setIsLoadingBookings(false);
+    }
+  };
+
+  const formatBookingLabel = (booking: BookingRequest) => {
+    const date = format(new Date(booking.requested_date), 'MMM d, yyyy');
+    const amount = booking.offer_amount ? ` - $${booking.offer_amount}` : '';
+    const status = booking.status.charAt(0).toUpperCase() + booking.status.slice(1);
+    return `${date}${amount} (${status})`;
+  };
 
   const handleSubmit = async () => {
     if (!disputeType || !title.trim() || !description.trim()) {
@@ -65,15 +168,17 @@ const DisputeSubmitDialog = ({ targetType, targetId, targetName, userId }: Dispu
         disputeData.reported_venue_id = targetId;
       }
 
+      if (selectedBookingId && selectedBookingId !== 'none') {
+        disputeData.booking_request_id = selectedBookingId;
+      }
+
       const { error } = await supabase.from('disputes').insert(disputeData as any);
 
       if (error) throw error;
 
       toast.success('Dispute submitted successfully. Our team will review it shortly.');
       setOpen(false);
-      setDisputeType('');
-      setTitle('');
-      setDescription('');
+      resetForm();
     } catch (error: unknown) {
       console.error('Failed to submit dispute:', error);
       toast.error('Failed to submit dispute. Please try again.');
@@ -82,8 +187,19 @@ const DisputeSubmitDialog = ({ targetType, targetId, targetName, userId }: Dispu
     }
   };
 
+  const resetForm = () => {
+    setDisputeType('');
+    setTitle('');
+    setDescription('');
+    setSelectedBookingId('');
+    setBookingRequests([]);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) resetForm();
+    }}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive">
           <AlertTriangle className="w-4 h-4 mr-2" />
@@ -117,6 +233,31 @@ const DisputeSubmitDialog = ({ targetType, targetId, targetName, userId }: Dispu
               </SelectContent>
             </Select>
           </div>
+
+          {bookingRequests.length > 0 && (
+            <div className="space-y-2">
+              <Label htmlFor="booking-request" className="flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Related Booking (Optional)
+              </Label>
+              <Select value={selectedBookingId} onValueChange={setSelectedBookingId}>
+                <SelectTrigger id="booking-request">
+                  <SelectValue placeholder={isLoadingBookings ? "Loading bookings..." : "Select a booking for context"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No booking attached</SelectItem>
+                  {bookingRequests.map((booking) => (
+                    <SelectItem key={booking.id} value={booking.id}>
+                      {formatBookingLabel(booking)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Attaching a booking helps our team investigate faster
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="dispute-title">Title *</Label>
