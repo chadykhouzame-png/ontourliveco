@@ -16,6 +16,7 @@ import CityAutocomplete from '@/components/CityAutocomplete';
 import ProfileImageUpload from '@/components/ProfileImageUpload';
 import ReviewStatusBadge from '@/components/ReviewStatusBadge';
 import SocialConnectButton, { SocialPlatform } from '@/components/SocialConnectButton';
+import AiBioGenerator from '@/components/AiBioGenerator';
 
 type SocialConnection = {
   platform: SocialPlatform;
@@ -272,7 +273,15 @@ const ArtistSetup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="bio">Bio</Label>
+                  <AiBioGenerator
+                    artistName={artistName}
+                    city={primaryCity}
+                    genres={selectedGenres}
+                    onBioGenerated={setBio}
+                  />
+                </div>
                 <Textarea
                   id="bio"
                   placeholder="Tell venues about yourself, your style, and what you bring to the decks..."
