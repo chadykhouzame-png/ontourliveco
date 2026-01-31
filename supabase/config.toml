@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.generate-artist-bio]
 verify_jwt = false
+
+[functions.send-dispute-notification]
+verify_jwt = false
