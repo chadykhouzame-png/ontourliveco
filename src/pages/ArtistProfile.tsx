@@ -20,6 +20,7 @@ import { Artist, TravelDate, Venue, GENRE_LABELS } from '@/types/database';
 import { SocialStatsDisplay, SocialPlatform } from '@/components/SocialConnectButton';
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
+import ArtistAvailabilityCalendar from '@/components/ArtistAvailabilityCalendar';
 
 type SocialConnection = {
   platform: SocialPlatform;
@@ -416,62 +417,76 @@ const ArtistProfile = () => {
 
           {/* Sidebar */}
           <div className="space-y-5">
-            {/* Travel Dates */}
-            <Card className="glass border-border/50 rounded-2xl overflow-hidden">
-              <CardHeader className="border-b border-border/30 bg-secondary/20">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="w-8 h-8 rounded-xl bg-artist/20 flex items-center justify-center">
-                    <CalendarIcon className="w-4 h-4 text-artist" />
-                  </div>
-                  Upcoming Travel
-                </CardTitle>
-                <CardDescription>
-                  {travelDates.length === 0 
-                    ? "No travel dates listed"
-                    : "When and where they'll be"
-                  }
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-4">
-                {travelDates.length === 0 ? (
-                  <p className="text-muted-foreground text-sm text-center py-6">
-                    No upcoming travel dates
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {travelDates.map((td) => (
-                      <div 
-                        key={td.id}
-                        className={cn(
-                          "p-4 rounded-xl border backdrop-blur-sm transition-all duration-200 haptic",
-                          td.is_available 
-                            ? "border-artist/30 bg-artist/5 shadow-sm" 
-                            : "border-border/30 bg-secondary/30"
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <MapPin className={cn(
-                              "w-4 h-4",
-                              td.is_available ? "text-artist" : "text-muted-foreground"
-                            )} />
-                            <span className="font-medium">{td.city}</span>
-                          </div>
-                          {td.is_available && (
-                            <Badge variant="outline" className="text-xs border-artist text-artist rounded-full">
-                              Available
-                            </Badge>
+            {/* Availability Calendar - Show to venue users */}
+            {(userRole === 'venue' || !user) && travelDates.length > 0 && (
+              <ArtistAvailabilityCalendar
+                travelDates={travelDates}
+                artistName={artist.artist_name}
+                selectedDate={bookingDate}
+                onDateSelect={(date) => {
+                  setBookingDate(date);
+                }}
+              />
+            )}
+
+            {/* Travel Dates - Show to non-venue users or when no travel dates */}
+            {(userRole !== 'venue' && user) && (
+              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
+                <CardHeader className="border-b border-border/30 bg-secondary/20">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <div className="w-8 h-8 rounded-xl bg-artist/20 flex items-center justify-center">
+                      <CalendarIcon className="w-4 h-4 text-artist" />
+                    </div>
+                    Upcoming Travel
+                  </CardTitle>
+                  <CardDescription>
+                    {travelDates.length === 0 
+                      ? "No travel dates listed"
+                      : "When and where they'll be"
+                    }
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="pt-4">
+                  {travelDates.length === 0 ? (
+                    <p className="text-muted-foreground text-sm text-center py-6">
+                      No upcoming travel dates
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {travelDates.map((td) => (
+                        <div 
+                          key={td.id}
+                          className={cn(
+                            "p-4 rounded-xl border backdrop-blur-sm transition-all duration-200 haptic",
+                            td.is_available 
+                              ? "border-artist/30 bg-artist/5 shadow-sm" 
+                              : "border-border/30 bg-secondary/30"
                           )}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <MapPin className={cn(
+                                "w-4 h-4",
+                                td.is_available ? "text-artist" : "text-muted-foreground"
+                              )} />
+                              <span className="font-medium">{td.city}</span>
+                            </div>
+                            {td.is_available && (
+                              <Badge variant="outline" className="text-xs border-artist text-artist rounded-full">
+                                Available
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-2">
+                            {format(new Date(td.start_date), 'MMM d')} – {format(new Date(td.end_date), 'MMM d, yyyy')}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground mt-2">
-                          {format(new Date(td.start_date), 'MMM d')} – {format(new Date(td.end_date), 'MMM d, yyyy')}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Action Buttons */}
             {userRole === 'venue' && venue ? (
