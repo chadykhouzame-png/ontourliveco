@@ -172,9 +172,28 @@ const DisputeSubmitDialog = ({ targetType, targetId, targetName, userId }: Dispu
         disputeData.booking_request_id = selectedBookingId;
       }
 
-      const { error } = await supabase.from('disputes').insert(disputeData as any);
+      const { data: insertedDispute, error } = await supabase
+        .from('disputes')
+        .insert(disputeData as any)
+        .select('id')
+        .single();
 
       if (error) throw error;
+
+      // Send confirmation email to the reporter
+      try {
+        await supabase.functions.invoke('send-dispute-notification', {
+          body: {
+            type: 'created',
+            dispute_id: insertedDispute.id,
+            dispute_title: title.trim(),
+            dispute_type: disputeType,
+          },
+        });
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+        // Don't fail the submission if email fails
+      }
 
       toast.success('Dispute submitted successfully. Our team will review it shortly.');
       setOpen(false);
