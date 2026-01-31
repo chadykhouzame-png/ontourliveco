@@ -226,6 +226,82 @@ export type Database = {
           },
         ]
       }
+      disputes: {
+        Row: {
+          booking_request_id: string | null
+          created_at: string
+          description: string
+          dispute_type: string
+          id: string
+          reported_artist_id: string | null
+          reported_user_id: string | null
+          reported_venue_id: string | null
+          reporter_user_id: string
+          resolution: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          booking_request_id?: string | null
+          created_at?: string
+          description: string
+          dispute_type?: string
+          id?: string
+          reported_artist_id?: string | null
+          reported_user_id?: string | null
+          reported_venue_id?: string | null
+          reporter_user_id: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          booking_request_id?: string | null
+          created_at?: string
+          description?: string
+          dispute_type?: string
+          id?: string
+          reported_artist_id?: string | null
+          reported_user_id?: string | null
+          reported_venue_id?: string | null
+          reporter_user_id?: string
+          resolution?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disputes_booking_request_id_fkey"
+            columns: ["booking_request_id"]
+            isOneToOne: false
+            referencedRelation: "booking_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_reported_artist_id_fkey"
+            columns: ["reported_artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disputes_reported_venue_id_fkey"
+            columns: ["reported_venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entertainment_requests: {
         Row: {
           budget_max: number | null
