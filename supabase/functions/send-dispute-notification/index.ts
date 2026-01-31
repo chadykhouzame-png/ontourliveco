@@ -42,7 +42,7 @@ const handler = async (req: Request): Promise<Response> => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Verify the user has admin role
+    // Verify the user
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabase.auth.getUser(token);
     
@@ -54,26 +54,32 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check if user is admin
-    const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userData.user.id)
-      .eq("role", "admin")
-      .maybeSingle();
-
-    if (roleError || !roleData) {
-      console.error("User is not an admin:", roleError);
-      return new Response(
-        JSON.stringify({ error: "Admin access required" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
+    // Parse request body early to check type
     const body: DisputeNotificationRequest = await req.json();
     console.log("Request body:", body);
 
     const { type, dispute_id, dispute_title, dispute_type, reporter_email, resolution } = body;
+
+    // For "created" type, allow any authenticated user (the reporter themselves)
+    // For other types (in_review, resolved, dismissed), require admin role
+    if (type !== "created") {
+      const { data: roleData, error: roleError } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (roleError || !roleData) {
+        console.error("User is not an admin:", roleError);
+        return new Response(
+          JSON.stringify({ error: "Admin access required" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    // Body already parsed above
 
     // Validate required fields
     if (!type || !dispute_id || !dispute_title) {
