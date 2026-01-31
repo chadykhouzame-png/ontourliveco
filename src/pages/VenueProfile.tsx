@@ -9,12 +9,14 @@ import { Building2, MapPin, Users, Music, Calendar, Instagram, ExternalLink, Arr
 import { Venue, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
+import { useRecordProfileView } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
 
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, userRole, signOut } = useAuth();
+  const { recordView } = useRecordProfileView();
   
   const [venue, setVenue] = useState<Venue | null>(null);
   const [artistProfile, setArtistProfile] = useState<{ id: string } | null>(null);
@@ -97,6 +99,13 @@ const VenueProfile = () => {
     
     fetchVenue();
   }, [id, navigate, user, userRole]);
+
+  // Record profile view
+  useEffect(() => {
+    if (id && venue && user?.id !== venue.user_id) {
+      recordView('venue', id);
+    }
+  }, [id, venue, user, recordView]);
 
   const handleSignOut = async () => {
     await signOut();

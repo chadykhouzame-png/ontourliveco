@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, DollarSign, Building2, Users } from 'lucide-react';
+import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, DollarSign, Building2, Users, BarChart3 } from 'lucide-react';
 import { format } from 'date-fns';
 import { TravelDate, BookingRequest, Artist, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -318,6 +318,10 @@ const ArtistDashboard = () => {
             <p className="text-muted-foreground">Welcome back, {artist?.artist_name}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
+            <Button onClick={() => navigate('/analytics')} variant="outline" className="haptic glass-subtle">
+              <BarChart3 className="w-4 h-4 mr-2" />
+              Analytics
+            </Button>
             <Button onClick={() => navigate('/messages')} variant="outline" className="haptic glass-subtle">
               <MessageSquare className="w-4 h-4 mr-2" />
               Messages

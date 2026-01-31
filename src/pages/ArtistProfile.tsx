@@ -15,6 +15,7 @@ import { Music, MapPin, Calendar as CalendarIcon, Instagram, ExternalLink, Arrow
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useRecordProfileView } from '@/hooks/useAnalytics';
 import { Artist, TravelDate, Venue, GENRE_LABELS } from '@/types/database';
 import { SocialStatsDisplay, SocialPlatform } from '@/components/SocialConnectButton';
 import { RatingDisplay } from '@/components/StarRating';
@@ -33,6 +34,7 @@ const ArtistProfile = () => {
   const navigate = useNavigate();
   const { user, userRole, signOut } = useAuth();
   const { toast } = useToast();
+  const { recordView } = useRecordProfileView();
   
   const [artist, setArtist] = useState<Artist | null>(null);
   const [travelDates, setTravelDates] = useState<TravelDate[]>([]);
@@ -152,6 +154,13 @@ const ArtistProfile = () => {
     
     fetchData();
   }, [id, user, userRole, navigate]);
+
+  // Record profile view
+  useEffect(() => {
+    if (id && artist && user?.id !== artist.user_id) {
+      recordView('artist', id);
+    }
+  }, [id, artist, user, recordView]);
 
   const handleSendBookingRequest = async () => {
     if (!venue || !artist || !bookingDate) {
