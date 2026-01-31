@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Music, MapPin, Calendar as CalendarIcon, Instagram, ExternalLink, ArrowLeft, Send, LogOut, DollarSign, MessageSquare } from 'lucide-react';
+import DisputeSubmitDialog from '@/components/DisputeSubmitDialog';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -413,6 +414,18 @@ const ArtistProfile = () => {
               reviews={reviews} 
               emptyMessage="No reviews yet for this artist"
             />
+
+            {/* Report Issue - Only show to logged-in users who are not the owner */}
+            {user && user.id !== artist.user_id && (
+              <div className="flex justify-center pt-4">
+                <DisputeSubmitDialog
+                  targetType="artist"
+                  targetId={artist.id}
+                  targetName={artist.artist_name}
+                  userId={user.id}
+                />
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
