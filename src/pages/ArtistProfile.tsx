@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, MapPin, Calendar as CalendarIcon, Instagram, ExternalLink, ArrowLeft, Send, LogOut, DollarSign } from 'lucide-react';
+import { Music, MapPin, Calendar as CalendarIcon, Instagram, ExternalLink, ArrowLeft, Send, LogOut, DollarSign, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
@@ -464,15 +464,24 @@ const ArtistProfile = () => {
               </CardContent>
             </Card>
 
-            {/* Booking CTA */}
+            {/* Action Buttons */}
             {userRole === 'venue' && venue ? (
-              <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
-                <DialogTrigger asChild>
-                  <Button className="w-full bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20" size="lg">
-                    <Send className="w-4 h-4 mr-2" />
-                    Send Booking Request
-                  </Button>
-                </DialogTrigger>
+              <div className="space-y-3">
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90 haptic shadow-lg"
+                  size="lg"
+                  onClick={() => navigate(`/messages?artist=${artist.id}&venue=${venue.id}`)}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Send Message
+                </Button>
+                <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20" size="lg" variant="outline">
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Booking Request
+                    </Button>
+                  </DialogTrigger>
                 <DialogContent className="glass border-border/50 rounded-2xl">
                   <DialogHeader>
                     <DialogTitle>Book {artist.artist_name}</DialogTitle>
@@ -573,6 +582,7 @@ const ArtistProfile = () => {
                   </div>
                 </DialogContent>
               </Dialog>
+              </div>
             ) : !user ? (
               <Card className="border-dashed">
                 <CardContent className="py-6 text-center">

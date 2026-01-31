@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, MapPin, Users, Music, Calendar, Instagram, ExternalLink, ArrowLeft, LogOut } from 'lucide-react';
+import { Building2, MapPin, Users, Music, Calendar, Instagram, ExternalLink, ArrowLeft, LogOut, MessageSquare } from 'lucide-react';
 import { Venue, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
@@ -14,9 +14,10 @@ import { cn } from '@/lib/utils';
 const VenueProfile = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, userRole, signOut } = useAuth();
   
   const [venue, setVenue] = useState<Venue | null>(null);
+  const [artistProfile, setArtistProfile] = useState<{ id: string } | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -80,11 +81,22 @@ const VenueProfile = () => {
         setReviews(formattedReviews);
       }
       
+      // Get artist profile if user is an artist
+      if (user && userRole === 'artist') {
+        const { data: artistData } = await supabase
+          .from('artists')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        setArtistProfile(artistData);
+      }
+      
       setIsLoading(false);
     };
     
     fetchVenue();
-  }, [id, navigate]);
+  }, [id, navigate, user, userRole]);
 
   const handleSignOut = async () => {
     await signOut();
@@ -287,6 +299,32 @@ const VenueProfile = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Message CTA for Artists */}
+            {userRole === 'artist' && artistProfile ? (
+              <Button 
+                className="w-full bg-primary hover:bg-primary/90 haptic shadow-lg"
+                size="lg"
+                onClick={() => navigate(`/messages?artist=${artistProfile.id}&venue=${venue.id}`)}
+              >
+                <MessageSquare className="w-4 h-4 mr-2" />
+                Send Message
+              </Button>
+            ) : !user ? (
+              <Card className="border-dashed">
+                <CardContent className="py-6 text-center">
+                  <p className="text-muted-foreground text-sm mb-4">
+                    Want to connect with this venue?
+                  </p>
+                  <Button 
+                    onClick={() => navigate('/join/artist')}
+                    className="w-full ios-press"
+                  >
+                    Join as an Artist
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : null}
           </div>
         </div>
       </div>

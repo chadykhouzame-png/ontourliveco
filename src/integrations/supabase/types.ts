@@ -184,6 +184,48 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          artist_id: string
+          created_at: string
+          id: string
+          last_message_at: string | null
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entertainment_requests: {
         Row: {
           budget_max: number | null
@@ -302,6 +344,44 @@ export type Database = {
           success?: boolean
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          sender_id: string
+          sender_type: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -752,6 +832,9 @@ export type Database = {
         Args: { p_email: string; p_ip_address?: string; p_success: boolean }
         Returns: undefined
       }
+      user_in_conversation: { Args: { conv_id: string }; Returns: boolean }
+      user_owns_artist: { Args: { artist_uuid: string }; Returns: boolean }
+      user_owns_venue: { Args: { venue_uuid: string }; Returns: boolean }
     }
     Enums: {
       app_role: "artist" | "venue" | "admin"

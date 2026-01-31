@@ -20,6 +20,7 @@ import ArtistProfile from '@/pages/ArtistProfile';
 import VenueProfile from '@/pages/VenueProfile';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
+import Messages from '@/pages/Messages';
 
 // Wrapper that combines PageTransition with RouteErrorBoundary
 const ProtectedRoute = ({ children }: { children: ReactNode }) => (
@@ -57,6 +58,9 @@ const AnimatedRoutes = () => {
         {/* Search */}
         <Route path="/search" element={<ProtectedRoute><SearchArtists /></ProtectedRoute>} />
         <Route path="/search/venues" element={<ProtectedRoute><SearchVenues /></ProtectedRoute>} />
+        
+        {/* Messaging */}
+        <Route path="/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         
         {/* Catch-all */}
         <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
