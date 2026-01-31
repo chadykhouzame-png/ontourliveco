@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Building2, MapPin, Users, Music, Calendar, Instagram, ExternalLink, ArrowLeft, LogOut, MessageSquare } from 'lucide-react';
+import DisputeSubmitDialog from '@/components/DisputeSubmitDialog';
 import { Venue, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
@@ -244,6 +245,18 @@ const VenueProfile = () => {
               reviews={reviews} 
               emptyMessage="No reviews yet for this venue"
             />
+
+            {/* Report Issue - Only show to logged-in users who are not the owner */}
+            {user && user.id !== venue.user_id && (
+              <div className="flex justify-center pt-4">
+                <DisputeSubmitDialog
+                  targetType="venue"
+                  targetId={venue.id}
+                  targetName={venue.venue_name}
+                  userId={user.id}
+                />
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
