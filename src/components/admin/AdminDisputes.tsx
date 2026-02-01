@@ -9,9 +9,31 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, Clock, CheckCircle, XCircle, Eye, Search, Filter } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { AlertTriangle, Clock, CheckCircle, XCircle, Eye, Search, Filter, Calendar, DollarSign, MapPin, Music } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { BOOKING_STATUS_LABELS } from '@/types/database';
+
+interface BookingDetails {
+  id: string;
+  requested_date: string;
+  requested_time: string | null;
+  offer_amount: number | null;
+  counter_offer: number | null;
+  status: string;
+  message: string | null;
+  artist: {
+    id: string;
+    artist_name: string;
+    primary_city: string;
+  } | null;
+  venue: {
+    id: string;
+    venue_name: string;
+    city: string;
+  } | null;
+}
 
 interface Dispute {
   id: string;
@@ -29,6 +51,9 @@ interface Dispute {
   resolved_by: string | null;
   created_at: string;
   updated_at: string;
+  reported_artist?: { id: string; artist_name: string; primary_city: string } | null;
+  reported_venue?: { id: string; venue_name: string; city: string } | null;
+  booking_request?: BookingDetails | null;
 }
 
 const AdminDisputes = () => {
@@ -44,7 +69,22 @@ const AdminDisputes = () => {
     queryFn: async () => {
       let query = supabase
         .from('disputes')
-        .select('*')
+        .select(`
+          *,
+          reported_artist:artists!disputes_reported_artist_id_fkey(id, artist_name, primary_city),
+          reported_venue:venues!disputes_reported_venue_id_fkey(id, venue_name, city),
+          booking_request:booking_requests!disputes_booking_request_id_fkey(
+            id,
+            requested_date,
+            requested_time,
+            offer_amount,
+            counter_offer,
+            status,
+            message,
+            artist:artists(id, artist_name, primary_city),
+            venue:venues(id, venue_name, city)
+          )
+        `)
         .order('created_at', { ascending: false });
       
       if (statusFilter !== 'all') {
@@ -223,9 +263,15 @@ const AdminDisputes = () => {
                           {getStatusIcon(dispute.status)}
                           <h3 className="font-semibold truncate">{dispute.title}</h3>
                         </div>
-                        <div className="flex items-center gap-2 mb-3">
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
                           {getTypeBadge(dispute.dispute_type)}
                           {getStatusBadge(dispute.status)}
+                          {dispute.booking_request && (
+                            <Badge variant="outline" className="text-xs">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              Booking Attached
+                            </Badge>
+                          )}
                           <span className="text-sm text-muted-foreground">
                             {format(new Date(dispute.created_at), 'MMM d, yyyy')}
                           </span>
@@ -265,7 +311,7 @@ const AdminDisputes = () => {
       </Card>
 
       <Dialog open={!!selectedDispute} onOpenChange={() => setSelectedDispute(null)}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Review Dispute</DialogTitle>
             <DialogDescription>
@@ -282,12 +328,133 @@ const AdminDisputes = () => {
                 <Label className="text-sm font-medium">Description</Label>
                 <p className="mt-1 text-muted-foreground">{selectedDispute.description}</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {getTypeBadge(selectedDispute.dispute_type)}
                 <span className="text-sm text-muted-foreground">
                   Reported {format(new Date(selectedDispute.created_at), 'MMMM d, yyyy')}
                 </span>
               </div>
+
+              {/* Reported Party Info */}
+              {(selectedDispute.reported_artist || selectedDispute.reported_venue) && (
+                <div className="p-3 bg-muted rounded-lg">
+                  <Label className="text-sm font-medium">Reported Party</Label>
+                  <div className="mt-1 flex items-center gap-2">
+                    {selectedDispute.reported_artist ? (
+                      <>
+                        <Music className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{selectedDispute.reported_artist.artist_name}</span>
+                        <span className="text-muted-foreground">•</span>
+                        <span className="text-sm text-muted-foreground flex items-center gap-1">
+                          <MapPin className="h-3 w-3" />
+                          {selectedDispute.reported_artist.primary_city}
+                        </span>
+                      </>
+                    ) : selectedDispute.reported_venue ? (
+                      <>
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="font-medium">{selectedDispute.reported_venue.venue_name}</span>
+                        <span className="text-muted-foreground">•</span>
+                        <span className="text-sm text-muted-foreground">{selectedDispute.reported_venue.city}</span>
+                      </>
+                    ) : null}
+                  </div>
+                </div>
+              )}
+
+              {/* Attached Booking Details */}
+              {selectedDispute.booking_request && (
+                <>
+                  <Separator />
+                  <div className="space-y-3">
+                    <Label className="text-sm font-medium flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      Attached Booking Details
+                    </Label>
+                    <div className="p-4 border rounded-lg bg-card space-y-3">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Date</p>
+                          <p className="font-medium">
+                            {format(new Date(selectedDispute.booking_request.requested_date), 'MMMM d, yyyy')}
+                          </p>
+                        </div>
+                        {selectedDispute.booking_request.requested_time && (
+                          <div>
+                            <p className="text-xs text-muted-foreground">Time</p>
+                            <p className="font-medium">{selectedDispute.booking_request.requested_time}</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <Separator className="my-2" />
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Artist</p>
+                          <p className="font-medium">{selectedDispute.booking_request.artist?.artist_name || 'Unknown'}</p>
+                          {selectedDispute.booking_request.artist?.primary_city && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <MapPin className="h-3 w-3" />
+                              {selectedDispute.booking_request.artist.primary_city}
+                            </p>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Venue</p>
+                          <p className="font-medium">{selectedDispute.booking_request.venue?.venue_name || 'Unknown'}</p>
+                          {selectedDispute.booking_request.venue?.city && (
+                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                              <MapPin className="h-3 w-3" />
+                              {selectedDispute.booking_request.venue.city}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <Separator className="my-2" />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Booking Status</p>
+                          <Badge variant="outline" className="mt-1">
+                            {BOOKING_STATUS_LABELS[selectedDispute.booking_request.status as keyof typeof BOOKING_STATUS_LABELS] || selectedDispute.booking_request.status}
+                          </Badge>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground">Offer</p>
+                          {selectedDispute.booking_request.offer_amount ? (
+                            <p className="font-medium flex items-center gap-1">
+                              <DollarSign className="h-3 w-3" />
+                              {selectedDispute.booking_request.offer_amount.toLocaleString()}
+                              {selectedDispute.booking_request.counter_offer && (
+                                <span className="text-muted-foreground text-xs ml-1">
+                                  (Counter: ${selectedDispute.booking_request.counter_offer.toLocaleString()})
+                                </span>
+                              )}
+                            </p>
+                          ) : (
+                            <p className="text-muted-foreground text-sm">No offer</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {selectedDispute.booking_request.message && (
+                        <>
+                          <Separator className="my-2" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Booking Message</p>
+                            <p className="text-sm mt-1 text-muted-foreground">{selectedDispute.booking_request.message}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <Separator />
+
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select value={newStatus} onValueChange={setNewStatus}>
