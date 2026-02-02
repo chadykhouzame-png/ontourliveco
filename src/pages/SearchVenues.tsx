@@ -16,6 +16,7 @@ import { RatingDisplay } from '@/components/StarRating';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import logo from '@/assets/logo.png';
 
 type SortOption = 'name_asc' | 'name_desc' | 'rating_desc' | 'rating_asc' | 'capacity_desc' | 'capacity_asc';
 
@@ -245,9 +246,8 @@ const SearchVenues = () => {
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-black tracking-tighter">
-            <span className="text-primary">ON</span>
-            <span className="text-foreground">TOUR</span>
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="On Tour Live" className="h-14 w-auto" />
           </Link>
           <div className="flex items-center gap-4">
             {user && userRole === 'artist' && (
