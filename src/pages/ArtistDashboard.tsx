@@ -21,6 +21,7 @@ import { useNegotiationLimit, MAX_NEGOTIATION_ROUNDS } from '@/hooks/useNegotiat
 import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
+import UserDisputes from '@/components/UserDisputes';
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
@@ -587,6 +588,11 @@ const ArtistDashboard = () => {
               )}
             </CardContent>
           </Card>
+        </div>
+
+        {/* My Disputes */}
+        <div className="mt-6">
+          <UserDisputes />
         </div>
 
         {/* Notification Settings */}
