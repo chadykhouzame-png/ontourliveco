@@ -3,14 +3,22 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, MapPin, Users, Music, Calendar, Instagram, ExternalLink, ArrowLeft, LogOut, MessageSquare } from 'lucide-react';
+import { Building2, MapPin, Users, Music, Calendar, Instagram, ExternalLink, ArrowLeft, LogOut, MessageSquare, Send, CalendarIcon, DollarSign } from 'lucide-react';
 import DisputeSubmitDialog from '@/components/DisputeSubmitDialog';
-import { Venue, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
+import { Venue, Artist, GENRE_LABELS, VENUE_TYPE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
 import { useRecordProfileView } from '@/hooks/useAnalytics';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const VenueProfile = () => {
@@ -18,11 +26,20 @@ const VenueProfile = () => {
   const navigate = useNavigate();
   const { user, userRole, signOut } = useAuth();
   const { recordView } = useRecordProfileView();
+  const { toast } = useToast();
   
   const [venue, setVenue] = useState<Venue | null>(null);
-  const [artistProfile, setArtistProfile] = useState<{ id: string } | null>(null);
+  const [artistProfile, setArtistProfile] = useState<Artist | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Booking form state
+  const [showBookingDialog, setShowBookingDialog] = useState(false);
+  const [bookingDate, setBookingDate] = useState<Date | undefined>();
+  const [bookingTime, setBookingTime] = useState('');
+  const [bookingMessage, setBookingMessage] = useState('');
+  const [offerAmount, setOfferAmount] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchVenue = async () => {
@@ -88,11 +105,11 @@ const VenueProfile = () => {
       if (user && userRole === 'artist') {
         const { data: artistData } = await supabase
           .from('artists')
-          .select('id')
+          .select('*')
           .eq('user_id', user.id)
           .maybeSingle();
         
-        setArtistProfile(artistData);
+        setArtistProfile(artistData as Artist);
       }
       
       setIsLoading(false);
@@ -111,6 +128,72 @@ const VenueProfile = () => {
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
+  };
+
+  const handleSendBookingRequest = async () => {
+    if (!artistProfile || !venue || !bookingDate) {
+      toast({
+        variant: "destructive",
+        title: "Missing information",
+        description: "Please select a date for your booking request.",
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+
+    try {
+      const { data: insertedData, error } = await supabase
+        .from('booking_requests')
+        .insert({
+          artist_id: artistProfile.id,
+          venue_id: venue.id,
+          requested_date: format(bookingDate, 'yyyy-MM-dd'),
+          requested_time: bookingTime || null,
+          message: bookingMessage.trim() || null,
+          offer_amount: offerAmount ? parseInt(offerAmount) : null,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Send notification to venue
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            type: 'artist_offer',
+            booking_request_id: insertedData.id,
+            sender_name: artistProfile.artist_name,
+            recipient_user_id: venue.user_id,
+            requested_date: format(bookingDate, 'yyyy-MM-dd'),
+            offer_amount: offerAmount ? parseInt(offerAmount) : undefined,
+            message: bookingMessage.trim() || undefined,
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send notification:', notifyError);
+      }
+
+      toast({
+        title: "Booking request sent!",
+        description: `Your offer has been sent to ${venue.venue_name}.`,
+      });
+      
+      setShowBookingDialog(false);
+      setBookingDate(undefined);
+      setBookingTime('');
+      setBookingMessage('');
+      setOfferAmount('');
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error sending request",
+        description: error.message || "Something went wrong.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -322,16 +405,126 @@ const VenueProfile = () => {
               </Card>
             )}
 
-            {/* Message CTA for Artists */}
+            {/* Action Buttons for Artists */}
             {userRole === 'artist' && artistProfile ? (
-              <Button 
-                className="w-full bg-primary hover:bg-primary/90 haptic shadow-lg"
-                size="lg"
-                onClick={() => navigate(`/messages?artist=${artistProfile.id}&venue=${venue.id}`)}
-              >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Send Message
-              </Button>
+              <div className="space-y-3">
+                <Button 
+                  className="w-full bg-primary hover:bg-primary/90 haptic shadow-lg"
+                  size="lg"
+                  onClick={() => navigate(`/messages?artist=${artistProfile.id}&venue=${venue.id}`)}
+                >
+                  <MessageSquare className="w-4 h-4 mr-2" />
+                  Send Message
+                </Button>
+                <Dialog open={showBookingDialog} onOpenChange={setShowBookingDialog}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full bg-artist hover:bg-artist/90 haptic shadow-lg shadow-artist/20" size="lg" variant="outline">
+                      <Send className="w-4 h-4 mr-2" />
+                      Send Booking Offer
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="glass border-border/50 rounded-2xl">
+                    <DialogHeader>
+                      <DialogTitle>Offer to Perform at {venue.venue_name}</DialogTitle>
+                      <DialogDescription>
+                        Send a booking offer from {artistProfile.artist_name}
+                      </DialogDescription>
+                    </DialogHeader>
+                    
+                    {/* Artist Info Display */}
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
+                      <div>
+                        <p className="font-medium">{artistProfile.artist_name}</p>
+                        <p className="text-sm text-muted-foreground">{artistProfile.primary_city}</p>
+                      </div>
+                      <RatingDisplay 
+                        rating={(artistProfile as any).average_rating} 
+                        totalReviews={(artistProfile as any).total_reviews || 0}
+                        size="sm"
+                      />
+                    </div>
+                    <div className="space-y-4 py-2">
+                      <div className="space-y-2">
+                        <Label>Date *</Label>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className={cn(
+                                "w-full justify-start text-left font-normal",
+                                !bookingDate && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {bookingDate ? format(bookingDate, 'PPP') : 'Select a date'}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0" align="start">
+                            <CalendarComponent
+                              mode="single"
+                              selected={bookingDate}
+                              onSelect={setBookingDate}
+                              disabled={(date) => date < new Date()}
+                              initialFocus
+                              className={cn("p-3 pointer-events-auto")}
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Time (optional)</Label>
+                        <Input 
+                          type="time" 
+                          value={bookingTime}
+                          onChange={(e) => setBookingTime(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Your Fee (optional)</Label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">$</span>
+                          <Input 
+                            type="number"
+                            placeholder="0"
+                            value={offerAmount}
+                            onChange={(e) => setOfferAmount(e.target.value)}
+                            className="pl-7"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Message (optional)</Label>
+                        <Textarea 
+                          placeholder="Tell them about yourself and why you'd be a great fit..."
+                          value={bookingMessage}
+                          onChange={(e) => setBookingMessage(e.target.value)}
+                          rows={3}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-3 pt-2">
+                      <Button 
+                        variant="outline" 
+                        className="flex-1 ios-press"
+                        onClick={() => setShowBookingDialog(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button 
+                        className="flex-1 bg-artist hover:bg-artist/90 ios-press"
+                        onClick={handleSendBookingRequest}
+                        disabled={isSubmitting || !bookingDate}
+                      >
+                        {isSubmitting ? 'Sending...' : 'Send Offer'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
             ) : !user ? (
               <Card className="border-dashed">
                 <CardContent className="py-6 text-center">
