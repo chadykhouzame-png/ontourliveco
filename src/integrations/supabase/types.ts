@@ -555,6 +555,7 @@ export type Database = {
           email: string
           email_notifications_enabled: boolean
           id: string
+          sound_notifications_enabled: boolean
           updated_at: string
           user_id: string
         }
@@ -563,6 +564,7 @@ export type Database = {
           email: string
           email_notifications_enabled?: boolean
           id?: string
+          sound_notifications_enabled?: boolean
           updated_at?: string
           user_id: string
         }
@@ -571,6 +573,7 @@ export type Database = {
           email?: string
           email_notifications_enabled?: boolean
           id?: string
+          sound_notifications_enabled?: boolean
           updated_at?: string
           user_id?: string
         }
