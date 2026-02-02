@@ -4,12 +4,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, isToday, isYesterday } from 'date-fns';
 import type { Message, ConversationWithDetails } from '@/types/messaging';
+import TypingIndicator from './TypingIndicator';
 
 interface MessageThreadProps {
   messages: Message[];
   loading: boolean;
   currentUserId: string;
   conversation: ConversationWithDetails | null;
+  isOtherUserTyping?: boolean;
 }
 
 const formatMessageDate = (dateStr: string) => {
@@ -28,6 +30,7 @@ const MessageThread = ({
   loading,
   currentUserId,
   conversation,
+  isOtherUserTyping = false,
 }: MessageThreadProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +38,7 @@ const MessageThread = ({
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, [messages, isOtherUserTyping]);
 
   if (!conversation) {
     return (
@@ -59,7 +62,7 @@ const MessageThread = ({
     );
   }
 
-  if (messages.length === 0) {
+  if (messages.length === 0 && !isOtherUserTyping) {
     return (
       <div className="flex-1 flex items-center justify-center text-muted-foreground">
         <div className="text-center">
@@ -116,6 +119,13 @@ const MessageThread = ({
             </div>
           );
         })}
+        
+        {isOtherUserTyping && (
+          <TypingIndicator 
+            userName={conversation.other_party_name || 'Someone'}
+            userImage={conversation.other_party_image}
+          />
+        )}
       </div>
     </ScrollArea>
   );

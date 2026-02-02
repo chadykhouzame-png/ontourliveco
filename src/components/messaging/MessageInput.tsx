@@ -7,9 +7,11 @@ interface MessageInputProps {
   onSend: (content: string) => Promise<void>;
   disabled?: boolean;
   sending?: boolean;
+  onTyping?: () => void;
+  onStopTyping?: () => void;
 }
 
-const MessageInput = ({ onSend, disabled, sending }: MessageInputProps) => {
+const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: MessageInputProps) => {
   const [content, setContent] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -17,6 +19,7 @@ const MessageInput = ({ onSend, disabled, sending }: MessageInputProps) => {
     if (!content.trim() || disabled || sending) return;
 
     try {
+      onStopTyping?.();
       await onSend(content);
       setContent('');
       textareaRef.current?.focus();
@@ -29,6 +32,15 @@ const MessageInput = ({ onSend, disabled, sending }: MessageInputProps) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
+    if (e.target.value.trim()) {
+      onTyping?.();
+    } else {
+      onStopTyping?.();
     }
   };
 
@@ -49,8 +61,9 @@ const MessageInput = ({ onSend, disabled, sending }: MessageInputProps) => {
         <Textarea
           ref={textareaRef}
           value={content}
-          onChange={(e) => setContent(e.target.value)}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onBlur={onStopTyping}
           placeholder="Type a message..."
           disabled={disabled || sending}
           rows={1}
