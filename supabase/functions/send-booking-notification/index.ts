@@ -8,12 +8,65 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Helper function to generate review request email HTML
+function generateReviewEmail(revieweeName: string, date: string, revieweeType: 'artist' | 'venue'): string {
+  const heading = revieweeType === 'artist' 
+    ? `⭐ How was ${revieweeName}'s performance?`
+    : `⭐ How was your gig at ${revieweeName}?`;
+  
+  const bodyContent = revieweeType === 'artist'
+    ? `<p>Your booking with <strong>${revieweeName}</strong> on <strong>${date}</strong> is now complete!</p>
+       <p>Your feedback helps other venues make better booking decisions. Share your experience!</p>`
+    : `<p>Your performance at <strong>${revieweeName}</strong> on <strong>${date}</strong> is now complete!</p>
+       <p>Your feedback helps other artists know what to expect. Share your experience!</p>`;
+
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+  
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      </head>
+      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0a0a0a; margin: 0; padding: 40px 20px;">
+        <div style="max-width: 560px; margin: 0 auto; background-color: #18181b; border-radius: 16px; padding: 40px; border: 1px solid #27272a;">
+          <div style="text-align: center; margin-bottom: 32px;">
+            <span style="font-size: 28px; font-weight: 900; letter-spacing: -0.05em;">
+              <span style="color: #0ea5e9;">ON</span><span style="color: #ffffff;">TOUR</span>
+            </span>
+          </div>
+          
+          <h1 style="color: #ffffff; font-size: 24px; text-align: center; margin-bottom: 24px;">${heading}</h1>
+          
+          <div style="color: #a1a1aa; font-size: 16px; line-height: 1.6;">
+            ${bodyContent}
+          </div>
+          
+          <div style="text-align: center; margin-top: 32px;">
+            <a href="${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}" 
+               style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 16px;">
+              Leave a Review
+            </a>
+          </div>
+          
+          <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #27272a; text-align: center;">
+            <p style="color: #52525b; font-size: 14px; margin: 0;">
+              Reviews help build trust in our community. Thank you for sharing your experience!
+            </p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
 // Input validation schema
 const BookingNotificationSchema = z.object({
-  type: z.enum(['new_offer', 'counter_offer', 'accepted', 'declined']),
+  type: z.enum(['new_offer', 'counter_offer', 'accepted', 'declined', 'completed']),
   booking_request_id: z.string().uuid(),
-  sender_name: z.string().min(1).max(200),
-  recipient_user_id: z.string().uuid(),
+  sender_name: z.string().min(1).max(200).optional(), // Optional for 'completed' type
+  recipient_user_id: z.string().uuid().optional(), // Optional for 'completed' type (sends to both parties)
   requested_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   offer_amount: z.number().positive().optional(),
   counter_offer: z.number().positive().optional(),
@@ -95,8 +148,8 @@ serve(async (req: Request) => {
         id,
         artist_id,
         venue_id,
-        artists!inner(user_id),
-        venues!inner(user_id)
+        artists!inner(user_id, artist_name),
+        venues!inner(user_id, venue_name)
       `)
       .eq('id', booking_request_id)
       .single();
@@ -112,12 +165,114 @@ serve(async (req: Request) => {
     // Check if user is either the artist or venue in this booking
     const artistUserId = (booking.artists as any)?.user_id;
     const venueUserId = (booking.venues as any)?.user_id;
+    const artistName = (booking.artists as any)?.artist_name;
+    const venueName = (booking.venues as any)?.venue_name;
     
     if (userId !== artistUserId && userId !== venueUserId) {
       console.error('Authorization failed - user not part of booking');
       return new Response(
         JSON.stringify({ error: 'Forbidden - You are not authorized for this booking' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Format the date for display
+    const formattedDate = new Date(requested_date).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+
+    // --- HANDLE COMPLETED TYPE SPECIALLY (sends to both parties) ---
+    if (type === 'completed') {
+      console.log('Processing completed booking notification - sending to both parties');
+      
+      // Get both profiles
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, email, email_notifications_enabled')
+        .in('user_id', [artistUserId, venueUserId]);
+
+      if (profilesError || !profiles) {
+        console.error('Error fetching profiles:', profilesError);
+        throw new Error('Could not fetch user profiles');
+      }
+
+      const artistProfile = profiles.find(p => p.user_id === artistUserId);
+      const venueProfile = profiles.find(p => p.user_id === venueUserId);
+
+      const resendApiKey = Deno.env.get('RESEND_API_KEY');
+      const resend = resendApiKey ? new Resend(resendApiKey) : null;
+
+      const results = { artist: { email_sent: false, notification_created: false }, venue: { email_sent: false, notification_created: false } };
+
+      // Send to artist (asking them to review the venue)
+      if (artistProfile) {
+        const { error: artistNotifError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: artistUserId,
+            title: `How was your gig at ${venueName}?`,
+            message: `Your booking on ${formattedDate} is complete! Leave a review to help other artists.`,
+            type: 'review_request',
+            reference_id: booking_request_id,
+            reference_type: 'booking_request',
+          });
+        results.artist.notification_created = !artistNotifError;
+
+        if (resend && artistProfile.email_notifications_enabled !== false) {
+          const artistHtml = generateReviewEmail(venueName, formattedDate, 'venue');
+          const { error: emailError } = await resend.emails.send({
+            from: 'OnTour <noreply@resend.dev>',
+            to: [artistProfile.email],
+            subject: `How was your gig at ${venueName}? Leave a review!`,
+            html: artistHtml,
+          });
+          results.artist.email_sent = !emailError;
+          if (emailError) console.error('Error sending artist review email:', emailError);
+        }
+      }
+
+      // Send to venue (asking them to review the artist)
+      if (venueProfile) {
+        const { error: venueNotifError } = await supabase
+          .from('notifications')
+          .insert({
+            user_id: venueUserId,
+            title: `How was ${artistName}'s performance?`,
+            message: `Your booking on ${formattedDate} is complete! Leave a review to help other venues.`,
+            type: 'review_request',
+            reference_id: booking_request_id,
+            reference_type: 'booking_request',
+          });
+        results.venue.notification_created = !venueNotifError;
+
+        if (resend && venueProfile.email_notifications_enabled !== false) {
+          const venueHtml = generateReviewEmail(artistName, formattedDate, 'artist');
+          const { error: emailError } = await resend.emails.send({
+            from: 'OnTour <noreply@resend.dev>',
+            to: [venueProfile.email],
+            subject: `How was ${artistName}'s performance? Leave a review!`,
+            html: venueHtml,
+          });
+          results.venue.email_sent = !emailError;
+          if (emailError) console.error('Error sending venue review email:', emailError);
+        }
+      }
+
+      console.log('Completed booking notification results:', results);
+      return new Response(
+        JSON.stringify({ success: true, results }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // --- STANDARD NOTIFICATION FLOW (for non-completed types) ---
+    if (!sender_name || !recipient_user_id) {
+      return new Response(
+        JSON.stringify({ error: 'sender_name and recipient_user_id are required for this notification type' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
@@ -135,14 +290,6 @@ serve(async (req: Request) => {
 
     // Check if user has opted out of email notifications
     const emailOptedOut = profile.email_notifications_enabled === false;
-
-    // Format the date for display
-    const formattedDate = new Date(requested_date).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
 
     // Build email subject and content based on notification type
     let subject = '';

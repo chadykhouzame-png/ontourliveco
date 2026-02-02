@@ -174,6 +174,19 @@ const ArtistDashboard = () => {
       ));
       
       if (status === 'completed') {
+        // Send review request notifications to both parties (fire and forget)
+        try {
+          await supabase.functions.invoke('send-booking-notification', {
+            body: {
+              type: 'completed',
+              booking_request_id: requestId,
+              requested_date: request.requested_date,
+            },
+          });
+        } catch (notifError) {
+          console.error('Error sending completion notification:', notifError);
+        }
+
         toast({
           title: "Booking marked as completed",
           description: "You can now leave a review for this venue.",
