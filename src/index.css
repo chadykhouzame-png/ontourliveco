@@ -11,97 +11,97 @@
 
 @layer base {
   :root {
-    /* iOS Dark Mode inspired palette */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    /* On Tour Live - Elegant Dark with Rose/Blush accents */
+    --background: 0 0% 2%;
+    --foreground: 15 20% 85%;
 
     /* Frosted glass card effect */
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 8%;
+    --card-foreground: 15 20% 85%;
 
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 15 20% 85%;
 
-    /* iOS blue accent */
-    --primary: 211 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    /* Rose/Blush pink accent from logo */
+    --primary: 15 30% 75%;
+    --primary-foreground: 0 0% 5%;
 
     /* Elevated surfaces */
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 15 20% 85%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 15 10% 50%;
 
-    --accent: 211 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 15 30% 75%;
+    --accent-foreground: 0 0% 5%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Subtle borders like iOS */
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 211 100% 50%;
+    /* Subtle borders */
+    --border: 15 10% 18%;
+    --input: 0 0% 12%;
+    --ring: 15 30% 75%;
 
     /* Larger iOS-style radius */
     --radius: 1rem;
 
-    /* Artist side - vibrant purple (iOS style) */
-    --artist: 280 80% 60%;
+    /* Artist side - warm rose */
+    --artist: 350 45% 55%;
     --artist-foreground: 0 0% 100%;
     
-    /* Venue side - iOS teal */
-    --venue: 195 100% 50%;
+    /* Venue side - cool mauve */
+    --venue: 280 30% 50%;
     --venue-foreground: 0 0% 100%;
 
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 65%;
-    --sidebar-primary: 211 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 211 100% 50%;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 15 10% 55%;
+    --sidebar-primary: 15 30% 75%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 15 20% 85%;
+    --sidebar-border: 15 10% 15%;
+    --sidebar-ring: 15 30% 75%;
   }
 
   .dark {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    --background: 0 0% 2%;
+    --foreground: 15 20% 85%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 8%;
+    --card-foreground: 15 20% 85%;
 
-    --popover: 0 0% 12%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 15 20% 85%;
 
-    --primary: 211 100% 50%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 15 30% 75%;
+    --primary-foreground: 0 0% 5%;
 
-    --secondary: 0 0% 15%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 15 20% 85%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 15 10% 50%;
 
-    --accent: 211 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 15 30% 75%;
+    --accent-foreground: 0 0% 5%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
-    --ring: 211 100% 50%;
+    --border: 15 10% 18%;
+    --input: 0 0% 12%;
+    --ring: 15 30% 75%;
 
-    --sidebar-background: 0 0% 8%;
-    --sidebar-foreground: 0 0% 65%;
-    --sidebar-primary: 211 100% 50%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 15%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 211 100% 50%;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 15 10% 55%;
+    --sidebar-primary: 15 30% 75%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 15 20% 85%;
+    --sidebar-border: 15 10% 15%;
+    --sidebar-ring: 15 30% 75%;
   }
 }
 
