@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { AlertTriangle, Clock, CheckCircle, XCircle, Eye, Search, Filter, Calendar, DollarSign, MapPin, Music } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle, XCircle, Eye, Search, Filter, Calendar, DollarSign, MapPin, Music, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { BOOKING_STATUS_LABELS } from '@/types/database';
@@ -339,24 +340,41 @@ const AdminDisputes = () => {
               {(selectedDispute.reported_artist || selectedDispute.reported_venue) && (
                 <div className="p-3 bg-muted rounded-lg">
                   <Label className="text-sm font-medium">Reported Party</Label>
-                  <div className="mt-1 flex items-center gap-2">
+                  <div className="mt-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      {selectedDispute.reported_artist ? (
+                        <>
+                          <Music className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{selectedDispute.reported_artist.artist_name}</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span className="text-sm text-muted-foreground flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {selectedDispute.reported_artist.primary_city}
+                          </span>
+                        </>
+                      ) : selectedDispute.reported_venue ? (
+                        <>
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium">{selectedDispute.reported_venue.venue_name}</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span className="text-sm text-muted-foreground">{selectedDispute.reported_venue.city}</span>
+                        </>
+                      ) : null}
+                    </div>
                     {selectedDispute.reported_artist ? (
-                      <>
-                        <Music className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{selectedDispute.reported_artist.artist_name}</span>
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {selectedDispute.reported_artist.primary_city}
-                        </span>
-                      </>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/artist/${selectedDispute.reported_artist.id}`} target="_blank">
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          View Profile
+                        </Link>
+                      </Button>
                     ) : selectedDispute.reported_venue ? (
-                      <>
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{selectedDispute.reported_venue.venue_name}</span>
-                        <span className="text-muted-foreground">•</span>
-                        <span className="text-sm text-muted-foreground">{selectedDispute.reported_venue.city}</span>
-                      </>
+                      <Button variant="outline" size="sm" asChild>
+                        <Link to={`/venue/${selectedDispute.reported_venue.id}`} target="_blank">
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          View Profile
+                        </Link>
+                      </Button>
                     ) : null}
                   </div>
                 </div>
@@ -392,7 +410,18 @@ const AdminDisputes = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-xs text-muted-foreground">Artist</p>
-                          <p className="font-medium">{selectedDispute.booking_request.artist?.artist_name || 'Unknown'}</p>
+                          {selectedDispute.booking_request.artist ? (
+                            <Link 
+                              to={`/artist/${selectedDispute.booking_request.artist.id}`} 
+                              target="_blank"
+                              className="font-medium text-primary hover:underline inline-flex items-center gap-1"
+                            >
+                              {selectedDispute.booking_request.artist.artist_name}
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          ) : (
+                            <p className="font-medium">Unknown</p>
+                          )}
                           {selectedDispute.booking_request.artist?.primary_city && (
                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                               <MapPin className="h-3 w-3" />
@@ -402,7 +431,18 @@ const AdminDisputes = () => {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">Venue</p>
-                          <p className="font-medium">{selectedDispute.booking_request.venue?.venue_name || 'Unknown'}</p>
+                          {selectedDispute.booking_request.venue ? (
+                            <Link 
+                              to={`/venue/${selectedDispute.booking_request.venue.id}`} 
+                              target="_blank"
+                              className="font-medium text-primary hover:underline inline-flex items-center gap-1"
+                            >
+                              {selectedDispute.booking_request.venue.venue_name}
+                              <ExternalLink className="h-3 w-3" />
+                            </Link>
+                          ) : (
+                            <p className="font-medium">Unknown</p>
+                          )}
                           {selectedDispute.booking_request.venue?.city && (
                             <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                               <MapPin className="h-3 w-3" />
