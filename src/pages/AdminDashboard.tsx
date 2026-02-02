@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,7 @@ import AdminUserManagement from '@/components/admin/AdminUserManagement';
 import AdminProfileApproval from '@/components/admin/AdminProfileApproval';
 import AdminDisputes from '@/components/admin/AdminDisputes';
 import AdminStats from '@/components/admin/AdminStats';
+import logo from '@/assets/logo.png';
 
 const AdminDashboard = () => {
   const { user, userRole, isLoading } = useAuth();
@@ -34,12 +35,15 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="On Tour Live" className="h-14 w-auto" />
+          </Link>
           <div className="flex items-center gap-3">
-            <Shield className="h-8 w-8 text-primary" />
+            <Shield className="h-6 w-6 text-primary" />
             <div>
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-              <p className="text-muted-foreground">Manage users, profiles, and disputes</p>
+              <h1 className="text-xl font-bold">Admin Dashboard</h1>
+              <p className="text-sm text-muted-foreground">Manage users, profiles, and disputes</p>
             </div>
           </div>
         </div>
