@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
+import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import logo from '@/assets/logo.png';
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -48,6 +49,9 @@ const VenueDashboard = () => {
   const [updateOfferDialogOpen, setUpdateOfferDialogOpen] = useState(false);
   const [newOfferAmount, setNewOfferAmount] = useState('');
   const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
+  
+  // Status filter state
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   
   // Negotiation limit check
   const { hasReachedLimit, remainingRounds, roundCount } = useNegotiationLimit(selectedBooking?.id);
@@ -462,6 +466,29 @@ const VenueDashboard = () => {
     }
   };
 
+  // Computed values - must be before any early returns for hook consistency
+  const pendingRequests = bookingRequests.filter(r => r.status === 'pending');
+  const acceptedRequests = bookingRequests.filter(r => r.status === 'accepted');
+  const completedRequests = bookingRequests.filter(r => r.status === 'completed');
+  const declinedRequests = bookingRequests.filter(r => r.status === 'declined');
+  const upcomingBookings = acceptedRequests.filter(r => new Date(r.requested_date) >= new Date());
+  const pastAcceptedBookings = acceptedRequests.filter(r => new Date(r.requested_date) < new Date());
+  
+  // Filter counts for the filter component
+  const filterCounts = useMemo(() => ({
+    all: bookingRequests.length,
+    pending: pendingRequests.length,
+    accepted: acceptedRequests.length,
+    completed: completedRequests.length,
+    declined: declinedRequests.length,
+  }), [bookingRequests.length, pendingRequests.length, acceptedRequests.length, completedRequests.length, declinedRequests.length]);
+  
+  // Filtered booking requests based on status filter
+  const filteredBookingRequests = useMemo(() => {
+    if (statusFilter === 'all') return bookingRequests;
+    return bookingRequests.filter(r => r.status === statusFilter);
+  }, [bookingRequests, statusFilter]);
+
   if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -469,12 +496,6 @@ const VenueDashboard = () => {
       </div>
     );
   }
-
-  const pendingRequests = bookingRequests.filter(r => r.status === 'pending');
-  const acceptedRequests = bookingRequests.filter(r => r.status === 'accepted');
-  const completedRequests = bookingRequests.filter(r => r.status === 'completed');
-  const upcomingBookings = acceptedRequests.filter(r => new Date(r.requested_date) >= new Date());
-  const pastAcceptedBookings = acceptedRequests.filter(r => new Date(r.requested_date) < new Date());
 
   return (
     <div className="min-h-screen bg-background">
@@ -596,22 +617,31 @@ const VenueDashboard = () => {
 
           {/* Booking Requests */}
           <Card className="glass border-border/50 rounded-2xl overflow-hidden">
-            <CardHeader className="border-b border-border/30 bg-secondary/20">
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-artist" />
-                Booking Requests
-                {pendingRequests.length > 0 && (
-                  <Badge variant="destructive" className="ml-auto text-xs">
-                    {pendingRequests.length}
-                  </Badge>
-                )}
-              </CardTitle>
-              <CardDescription>
-                {pendingRequests.length === 0 
-                  ? "No pending requests"
-                  : `${pendingRequests.length} pending ${pendingRequests.length === 1 ? 'request' : 'requests'}`
-                }
-              </CardDescription>
+            <CardHeader className="border-b border-border/30 bg-secondary/20 space-y-3">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-artist" />
+                  Booking Requests
+                  {pendingRequests.length > 0 && (
+                    <Badge variant="destructive" className="ml-auto text-xs">
+                      {pendingRequests.length}
+                    </Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  {pendingRequests.length === 0 
+                    ? "No pending requests"
+                    : `${pendingRequests.length} pending ${pendingRequests.length === 1 ? 'request' : 'requests'}`
+                  }
+                </CardDescription>
+              </div>
+              {bookingRequests.length > 0 && (
+                <BookingStatusFilter
+                  value={statusFilter}
+                  onChange={setStatusFilter}
+                  counts={filterCounts}
+                />
+              )}
             </CardHeader>
             <CardContent>
               {bookingRequests.length === 0 ? (
@@ -622,9 +652,14 @@ const VenueDashboard = () => {
                     Search for artists or wait for artists to reach out
                   </p>
                 </div>
+              ) : filteredBookingRequests.length === 0 ? (
+                <div className="text-center py-8">
+                  <MessageSquare className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
+                  <p className="text-muted-foreground">No {statusFilter} requests</p>
+                </div>
               ) : (
                 <div className="space-y-4">
-                  {bookingRequests.slice(0, 5).map((request) => (
+                  {filteredBookingRequests.slice(0, 10).map((request) => (
                     <div 
                       key={request.id}
                       className="p-4 rounded-xl border border-border/50 bg-secondary/20 backdrop-blur-sm haptic"
