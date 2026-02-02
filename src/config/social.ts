@@ -3,11 +3,11 @@
 
 export const socialLinks = {
   instagram: {
-    url: 'https://instagram.com/ontour',
+    url: 'https://instagram.com/ontour.live',
     label: 'Follow us on Instagram',
   },
   facebook: {
-    url: 'https://facebook.com/ontour',
+    url: 'https://www.facebook.com/ontour.live',
     label: 'Follow us on Facebook',
   },
   tiktok: {
