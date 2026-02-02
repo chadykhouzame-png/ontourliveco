@@ -24,6 +24,7 @@ import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import logo from '@/assets/logo.png';
 
 const ArtistDashboard = () => {
@@ -59,6 +60,12 @@ const ArtistDashboard = () => {
     entityId: artist?.id, 
     entityType: 'artist',
     enabled: !!artist?.id 
+  });
+
+  // Unread message count for Messages button
+  const { unreadCount } = useUnreadMessages({
+    entityId: artist?.id,
+    entityType: 'artist',
   });
 
   useEffect(() => {
@@ -464,9 +471,14 @@ const ArtistDashboard = () => {
               <BarChart3 className="w-4 h-4 mr-2" />
               Analytics
             </Button>
-            <Button onClick={() => navigate('/messages')} variant="outline" className="haptic glass-subtle">
+            <Button onClick={() => navigate('/messages')} variant="outline" className="haptic glass-subtle relative">
               <MessageSquare className="w-4 h-4 mr-2" />
               Messages
+              {unreadCount > 0 && (
+                <Badge className="absolute -top-2 -right-2 h-5 min-w-5 px-1.5 bg-destructive text-destructive-foreground text-xs">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </Badge>
+              )}
             </Button>
             <Button onClick={() => navigate('/search/venues')} className="bg-venue hover:bg-venue/90 haptic shadow-lg shadow-venue/20">
               <Building2 className="w-4 h-4 mr-2" />
