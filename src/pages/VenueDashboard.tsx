@@ -152,6 +152,65 @@ const VenueDashboard = () => {
     fetchData();
   }, [user, navigate, executeWithRetry]);
 
+  // Realtime subscription for booking requests
+  useEffect(() => {
+    if (!venue?.id) return;
+
+    const channel = supabase
+      .channel(`venue-bookings-${venue.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'booking_requests',
+          filter: `venue_id=eq.${venue.id}`,
+        },
+        async (payload) => {
+          console.log('Realtime booking update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            // Fetch the new request with artist info
+            const { data } = await supabase
+              .from('booking_requests')
+              .select('*, artist:artists(*)')
+              .eq('id', payload.new.id)
+              .single();
+            
+            if (data) {
+              setBookingRequests(prev => [data as BookingRequest, ...prev]);
+              toast({
+                title: "New Booking Request",
+                description: "You have a new booking request!",
+              });
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            // Fetch the updated request with artist info
+            const { data } = await supabase
+              .from('booking_requests')
+              .select('*, artist:artists(*)')
+              .eq('id', payload.new.id)
+              .single();
+            
+            if (data) {
+              setBookingRequests(prev => 
+                prev.map(req => req.id === payload.new.id ? data as BookingRequest : req)
+              );
+            }
+          } else if (payload.eventType === 'DELETE') {
+            setBookingRequests(prev => 
+              prev.filter(req => req.id !== payload.old.id)
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [venue?.id, toast]);
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/');
