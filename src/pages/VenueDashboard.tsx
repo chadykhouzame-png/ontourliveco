@@ -281,6 +281,60 @@ const VenueDashboard = () => {
     }
   };
 
+  const handleAcceptDeclineRequest = async (requestId: string, status: BookingStatus) => {
+    const request = bookingRequests.find(r => r.id === requestId);
+    if (!request || !venue) return;
+
+    try {
+      await executeWithRetry(async () => {
+        const { error } = await supabase
+          .from('booking_requests')
+          .update({ status })
+          .eq('id', requestId);
+        
+        if (error) throw error;
+      }, 'updating booking status');
+      
+      // Update local state
+      setBookingRequests(prev => prev.map(req => 
+        req.id === requestId ? { ...req, status } : req
+      ));
+      
+      // Send notification to artist
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            type: status,
+            booking_request_id: requestId,
+            sender_name: venue.venue_name,
+            recipient_user_id: request.artist?.user_id,
+            requested_date: request.requested_date,
+            offer_amount: request.offer_amount,
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send notification:', notifyError);
+      }
+
+      // Log negotiation event
+      await addNegotiationEvent(
+        requestId,
+        'venue',
+        status === 'accepted' ? 'accept' : 'decline',
+        request.offer_amount || undefined
+      );
+      
+      toast({
+        title: status === 'accepted' ? "Booking accepted!" : "Booking declined",
+        description: status === 'accepted' 
+          ? "The artist has been notified." 
+          : "The artist has been notified of your decision.",
+      });
+    } catch (error) {
+      showErrorWithTitle(error, "Error updating booking", 'update-booking-status');
+    }
+  };
+
   const handleSubmitUpdatedOffer = async () => {
     if (!selectedBooking || !newOfferAmount || !venue) return;
     
@@ -474,17 +528,17 @@ const VenueDashboard = () => {
             </CardContent>
           </Card>
 
-          {/* Sent Requests */}
+          {/* Booking Requests */}
           <Card className="glass border-border/50 rounded-2xl overflow-hidden">
             <CardHeader className="border-b border-border/30 bg-secondary/20">
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-artist" />
-                Sent Requests
+                Booking Requests
               </CardTitle>
               <CardDescription>
                 {pendingRequests.length === 0 
                   ? "No pending requests"
-                  : `${pendingRequests.length} awaiting response`
+                  : `${pendingRequests.length} pending ${pendingRequests.length === 1 ? 'request' : 'requests'}`
                 }
               </CardDescription>
             </CardHeader>
@@ -492,9 +546,9 @@ const VenueDashboard = () => {
               {bookingRequests.length === 0 ? (
                 <div className="text-center py-8">
                   <MessageSquare className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-                  <p className="text-muted-foreground">No requests sent yet</p>
+                  <p className="text-muted-foreground">No booking requests yet</p>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Search for artists and send booking requests
+                    Search for artists or wait for artists to reach out
                   </p>
                 </div>
               ) : (
@@ -506,9 +560,15 @@ const VenueDashboard = () => {
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <p className="font-medium">{request.artist?.artist_name || 'Unknown Artist'}</p>
+                          <Link 
+                            to={`/artist/${request.artist_id}`}
+                            className="font-medium hover:text-artist hover:underline transition-colors"
+                          >
+                            {request.artist?.artist_name || 'Unknown Artist'}
+                          </Link>
                           <p className="text-sm text-muted-foreground">
                             {format(new Date(request.requested_date), 'EEEE, MMMM d, yyyy')}
+                            {request.requested_time && ` at ${request.requested_time}`}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">
@@ -526,13 +586,18 @@ const VenueDashboard = () => {
                           </Badge>
                         </div>
                       </div>
+                      {request.message && (
+                        <p className="text-sm text-muted-foreground mb-3">
+                          "{request.message}"
+                        </p>
+                      )}
                       {/* Offer and Counter-offer display */}
                       <div className="flex flex-wrap gap-3 mb-3">
                         {request.offer_amount && (
                           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-venue/10 border border-venue/20">
                             <DollarSign className="w-4 h-4 text-venue" />
                             <span className="text-sm font-medium text-venue">
-                              Your offer: ${request.offer_amount.toLocaleString()}
+                              Offer: ${request.offer_amount.toLocaleString()}
                             </span>
                           </div>
                         )}
@@ -545,25 +610,65 @@ const VenueDashboard = () => {
                           </div>
                         )}
                       </div>
-                      {/* Counter-offer response buttons */}
-                      {request.status === 'pending' && request.counter_offer && (
+                      {/* Actions for pending requests */}
+                      {request.status === 'pending' && (
                         <div className="flex flex-wrap gap-2 mb-3">
-                          <Button 
-                            size="sm"
-                            className="bg-venue hover:bg-venue/90"
-                            onClick={() => handleAcceptCounterOffer(request)}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                            Accept ${request.counter_offer.toLocaleString()}
-                          </Button>
-                          <Button 
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleOpenUpdateOffer(request)}
-                          >
-                            <DollarSign className="w-4 h-4 mr-1" />
-                            Update Offer
-                          </Button>
+                          {request.counter_offer ? (
+                            // Venue responding to artist's counter-offer
+                            <>
+                              <Button 
+                                size="sm"
+                                className="bg-venue hover:bg-venue/90"
+                                onClick={() => handleAcceptCounterOffer(request)}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-1" />
+                                Accept ${request.counter_offer.toLocaleString()}
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenUpdateOffer(request)}
+                              >
+                                <DollarSign className="w-4 h-4 mr-1" />
+                                Update Offer
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant="ghost"
+                                className="text-muted-foreground"
+                                onClick={() => handleAcceptDeclineRequest(request.id, 'declined')}
+                              >
+                                Decline
+                              </Button>
+                            </>
+                          ) : (
+                            // Venue accepting or declining initial offer/request
+                            <>
+                              <Button 
+                                size="sm"
+                                className="bg-venue hover:bg-venue/90"
+                                onClick={() => handleAcceptDeclineRequest(request.id, 'accepted')}
+                              >
+                                Accept
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleOpenUpdateOffer(request)}
+                              >
+                                <DollarSign className="w-4 h-4 mr-1" />
+                                Counter Offer
+                              </Button>
+                              <Button 
+                                size="sm"
+                                variant="ghost"
+                                className="text-muted-foreground"
+                                onClick={() => handleAcceptDeclineRequest(request.id, 'declined')}
+                              >
+                                Decline
+                              </Button>
+                            </>
+                          )}
                         </div>
                       )}
                       {request.status === 'accepted' && new Date(request.requested_date) < new Date() && (
