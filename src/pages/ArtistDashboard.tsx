@@ -74,6 +74,8 @@ const ArtistDashboard = () => {
   }, [user]);
 
   useEffect(() => {
+    let artistId: string | null = null;
+    
     const fetchData = async () => {
       if (!user) return;
       
@@ -95,6 +97,7 @@ const ArtistDashboard = () => {
           return;
         }
         
+        artistId = artistData.id;
         setArtist(artistData as Artist);
         
         // Fetch remaining data in parallel with retry
@@ -149,6 +152,65 @@ const ArtistDashboard = () => {
     
     fetchData();
   }, [user, navigate, executeWithRetry]);
+
+  // Realtime subscription for booking requests
+  useEffect(() => {
+    if (!artist?.id) return;
+
+    const channel = supabase
+      .channel(`artist-bookings-${artist.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'booking_requests',
+          filter: `artist_id=eq.${artist.id}`,
+        },
+        async (payload) => {
+          console.log('Realtime booking update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            // Fetch the new request with venue info
+            const { data } = await supabase
+              .from('booking_requests')
+              .select('*, venue:venues(*)')
+              .eq('id', payload.new.id)
+              .single();
+            
+            if (data) {
+              setBookingRequests(prev => [data as BookingRequest, ...prev]);
+              toast({
+                title: "New Booking Request",
+                description: "You have a new booking request!",
+              });
+            }
+          } else if (payload.eventType === 'UPDATE') {
+            // Fetch the updated request with venue info
+            const { data } = await supabase
+              .from('booking_requests')
+              .select('*, venue:venues(*)')
+              .eq('id', payload.new.id)
+              .single();
+            
+            if (data) {
+              setBookingRequests(prev => 
+                prev.map(req => req.id === payload.new.id ? data as BookingRequest : req)
+              );
+            }
+          } else if (payload.eventType === 'DELETE') {
+            setBookingRequests(prev => 
+              prev.filter(req => req.id !== payload.old.id)
+            );
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [artist?.id, toast]);
 
   const handleSignOut = async () => {
     await signOut();
