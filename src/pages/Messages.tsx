@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useConversations } from '@/hooks/useConversations';
 import { useMessages } from '@/hooks/useMessages';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useToast } from '@/hooks/use-toast';
 import ConversationsList from '@/components/messaging/ConversationsList';
 import MessageThread from '@/components/messaging/MessageThread';
@@ -33,6 +34,21 @@ const Messages = () => {
     sending,
     sendMessage,
   } = useMessages(selectedConversation?.id || null);
+
+  // Get the current user's name for the typing indicator
+  const currentUserName = selectedConversation?.other_party_name 
+    ? (userType === 'artist' ? 'Artist' : 'Venue')
+    : undefined;
+
+  const {
+    isOtherUserTyping,
+    startTyping,
+    stopTyping,
+  } = useTypingIndicator({
+    conversationId: selectedConversation?.id,
+    userId: user?.id,
+    userName: currentUserName,
+  });
 
   // Handle deep linking to a specific conversation
   useEffect(() => {
@@ -157,12 +173,15 @@ const Messages = () => {
             loading={messagesLoading}
             currentUserId={user?.id || ''}
             conversation={selectedConversation}
+            isOtherUserTyping={isOtherUserTyping}
           />
           {selectedConversation && (
             <MessageInput
               onSend={handleSendMessage}
               disabled={!selectedConversation}
               sending={sending}
+              onTyping={startTyping}
+              onStopTyping={stopTyping}
             />
           )}
         </div>
