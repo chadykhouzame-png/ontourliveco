@@ -24,6 +24,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
+import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import logo from '@/assets/logo.png';
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -55,6 +56,13 @@ const VenueDashboard = () => {
   
   // Negotiation limit check
   const { hasReachedLimit, remainingRounds, roundCount } = useNegotiationLimit(selectedBooking?.id);
+  
+  // Sound and browser notifications for new bookings
+  useBookingNotifications({ 
+    entityId: venue?.id, 
+    entityType: 'venue',
+    enabled: !!venue?.id 
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
