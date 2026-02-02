@@ -39,19 +39,31 @@ export default function NotificationBell() {
 
     fetchNotifications();
 
-    // Subscribe to new notifications
+    // Subscribe to new notifications and updates
     const channel = supabase
-      .channel('notifications')
+      .channel(`user-notifications-${user.id}`)
       .on(
         'postgres_changes',
         {
-          event: 'INSERT',
+          event: '*',
           schema: 'public',
           table: 'notifications',
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          setNotifications(prev => [payload.new as Notification, ...prev]);
+          console.log('Realtime notification update:', payload);
+          
+          if (payload.eventType === 'INSERT') {
+            setNotifications(prev => [payload.new as Notification, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setNotifications(prev =>
+              prev.map(n => (n.id === payload.new.id ? payload.new as Notification : n))
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setNotifications(prev =>
+              prev.filter(n => n.id !== payload.old.id)
+            );
+          }
         }
       )
       .subscribe();
