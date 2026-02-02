@@ -23,6 +23,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
+import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import logo from '@/assets/logo.png';
 
 const ArtistDashboard = () => {
@@ -52,6 +53,13 @@ const ArtistDashboard = () => {
   
   // Negotiation limit check
   const { hasReachedLimit, remainingRounds, roundCount } = useNegotiationLimit(selectedBooking?.id);
+  
+  // Sound and browser notifications for new bookings
+  useBookingNotifications({ 
+    entityId: artist?.id, 
+    entityType: 'artist',
+    enabled: !!artist?.id 
+  });
 
   useEffect(() => {
     if (!authLoading && !user) {
