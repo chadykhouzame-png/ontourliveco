@@ -451,7 +451,14 @@ const VenueDashboard = () => {
       <div className="max-w-7xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold">Dashboard</h1>
+              {pendingRequests.length > 0 && (
+                <Badge className="bg-artist text-artist-foreground animate-pulse">
+                  {pendingRequests.length} pending
+                </Badge>
+              )}
+            </div>
             <p className="text-muted-foreground">Welcome back, {venue?.venue_name}</p>
           </div>
           <div className="flex gap-2 flex-wrap">
@@ -534,6 +541,11 @@ const VenueDashboard = () => {
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-artist" />
                 Booking Requests
+                {pendingRequests.length > 0 && (
+                  <Badge variant="destructive" className="ml-auto text-xs">
+                    {pendingRequests.length}
+                  </Badge>
+                )}
               </CardTitle>
               <CardDescription>
                 {pendingRequests.length === 0 
