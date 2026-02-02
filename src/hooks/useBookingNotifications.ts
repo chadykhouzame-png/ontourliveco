@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -17,11 +17,55 @@ export function useBookingNotifications({
   const { user } = useAuth();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const permissionRef = useRef<NotificationPermission>('default');
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  // Fetch sound preference from profile
+  useEffect(() => {
+    if (!user) return;
+
+    const fetchSoundPreference = async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('sound_notifications_enabled')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (data) {
+        setSoundEnabled(data.sound_notifications_enabled ?? true);
+      }
+    };
+
+    fetchSoundPreference();
+
+    // Subscribe to preference changes
+    const channel = supabase
+      .channel(`sound-pref-${user.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const newData = payload.new as { sound_notifications_enabled?: boolean };
+          if (typeof newData.sound_notifications_enabled === 'boolean') {
+            setSoundEnabled(newData.sound_notifications_enabled);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   // Initialize audio element
   useEffect(() => {
     // Create audio element with a pleasant notification sound
-    audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleWY2Z5W0xZJtQCSVzt/Fo2E6MYnRxqNrNQ+M09/IoGc3J43FwJJkNhCO0dSuglc5FIu8rIhbNhKNxbqRYjcFiLykjmNAGIuwsop1TDIRgqWih2xJNRF8oJWDelMxCHqakIpmPxV0lIuBdFk2DHiUjYNvTjUOeJWPhXJLNgt1k4yEckwyDneTjIRySzILdZSMhHFLMwx2k4yEcksyCnWUjIRxSzMLdpOMhHJLMgt1lIyEcUsyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZOMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEckoyC3WUjIRySzMLdpOMhHJLMgt1lIyEcksyC3WUjIRySjILdZSMhHJKMgt2lIyEckoyC3aUjIRySjILdpSMhHFKMgt2lIyEcUoyC3aUjIRxSjILdpSMhHFKMgt2lIyEcUoyC3aUjYRxSjILdpSNhHFKMQt2lI2EcEoxC3aUjYRwSjELdpSNhHBKMQt2lI2EcEoxC3aUjYRwSjELdpSNhHBKMQt2lI2DcEoxC3aUjYNwSjELdpSNg3BKMQt2lI2DcEoxC3aUjYNwSjELdpSNg3BKMQt2lI2DcEoxC3aUjYNwSjELdpSNg29KMQt2lI2Db0oxC3aVjYNvSjELdpWNg29KMQt2lY2Db0oxC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwCw==');
+    audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleWY2Z5W0xZJtQCSVzt/Fo2E6MYnRxqNrNQ+M09/IoGc3J43FwJJkNhCO0dSuglc5FIu8rIhbNhKNxbqRYjcFiLykjmNAGIuwsop1TDIRgqWih2xJNRF8oJWDelMxCHqakIpmPxV0lIuBdFk2DHiUjYNvTjUOeJWPhXJLNgt1k4yEckwyDneTjIRySzILdZSMhHFLMwx2k4yEcksyCnWUjIRxSzMLdpOMhHJLMgt1lIyEcUsyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZOMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEckoyC3WUjIRySzMLdpOMhHJLMgt1lIyEcksyC3WUjIRySjILdZSMhHJKMgt2lIyEckoyC3aUjIRySjILdpSMhHFKMgt2lIyEcUoyC3aUjIRxSjILdpSMhHFKMgt2lIyEcUoyC3aUjYRxSjILdpSNhHFKMQt2lI2EcEoxC3aUjYRwSjELdpSNhHBKMQt2lI2EcEoxC3aUjYRwSjELdpSNhHBKMQt2lI2DcEoxC3aUjYNwSjELdpSNg3BKMQt2lI2DcEoxC3aUjYNwSjELdpSNg3BKMQt2lI2DcEoxC3aUjYNwSjELdpSNg29KMQt2lI2Db0oxC3aVjYNvSjELdpWNg29KMQt2lY2Db0oxC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwCw==');
     audioRef.current.volume = 0.5;
 
     // Check and request notification permission
@@ -40,13 +84,13 @@ export function useBookingNotifications({
   }, []);
 
   const playSound = useCallback(() => {
-    if (audioRef.current) {
+    if (audioRef.current && soundEnabled) {
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch(() => {
         // Audio play failed (user hasn't interacted with page yet)
       });
     }
-  }, []);
+  }, [soundEnabled]);
 
   const showBrowserNotification = useCallback((title: string, body: string) => {
     if ('Notification' in window && permissionRef.current === 'granted') {
@@ -142,6 +186,7 @@ export function useBookingNotifications({
   return {
     playSound,
     showBrowserNotification,
+    soundEnabled,
     requestPermission: useCallback(async () => {
       if ('Notification' in window && Notification.permission === 'default') {
         const permission = await Notification.requestPermission();
