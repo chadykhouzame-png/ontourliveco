@@ -94,9 +94,9 @@ const Messages = () => {
     setShowMobileThread(true);
   };
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, imageUrl?: string) => {
     if (!userType) return;
-    await sendMessage(content, userType);
+    await sendMessage(content, userType, imageUrl);
   };
 
   const handleBack = () => {

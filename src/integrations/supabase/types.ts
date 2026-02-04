@@ -427,6 +427,7 @@ export type Database = {
           conversation_id: string
           created_at: string
           id: string
+          image_url: string | null
           is_read: boolean
           sender_id: string
           sender_type: string
@@ -436,6 +437,7 @@ export type Database = {
           conversation_id: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           sender_id: string
           sender_type: string
@@ -445,6 +447,7 @@ export type Database = {
           conversation_id?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_read?: boolean
           sender_id?: string
           sender_type?: string
