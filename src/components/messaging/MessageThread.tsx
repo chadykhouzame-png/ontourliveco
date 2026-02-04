@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, isToday, isYesterday } from 'date-fns';
+import { Check, CheckCheck } from 'lucide-react';
 import type { Message, ConversationWithDetails } from '@/types/messaging';
 import TypingIndicator from './TypingIndicator';
 
@@ -118,13 +119,22 @@ const MessageThread = ({
                     {message.content}
                   </p>
                 )}
-                <p
-                  className={`text-xs mt-1 ${
-                    isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                  }`}
-                >
-                  {formatMessageDate(message.created_at)}
-                </p>
+                <div className={`flex items-center gap-1 mt-1 ${isOwn ? 'justify-end' : ''}`}>
+                  <span
+                    className={`text-xs ${
+                      isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                    }`}
+                  >
+                    {formatMessageDate(message.created_at)}
+                  </span>
+                  {isOwn && (
+                    message.is_read ? (
+                      <CheckCheck className={`h-3.5 w-3.5 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`} />
+                    ) : (
+                      <Check className={`h-3.5 w-3.5 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`} />
+                    )
+                  )}
+                </div>
               </div>
             </div>
           );
