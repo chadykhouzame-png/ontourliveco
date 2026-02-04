@@ -26,6 +26,7 @@ export interface Message {
   sender_id: string;
   sender_type: 'artist' | 'venue';
   content: string;
+  image_url?: string | null;
   is_read: boolean;
   created_at: string;
 }

@@ -105,9 +105,19 @@ const MessageThread = ({
                     : 'bg-muted'
                 } rounded-2xl px-4 py-2`}
               >
-                <p className="text-sm whitespace-pre-wrap break-words">
-                  {message.content}
-                </p>
+                {message.image_url && (
+                  <img
+                    src={message.image_url}
+                    alt="Attachment"
+                    className="rounded-lg mb-2 max-w-full max-h-64 object-contain cursor-pointer"
+                    onClick={() => window.open(message.image_url!, '_blank')}
+                  />
+                )}
+                {message.content && (
+                  <p className="text-sm whitespace-pre-wrap break-words">
+                    {message.content}
+                  </p>
+                )}
                 <p
                   className={`text-xs mt-1 ${
                     isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
