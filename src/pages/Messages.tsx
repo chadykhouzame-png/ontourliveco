@@ -5,6 +5,7 @@ import { useConversations } from '@/hooks/useConversations';
 import { useMessages } from '@/hooks/useMessages';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useToast } from '@/hooks/use-toast';
+import { useMessageReactions } from '@/hooks/useMessageReactions';
 import ConversationsList from '@/components/messaging/ConversationsList';
 import MessageThread from '@/components/messaging/MessageThread';
 import MessageInput from '@/components/messaging/MessageInput';
@@ -34,6 +35,19 @@ const Messages = () => {
     sending,
     sendMessage,
   } = useMessages(selectedConversation?.id || null);
+
+  const {
+    fetchReactions,
+    getReactionsForMessage,
+    toggleReaction,
+  } = useMessageReactions(selectedConversation?.id || null);
+
+  // Fetch reactions when messages load
+  useEffect(() => {
+    if (messages.length > 0) {
+      fetchReactions(messages.map((m) => m.id));
+    }
+  }, [messages, fetchReactions]);
 
   // Get the current user's name for the typing indicator
   const currentUserName = selectedConversation?.other_party_name 
@@ -174,6 +188,8 @@ const Messages = () => {
             currentUserId={user?.id || ''}
             conversation={selectedConversation}
             isOtherUserTyping={isOtherUserTyping}
+            getReactionsForMessage={getReactionsForMessage}
+            onToggleReaction={toggleReaction}
           />
           {selectedConversation && (
             <MessageInput
