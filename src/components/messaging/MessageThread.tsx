@@ -6,6 +6,7 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { Check, CheckCheck } from 'lucide-react';
 import type { Message, ConversationWithDetails } from '@/types/messaging';
 import TypingIndicator from './TypingIndicator';
+import MessageReactions, { type Reaction } from './MessageReactions';
 
 interface MessageThreadProps {
   messages: Message[];
@@ -13,6 +14,8 @@ interface MessageThreadProps {
   currentUserId: string;
   conversation: ConversationWithDetails | null;
   isOtherUserTyping?: boolean;
+  getReactionsForMessage?: (messageId: string) => Reaction[];
+  onToggleReaction?: (messageId: string, emoji: string) => void;
 }
 
 const formatMessageDate = (dateStr: string) => {
@@ -32,6 +35,8 @@ const MessageThread = ({
   currentUserId,
   conversation,
   isOtherUserTyping = false,
+  getReactionsForMessage,
+  onToggleReaction,
 }: MessageThreadProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -85,11 +90,12 @@ const MessageThread = ({
       <div className="p-4 space-y-4">
         {messages.map((message) => {
           const isOwn = message.sender_id === currentUserId;
+          const messageReactions = getReactionsForMessage?.(message.id) || [];
 
           return (
             <div
               key={message.id}
-              className={`flex gap-3 ${isOwn ? 'justify-end' : ''}`}
+              className={`flex gap-3 group ${isOwn ? 'justify-end' : ''}`}
             >
               {!isOwn && (
                 <Avatar className="h-8 w-8 shrink-0">
@@ -99,42 +105,51 @@ const MessageThread = ({
                   </AvatarFallback>
                 </Avatar>
               )}
-              <div
-                className={`max-w-[70%] ${
-                  isOwn
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted'
-                } rounded-2xl px-4 py-2`}
-              >
-                {message.image_url && (
-                  <img
-                    src={message.image_url}
-                    alt="Attachment"
-                    className="rounded-lg mb-2 max-w-full max-h-64 object-contain cursor-pointer"
-                    onClick={() => window.open(message.image_url!, '_blank')}
+              <div className="max-w-[70%]">
+                <div
+                  className={`${
+                    isOwn
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted'
+                  } rounded-2xl px-4 py-2`}
+                >
+                  {message.image_url && (
+                    <img
+                      src={message.image_url}
+                      alt="Attachment"
+                      className="rounded-lg mb-2 max-w-full max-h-64 object-contain cursor-pointer"
+                      onClick={() => window.open(message.image_url!, '_blank')}
+                    />
+                  )}
+                  {message.content && (
+                    <p className="text-sm whitespace-pre-wrap break-words">
+                      {message.content}
+                    </p>
+                  )}
+                  <div className={`flex items-center gap-1 mt-1 ${isOwn ? 'justify-end' : ''}`}>
+                    <span
+                      className={`text-xs ${
+                        isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
+                      }`}
+                    >
+                      {formatMessageDate(message.created_at)}
+                    </span>
+                    {isOwn && (
+                      message.is_read ? (
+                        <CheckCheck className={`h-3.5 w-3.5 text-primary-foreground/70`} />
+                      ) : (
+                        <Check className={`h-3.5 w-3.5 text-primary-foreground/70`} />
+                      )
+                    )}
+                  </div>
+                </div>
+                {onToggleReaction && (
+                  <MessageReactions
+                    reactions={messageReactions}
+                    onToggleReaction={(emoji) => onToggleReaction(message.id, emoji)}
+                    isOwn={isOwn}
                   />
                 )}
-                {message.content && (
-                  <p className="text-sm whitespace-pre-wrap break-words">
-                    {message.content}
-                  </p>
-                )}
-                <div className={`flex items-center gap-1 mt-1 ${isOwn ? 'justify-end' : ''}`}>
-                  <span
-                    className={`text-xs ${
-                      isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'
-                    }`}
-                  >
-                    {formatMessageDate(message.created_at)}
-                  </span>
-                  {isOwn && (
-                    message.is_read ? (
-                      <CheckCheck className={`h-3.5 w-3.5 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`} />
-                    ) : (
-                      <Check className={`h-3.5 w-3.5 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`} />
-                    )
-                  )}
-                </div>
               </div>
             </div>
           );
