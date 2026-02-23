@@ -102,7 +102,7 @@ export const useMessages = (conversationId: string | null) => {
     };
   }, [conversationId]);
 
-  const sendMessage = async (content: string, senderType: 'artist' | 'venue', imageUrl?: string) => {
+  const sendMessage = async (content: string, senderType: 'artist' | 'venue', imageUrl?: string, replyToId?: string) => {
     if (!conversationId || !user || (!content.trim() && !imageUrl)) return;
 
     setSending(true);
@@ -113,6 +113,7 @@ export const useMessages = (conversationId: string | null) => {
         sender_type: senderType,
         content: content.trim(),
         image_url: imageUrl || null,
+        reply_to_id: replyToId || null,
       });
 
       if (sendError) throw sendError;

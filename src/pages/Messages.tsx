@@ -11,7 +11,7 @@ import MessageThread from '@/components/messaging/MessageThread';
 import MessageInput from '@/components/messaging/MessageInput';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
-import type { ConversationWithDetails } from '@/types/messaging';
+import type { ConversationWithDetails, Message } from '@/types/messaging';
 
 const Messages = () => {
   const navigate = useNavigate();
@@ -20,6 +20,7 @@ const Messages = () => {
   const [searchParams] = useSearchParams();
   const [selectedConversation, setSelectedConversation] = useState<ConversationWithDetails | null>(null);
   const [showMobileThread, setShowMobileThread] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<Message | null>(null);
 
   const {
     conversations,
@@ -108,14 +109,15 @@ const Messages = () => {
     setShowMobileThread(true);
   };
 
-  const handleSendMessage = async (content: string, imageUrl?: string) => {
+  const handleSendMessage = async (content: string, imageUrl?: string, replyToId?: string) => {
     if (!userType) return;
-    await sendMessage(content, userType, imageUrl);
+    await sendMessage(content, userType, imageUrl, replyToId);
   };
 
   const handleBack = () => {
     setShowMobileThread(false);
     setSelectedConversation(null);
+    setReplyingTo(null);
   };
 
   if (authLoading) {
@@ -190,6 +192,7 @@ const Messages = () => {
             isOtherUserTyping={isOtherUserTyping}
             getReactionsForMessage={getReactionsForMessage}
             onToggleReaction={toggleReaction}
+            onReply={setReplyingTo}
           />
           {selectedConversation && (
             <MessageInput
@@ -198,6 +201,8 @@ const Messages = () => {
               sending={sending}
               onTyping={startTyping}
               onStopTyping={stopTyping}
+              replyingTo={replyingTo}
+              onCancelReply={() => setReplyingTo(null)}
             />
           )}
         </div>
