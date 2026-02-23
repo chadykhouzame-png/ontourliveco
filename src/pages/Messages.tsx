@@ -6,6 +6,7 @@ import { useMessages } from '@/hooks/useMessages';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useToast } from '@/hooks/use-toast';
 import { useMessageReactions } from '@/hooks/useMessageReactions';
+import { useMessageSearch } from '@/hooks/useMessageSearch';
 import ConversationsList from '@/components/messaging/ConversationsList';
 import MessageThread from '@/components/messaging/MessageThread';
 import MessageInput from '@/components/messaging/MessageInput';
@@ -42,6 +43,14 @@ const Messages = () => {
     getReactionsForMessage,
     toggleReaction,
   } = useMessageReactions(selectedConversation?.id || null);
+
+  const {
+    query: searchQuery,
+    setQuery: setSearchQuery,
+    results: searchResults,
+    searching,
+    clearSearch,
+  } = useMessageSearch();
 
   // Fetch reactions when messages load
   useEffect(() => {
@@ -107,6 +116,16 @@ const Messages = () => {
   const handleSelectConversation = (conversation: ConversationWithDetails) => {
     setSelectedConversation(conversation);
     setShowMobileThread(true);
+    clearSearch();
+  };
+
+  const handleSelectSearchResult = (conversationId: string) => {
+    const conv = conversations.find((c) => c.id === conversationId);
+    if (conv) {
+      setSelectedConversation(conv);
+      setShowMobileThread(true);
+      clearSearch();
+    }
   };
 
   const handleSendMessage = async (content: string, imageUrl?: string, replyToId?: string) => {
@@ -175,6 +194,12 @@ const Messages = () => {
             loading={conversationsLoading}
             selectedId={selectedConversation?.id || null}
             onSelect={handleSelectConversation}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            searchResults={searchResults}
+            searching={searching}
+            onClearSearch={clearSearch}
+            onSelectSearchResult={handleSelectSearchResult}
           />
         </div>
 
