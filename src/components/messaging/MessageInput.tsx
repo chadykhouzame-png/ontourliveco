@@ -1,20 +1,23 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Send, Loader2, ImagePlus, X } from 'lucide-react';
+import { Send, Loader2, ImagePlus, X, Reply } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import type { Message } from '@/types/messaging';
 
 interface MessageInputProps {
-  onSend: (content: string, imageUrl?: string) => Promise<void>;
+  onSend: (content: string, imageUrl?: string, replyToId?: string) => Promise<void>;
   disabled?: boolean;
   sending?: boolean;
   onTyping?: () => void;
   onStopTyping?: () => void;
+  replyingTo?: Message | null;
+  onCancelReply?: () => void;
 }
 
-const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: MessageInputProps) => {
+const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping, replyingTo, onCancelReply }: MessageInputProps) => {
   const { user } = useAuth();
   const [content, setContent] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -23,17 +26,22 @@ const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: Mes
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Focus textarea when replying
+  useEffect(() => {
+    if (replyingTo) {
+      textareaRef.current?.focus();
+    }
+  }, [replyingTo]);
+
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('Please select an image file');
       return;
     }
 
-    // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Image must be less than 5MB');
       return;
@@ -85,9 +93,10 @@ const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: Mes
         imageUrl = await uploadImage(selectedImage);
       }
 
-      await onSend(content, imageUrl);
+      await onSend(content, imageUrl, replyingTo?.id);
       setContent('');
       clearImage();
+      onCancelReply?.();
       textareaRef.current?.focus();
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -102,6 +111,9 @@ const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: Mes
       e.preventDefault();
       handleSubmit();
     }
+    if (e.key === 'Escape' && replyingTo) {
+      onCancelReply?.();
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -113,7 +125,6 @@ const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: Mes
     }
   };
 
-  // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -124,7 +135,6 @@ const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: Mes
     }
   }, [content]);
 
-  // Cleanup preview URL on unmount
   useEffect(() => {
     return () => {
       if (imagePreview) {
@@ -137,6 +147,23 @@ const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: Mes
 
   return (
     <div className="border-t bg-background p-4">
+      {/* Reply preview */}
+      {replyingTo && (
+        <div className="mb-2 flex items-center gap-2 px-3 py-2 rounded-lg bg-muted/50 border-l-2 border-primary">
+          <Reply className="h-4 w-4 text-primary shrink-0 rotate-180" />
+          <p className="text-xs text-muted-foreground line-clamp-1 flex-1 break-words">
+            {replyingTo.content || (replyingTo.image_url ? '📷 Image' : '')}
+          </p>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-5 w-5 shrink-0"
+            onClick={onCancelReply}
+          >
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
       {imagePreview && (
         <div className="mb-3 relative inline-block">
           <img
@@ -179,7 +206,7 @@ const MessageInput = ({ onSend, disabled, sending, onTyping, onStopTyping }: Mes
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           onBlur={onStopTyping}
-          placeholder="Type a message..."
+          placeholder={replyingTo ? "Type your reply..." : "Type a message..."}
           disabled={disabled || isLoading}
           rows={1}
           className="min-h-[40px] max-h-[120px] resize-none"
