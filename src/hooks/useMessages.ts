@@ -95,6 +95,19 @@ export const useMessages = (conversationId: string | null) => {
           );
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'messages',
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const deletedId = (payload.old as { id: string }).id;
+          setMessages((prev) => prev.filter((m) => m.id !== deletedId));
+        }
+      )
       .subscribe();
 
     return () => {
@@ -125,12 +138,47 @@ export const useMessages = (conversationId: string | null) => {
     }
   };
 
+  const editMessage = async (messageId: string, newContent: string) => {
+    if (!user || !newContent.trim()) return;
+
+    const { error: editError } = await supabase
+      .from('messages')
+      .update({ content: newContent.trim(), edited_at: new Date().toISOString() })
+      .eq('id', messageId)
+      .eq('sender_id', user.id);
+
+    if (editError) {
+      console.error('Error editing message:', editError);
+      throw editError;
+    }
+  };
+
+  const deleteMessage = async (messageId: string) => {
+    if (!user) return;
+
+    const { error: deleteError } = await supabase
+      .from('messages')
+      .delete()
+      .eq('id', messageId)
+      .eq('sender_id', user.id);
+
+    if (deleteError) {
+      console.error('Error deleting message:', deleteError);
+      throw deleteError;
+    }
+
+    // Optimistic removal
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+  };
+
   return {
     messages,
     loading,
     error,
     sending,
     sendMessage,
+    editMessage,
+    deleteMessage,
     refetch: fetchMessages,
   };
 };

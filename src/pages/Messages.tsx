@@ -36,6 +36,8 @@ const Messages = () => {
     loading: messagesLoading,
     sending,
     sendMessage,
+    editMessage,
+    deleteMessage,
   } = useMessages(selectedConversation?.id || null);
 
   const {
@@ -218,6 +220,8 @@ const Messages = () => {
             getReactionsForMessage={getReactionsForMessage}
             onToggleReaction={toggleReaction}
             onReply={setReplyingTo}
+            onEditMessage={editMessage}
+            onDeleteMessage={deleteMessage}
           />
           {selectedConversation && (
             <MessageInput
