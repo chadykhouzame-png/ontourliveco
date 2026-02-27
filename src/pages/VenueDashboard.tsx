@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
+import PayBookingButton from '@/components/PayBookingButton';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -74,6 +75,16 @@ const VenueDashboard = () => {
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/join/venue');
+    }
+
+    // Handle payment return
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      toast({ title: 'Payment successful!', description: 'The artist has been notified.' });
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get('payment') === 'cancelled') {
+      toast({ title: 'Payment cancelled', description: 'You can pay anytime from your dashboard.', variant: 'destructive' });
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, [user, authLoading, navigate]);
 
@@ -627,7 +638,18 @@ const VenueDashboard = () => {
                           {booking.requested_time && ` at ${booking.requested_time}`}
                         </p>
                       </div>
-                      <Badge className="bg-venue text-venue-foreground">Confirmed</Badge>
+                      <div className="flex items-center gap-2">
+                        {booking.payment_status === 'paid' ? (
+                          <Badge className="bg-green-600 text-white">Paid</Badge>
+                        ) : (
+                          <PayBookingButton
+                            bookingId={booking.id}
+                            amount={booking.counter_offer || booking.offer_amount || 0}
+                            paymentStatus={booking.payment_status}
+                          />
+                        )}
+                        <Badge className="bg-venue text-venue-foreground">Confirmed</Badge>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -797,15 +819,24 @@ const VenueDashboard = () => {
                           )}
                         </div>
                       )}
-                      {request.status === 'accepted' && new Date(request.requested_date) < new Date() && (
-                        <Button 
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleMarkCompleted(request.id)}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Mark as Completed
-                        </Button>
+                      {request.status === 'accepted' && (
+                        <div className="flex flex-wrap gap-2">
+                          <PayBookingButton
+                            bookingId={request.id}
+                            amount={request.counter_offer || request.offer_amount || 0}
+                            paymentStatus={(request as any).payment_status}
+                          />
+                          {new Date(request.requested_date) < new Date() && (
+                            <Button 
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleMarkCompleted(request.id)}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Mark as Completed
+                            </Button>
+                          )}
+                        </div>
                       )}
                       {request.status === 'completed' && (
                         <div className="flex gap-2">

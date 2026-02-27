@@ -96,6 +96,10 @@ export interface BookingRequest {
   offer_amount?: number;
   counter_offer?: number;
   status: BookingStatus;
+  payment_status?: string;
+  payment_amount?: number;
+  payment_intent_id?: string;
+  platform_fee?: number;
   created_at: string;
   updated_at: string;
   artist?: Artist;
