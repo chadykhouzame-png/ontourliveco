@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle, Music, Plus, DollarSign, BarChart3, Shield } from 'lucide-react';
+import { Building2, Search, Calendar, MessageSquare, Settings, LogOut, Star, CheckCircle, XCircle, Music, Plus, DollarSign, BarChart3, Shield } from 'lucide-react';
 import { format } from 'date-fns';
 import { BookingRequest, Venue, EntertainmentRequest, BOOKING_STATUS_LABELS, BookingStatus, ENTERTAINMENT_REQUEST_STATUS_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -283,6 +283,50 @@ const VenueDashboard = () => {
       });
     } catch (error) {
       showErrorWithTitle(error, "Error marking booking complete", 'mark-complete');
+    }
+  };
+
+  const handleCancelBooking = async (requestId: string) => {
+    const request = bookingRequests.find(r => r.id === requestId);
+    if (!request || !venue) return;
+
+    try {
+      await executeWithRetry(async () => {
+        const { error } = await supabase
+          .from('booking_requests')
+          .update({ status: 'cancelled' as BookingStatus })
+          .eq('id', requestId);
+        
+        if (error) throw error;
+      }, 'cancelling booking');
+      
+      setBookingRequests(prev => prev.map(req => 
+        req.id === requestId ? { ...req, status: 'cancelled' as BookingStatus } : req
+      ));
+      
+      // Send cancellation notification to artist
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            type: 'cancelled',
+            booking_request_id: requestId,
+            sender_name: venue.venue_name,
+            recipient_user_id: request.artist?.user_id,
+            requested_date: request.requested_date,
+            offer_amount: request.counter_offer || request.offer_amount,
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send cancellation notification:', notifyError);
+      }
+
+      toast({
+        title: "Booking cancelled",
+        description: "The artist has been notified of the cancellation.",
+        variant: "destructive",
+      });
+    } catch (error) {
+      showErrorWithTitle(error, "Error cancelling booking", 'cancel-booking');
     }
   };
 
@@ -836,6 +880,15 @@ const VenueDashboard = () => {
                               Mark as Completed
                             </Button>
                           )}
+                          <Button 
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleCancelBooking(request.id)}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Cancel Booking
+                          </Button>
                         </div>
                       )}
                       {request.status === 'completed' && (

@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, DollarSign, Building2, Users, BarChart3, Shield } from 'lucide-react';
+import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, XCircle, DollarSign, Building2, Users, BarChart3, Shield } from 'lucide-react';
 import { format } from 'date-fns';
 import { TravelDate, BookingRequest, Artist, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -305,6 +305,28 @@ const ArtistDashboard = () => {
           description: status === 'accepted' 
             ? "The venue has been notified." 
             : "The venue has been notified of your decision.",
+        });
+      } else if (status === 'cancelled') {
+        // Send cancellation notification to venue
+        try {
+          await supabase.functions.invoke('send-booking-notification', {
+            body: {
+              type: 'cancelled',
+              booking_request_id: requestId,
+              sender_name: artist?.artist_name || 'An artist',
+              recipient_user_id: request.venue?.user_id,
+              requested_date: request.requested_date,
+              offer_amount: request.counter_offer || request.offer_amount,
+            },
+          });
+        } catch (notifyError) {
+          console.error('Failed to send cancellation notification:', notifyError);
+        }
+
+        toast({
+          title: "Booking cancelled",
+          description: "The venue has been notified of the cancellation.",
+          variant: "destructive",
         });
       }
     } catch (error) {
@@ -697,15 +719,28 @@ const ArtistDashboard = () => {
                           </Button>
                         </div>
                       )}
-                      {request.status === 'accepted' && new Date(request.requested_date) < new Date() && (
-                        <Button 
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleUpdateRequestStatus(request.id, 'completed')}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Mark as Completed
-                        </Button>
+                      {request.status === 'accepted' && (
+                        <div className="flex flex-wrap gap-2">
+                          {new Date(request.requested_date) < new Date() && (
+                            <Button 
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleUpdateRequestStatus(request.id, 'completed')}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-1" />
+                              Mark as Completed
+                            </Button>
+                          )}
+                          <Button 
+                            size="sm"
+                            variant="ghost"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Cancel Booking
+                          </Button>
+                        </div>
                       )}
                       {request.status === 'completed' && (
                         <div className="flex gap-2">
