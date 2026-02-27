@@ -68,8 +68,9 @@ serve(async (req: Request) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-    // --- JWT AUTHENTICATION ---
+    // --- AUTHENTICATION ---
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       console.error('Missing or invalid Authorization header');
@@ -79,21 +80,27 @@ serve(async (req: Request) => {
       );
     }
 
-    // Verify user with explicit token
     const token = authHeader.replace('Bearer ', '');
-    const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+    let user: any = null;
 
-    const { data: { user }, error: userError } = await supabaseAuth.auth.getUser(token);
-    
-    if (userError || !user) {
-      console.error('JWT verification failed:', userError);
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized - Invalid token' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // Check if this is a service role call (server-to-server)
+    if (token === supabaseServiceKey) {
+      console.log('Service role authentication - skipping user verification');
+    } else {
+      // Verify user with explicit token
+      const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
+      const { data: { user: authUser }, error: userError } = await supabaseAuth.auth.getUser(token);
+      
+      if (userError || !authUser) {
+        console.error('JWT verification failed:', userError);
+        return new Response(
+          JSON.stringify({ error: 'Unauthorized - Invalid token' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      user = authUser;
+      console.log('Authenticated user:', user.id);
     }
-
-    console.log('Authenticated user:', user.id);
 
     // --- RATE LIMITING CHECK ---
     const rateLimit = checkRateLimit(user.id);
