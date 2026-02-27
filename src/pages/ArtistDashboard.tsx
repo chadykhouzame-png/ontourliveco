@@ -23,6 +23,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
 import StripeConnectSetup from '@/components/StripeConnectSetup';
+import ArtistEPKUpload from '@/components/ArtistEPKUpload';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -744,6 +745,13 @@ const ArtistDashboard = () => {
         <div className="mt-6">
           <UserDisputes />
         </div>
+
+        {/* EPK / Press Kit Upload */}
+        {artist && (
+          <div className="mt-6">
+            <ArtistEPKUpload artistId={artist.id} />
+          </div>
+        )}
 
         {/* Notification Settings */}
         <div className="mt-6">
