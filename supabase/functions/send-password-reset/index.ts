@@ -194,7 +194,7 @@ serve(async (req: Request) => {
 
     // Send email via Resend
     const { error: emailError } = await resend.emails.send({
-      from: 'On Tour <noreply@resend.dev>',
+      from: 'On Tour <noreply@ontourlive.co>',
       to: [email],
       subject: 'Reset your On Tour password',
       html,
