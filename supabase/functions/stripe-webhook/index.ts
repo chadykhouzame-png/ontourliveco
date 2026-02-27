@@ -22,13 +22,13 @@ serve(async (req) => {
 
   let event: Stripe.Event;
 
+  if (!signature || !webhookSecret) {
+    console.error("Missing stripe-signature header or STRIPE_WEBHOOK_SECRET");
+    return new Response(JSON.stringify({ error: "Missing signature or secret" }), { status: 400 });
+  }
+
   try {
-    if (webhookSecret && signature) {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } else {
-      // For development without webhook signature verification
-      event = JSON.parse(body) as Stripe.Event;
-    }
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
     return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
