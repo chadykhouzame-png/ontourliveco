@@ -103,6 +103,7 @@ function generateBookingEmailContent(
   counterOffer?: number,
   message?: string,
   appUrl?: string,
+  extra?: { artistName?: string; venueName?: string; bookingId?: string; agreedAmount?: number },
 ): { subject: string; content: string } {
   const url = appUrl || '#';
   
@@ -157,23 +158,79 @@ function generateBookingEmailContent(
     }
 
     case 'accepted': {
+      const aName = extra?.artistName || senderName;
+      const vName = extra?.venueName || '';
+      const agreed = extra?.agreedAmount || counterOffer || offerAmount;
+      const refId = extra?.bookingId ? extra.bookingId.substring(0, 8).toUpperCase() : '';
+
       const content = `
-        <div style="text-align: center; margin-bottom: 24px;">
-          <div style="font-size: 40px; margin-bottom: 12px;">🎉</div>
-          <h1 style="color: ${brand.success}; font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em;">Booking Confirmed!</h1>
-          <p style="color: ${brand.muted}; font-size: 15px; margin: 0;"><strong style="color: ${brand.foreground};">${senderName}</strong> accepted your booking</p>
+        <div style="text-align: center; margin-bottom: 28px;">
+          <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+          <h1 style="color: ${brand.success}; font-size: 24px; font-weight: 800; margin: 0 0 4px; letter-spacing: -0.03em;">Booking Confirmed!</h1>
+          <p style="color: ${brand.muted}; font-size: 14px; margin: 0;">It's official — you're booked.</p>
         </div>
-        
-        ${dateBadge(formattedDate)}
-        
-        <div style="margin: 20px 0; padding: 20px; background: ${brand.success}10; border: 1px solid ${brand.success}25; border-radius: 14px; text-align: center;">
-          <p style="color: ${brand.foreground}; font-size: 15px; margin: 0; line-height: 1.6;">
-            You're all set! Check your dashboard for the full booking details.
+
+        ${refId ? `<div style="text-align: center; margin-bottom: 20px;">
+          <span style="display: inline-block; background: #1a1a1e; border: 1px solid ${brand.cardBorder}; border-radius: 8px; padding: 6px 14px; font-size: 12px; letter-spacing: 0.12em; color: ${brand.muted}; font-family: monospace;">REF #${refId}</span>
+        </div>` : ''}
+
+        <!-- Booking details card -->
+        <div style="background: #111114; border: 1px solid ${brand.cardBorder}; border-radius: 16px; overflow: hidden; margin-bottom: 20px;">
+          <!-- Artist row -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid ${brand.cardBorder}; display: flex; align-items: center;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: ${brand.artistPink}20; display: flex; align-items: center; justify-content: center; margin-right: 14px;">
+              <span style="font-size: 16px;">🎤</span>
+            </div>
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: ${brand.muted}; margin-bottom: 2px;">Artist</div>
+              <div style="font-size: 15px; font-weight: 600; color: ${brand.foreground};">${aName}</div>
+            </div>
+          </div>
+
+          ${vName ? `<!-- Venue row -->
+          <div style="padding: 16px 20px; border-bottom: 1px solid ${brand.cardBorder}; display: flex; align-items: center;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: ${brand.venuePurple}20; display: flex; align-items: center; justify-content: center; margin-right: 14px;">
+              <span style="font-size: 16px;">🏠</span>
+            </div>
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: ${brand.muted}; margin-bottom: 2px;">Venue</div>
+              <div style="font-size: 15px; font-weight: 600; color: ${brand.foreground};">${vName}</div>
+            </div>
+          </div>` : ''}
+
+          <!-- Date row -->
+          <div style="padding: 16px 20px;${agreed ? ` border-bottom: 1px solid ${brand.cardBorder};` : ''} display: flex; align-items: center;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: ${brand.primary}20; display: flex; align-items: center; justify-content: center; margin-right: 14px;">
+              <span style="font-size: 16px;">📅</span>
+            </div>
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: ${brand.muted}; margin-bottom: 2px;">Date</div>
+              <div style="font-size: 15px; font-weight: 600; color: ${brand.foreground};">${formattedDate}</div>
+            </div>
+          </div>
+
+          ${agreed ? `<!-- Agreed fee row -->
+          <div style="padding: 16px 20px; display: flex; align-items: center;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: ${brand.success}20; display: flex; align-items: center; justify-content: center; margin-right: 14px;">
+              <span style="font-size: 16px;">💵</span>
+            </div>
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: ${brand.muted}; margin-bottom: 2px;">Agreed Fee</div>
+              <div style="font-size: 20px; font-weight: 800; color: ${brand.success}; letter-spacing: -0.02em;">$${agreed.toLocaleString()}</div>
+            </div>
+          </div>` : ''}
+        </div>
+
+        <!-- Success banner -->
+        <div style="background: ${brand.success}10; border: 1px solid ${brand.success}25; border-radius: 14px; padding: 16px 20px; text-align: center; margin-bottom: 8px;">
+          <p style="color: ${brand.foreground}; font-size: 14px; margin: 0; line-height: 1.6;">
+            ✅ Both parties have been notified. Head to your dashboard for full details and next steps.
           </p>
         </div>
-        ${ctaButton('View Booking', url, brand.success)}
+
+        ${ctaButton('View Booking Details', url, brand.success)}
       `;
-      return { subject: `Booking Accepted by ${senderName}`, content };
+      return { subject: `🎉 Booking Confirmed — ${aName} × ${vName || 'Your Venue'}`, content };
     }
 
     case 'declined': {
@@ -514,8 +571,28 @@ serve(async (req: Request) => {
 
     const resend = new Resend(resendApiKey);
 
+    const extraContext = type === 'accepted' ? {
+      artistName: artistName,
+      venueName: venueName,
+      bookingId: booking_request_id,
+      agreedAmount: booking.counter_offer || booking.offer_amount || offer_amount,
+    } : undefined;
+
+    // Fetch booking amounts for accepted confirmation
+    let bookingAmounts = { counter_offer: counter_offer, offer_amount: offer_amount };
+    if (type === 'accepted' && extraContext) {
+      const { data: fullBooking } = await supabase
+        .from('booking_requests')
+        .select('offer_amount, counter_offer')
+        .eq('id', booking_request_id)
+        .single();
+      if (fullBooking) {
+        extraContext.agreedAmount = fullBooking.counter_offer || fullBooking.offer_amount || offer_amount;
+      }
+    }
+
     const { subject, content } = generateBookingEmailContent(
-      type, sender_name, formattedDate, offer_amount, counter_offer, message, appUrl
+      type, sender_name, formattedDate, offer_amount, counter_offer, message, appUrl, extraContext
     );
     const html = emailShell(content, supabaseUrl);
 
