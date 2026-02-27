@@ -8,56 +8,234 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// Helper function to generate review request email HTML
-function generateReviewEmail(revieweeName: string, date: string, revieweeType: 'artist' | 'venue'): string {
-  const heading = revieweeType === 'artist' 
-    ? `⭐ How was ${revieweeName}'s performance?`
-    : `⭐ How was your gig at ${revieweeName}?`;
-  
-  const bodyContent = revieweeType === 'artist'
-    ? `<p>Your booking with <strong>${revieweeName}</strong> on <strong>${date}</strong> is now complete!</p>
-       <p>Your feedback helps other venues make better booking decisions. Share your experience!</p>`
-    : `<p>Your performance at <strong>${revieweeName}</strong> on <strong>${date}</strong> is now complete!</p>
-       <p>Your feedback helps other artists know what to expect. Share your experience!</p>`;
+// On Tour Live brand colors (from index.css design system)
+const brand = {
+  bg: '#ffffff',              // White email body (email best practice)
+  cardBg: '#0a0a0a',         // Dark card background
+  cardBorder: '#1f1f23',     // Subtle border
+  primary: '#c9a88c',        // Rose/blush primary: hsl(15, 30%, 75%)
+  primaryDark: '#b8926e',    // Slightly deeper for hover
+  foreground: '#ddd5cd',     // hsl(15, 20%, 85%)
+  muted: '#8a7f77',          // hsl(15, 10%, 50%)
+  mutedDark: '#3d3d3d',      // Footer text
+  accent: '#e87c6a',         // Warm accent for highlights
+  success: '#22c55e',        // Green for accepted
+  warning: '#f59e0b',        // Amber for counter-offers
+  info: '#0ea5e9',           // Sky blue for new offers
+  artistPink: '#d94f7a',     // hsl(350, 45%, 55%)
+  venuePurple: '#9966cc',    // hsl(280, 30%, 50%)
+};
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+function emailShell(content: string, supabaseUrl: string): string {
+  const appUrl = supabaseUrl.replace('.supabase.co', '.lovableproject.com');
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>On Tour Live</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: ${brand.bg}; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif; -webkit-font-smoothing: antialiased;">
+  <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
+    <!-- Card -->
+    <div style="background-color: ${brand.cardBg}; border-radius: 20px; overflow: hidden; border: 1px solid ${brand.cardBorder};">
+      
+      <!-- Header with logo -->
+      <div style="padding: 32px 40px 24px; text-align: center; border-bottom: 1px solid ${brand.cardBorder};">
+        <div style="display: inline-block; margin-bottom: 4px;">
+          <span style="font-size: 32px; font-weight: 900; letter-spacing: -0.04em; line-height: 1;">
+            <span style="color: ${brand.primary};">ON</span><span style="color: #ffffff;">TOUR</span>
+          </span>
+        </div>
+        <div style="font-size: 11px; letter-spacing: 0.2em; color: ${brand.muted}; text-transform: uppercase; margin-top: 2px;">Live Entertainment</div>
+      </div>
+
+      <!-- Content -->
+      <div style="padding: 36px 40px;">
+        ${content}
+      </div>
+
+      <!-- Footer -->
+      <div style="padding: 24px 40px; border-top: 1px solid ${brand.cardBorder}; text-align: center;">
+        <p style="color: ${brand.mutedDark}; font-size: 13px; margin: 0 0 8px; line-height: 1.5;">
+          You're receiving this because you have an account on
+          <a href="${appUrl}" style="color: ${brand.primary}; text-decoration: none;">On Tour Live</a>.
+        </p>
+        <p style="color: ${brand.mutedDark}; font-size: 12px; margin: 0;">
+          © ${new Date().getFullYear()} On Tour Live. All rights reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+function ctaButton(text: string, url: string, color: string = brand.primary): string {
+  return `<div style="text-align: center; margin-top: 28px;">
+    <a href="${url}" style="display: inline-block; background-color: ${color}; color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 14px; font-weight: 600; font-size: 15px; letter-spacing: 0.01em; min-width: 180px;">
+      ${text}
+    </a>
+  </div>`;
+}
+
+function amountBadge(label: string, amount: number, color: string): string {
+  return `<div style="background-color: ${color}15; border: 1px solid ${color}30; border-radius: 14px; padding: 16px 20px; margin: 16px 0; text-align: center;">
+    <div style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: ${brand.muted}; margin-bottom: 6px;">${label}</div>
+    <div style="font-size: 28px; font-weight: 800; color: ${color}; letter-spacing: -0.02em;">$${amount.toLocaleString()}</div>
+  </div>`;
+}
+
+function dateBadge(formattedDate: string): string {
+  return `<div style="display: inline-block; background-color: #1a1a1e; border: 1px solid ${brand.cardBorder}; border-radius: 10px; padding: 8px 16px; margin: 8px 0;">
+    <span style="font-size: 13px; color: ${brand.muted};">📅</span>
+    <span style="font-size: 14px; color: ${brand.foreground}; font-weight: 500; margin-left: 6px;">${formattedDate}</span>
+  </div>`;
+}
+
+function generateBookingEmailContent(
+  type: string,
+  senderName: string,
+  formattedDate: string,
+  offerAmount?: number,
+  counterOffer?: number,
+  message?: string,
+  appUrl?: string,
+): { subject: string; content: string } {
+  const url = appUrl || '#';
+  
+  switch (type) {
+    case 'new_offer': {
+      const content = `
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 40px; margin-bottom: 12px;">🎵</div>
+          <h1 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em;">New Booking Request</h1>
+          <p style="color: ${brand.muted}; font-size: 15px; margin: 0;">from <strong style="color: ${brand.foreground};">${senderName}</strong></p>
+        </div>
+        
+        ${dateBadge(formattedDate)}
+        ${offerAmount ? amountBadge('Offer Amount', offerAmount, brand.info) : ''}
+        ${message ? `<div style="margin: 16px 0; padding: 16px; background: #1a1a1e; border-radius: 12px; border-left: 3px solid ${brand.primary};"><p style="color: ${brand.foreground}; font-size: 14px; font-style: italic; margin: 0; line-height: 1.6;">"${message}"</p></div>` : ''}
+        
+        <p style="color: ${brand.muted}; font-size: 14px; text-align: center; line-height: 1.6; margin-top: 20px;">
+          Head to your dashboard to accept, decline, or send a counter-offer.
+        </p>
+        ${ctaButton('View Request', url)}
+      `;
+      return { subject: `New Booking Request from ${senderName}`, content };
+    }
+
+    case 'counter_offer': {
+      const content = `
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 40px; margin-bottom: 12px;">💰</div>
+          <h1 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em;">Counter-Offer Received</h1>
+          <p style="color: ${brand.muted}; font-size: 15px; margin: 0;">from <strong style="color: ${brand.foreground};">${senderName}</strong></p>
+        </div>
+        
+        ${dateBadge(formattedDate)}
+        
+        <div style="display: flex; gap: 12px; margin: 16px 0;">
+          ${offerAmount ? `<div style="flex: 1; background-color: #1a1a1e; border-radius: 14px; padding: 14px; text-align: center;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: ${brand.muted}; margin-bottom: 4px;">Your Offer</div>
+            <div style="font-size: 20px; font-weight: 700; color: ${brand.muted}; text-decoration: line-through;">$${offerAmount.toLocaleString()}</div>
+          </div>` : ''}
+          ${counterOffer ? `<div style="flex: 1; background-color: ${brand.warning}12; border: 1px solid ${brand.warning}30; border-radius: 14px; padding: 14px; text-align: center;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: ${brand.warning}; margin-bottom: 4px;">Counter-Offer</div>
+            <div style="font-size: 20px; font-weight: 700; color: ${brand.warning};">$${counterOffer.toLocaleString()}</div>
+          </div>` : ''}
+        </div>
+        
+        <p style="color: ${brand.muted}; font-size: 14px; text-align: center; line-height: 1.6; margin-top: 20px;">
+          Review the counter-offer and respond on your dashboard.
+        </p>
+        ${ctaButton('Review Counter-Offer', url, brand.warning)}
+      `;
+      return { subject: `Counter-Offer from ${senderName}`, content };
+    }
+
+    case 'accepted': {
+      const content = `
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 40px; margin-bottom: 12px;">🎉</div>
+          <h1 style="color: ${brand.success}; font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em;">Booking Confirmed!</h1>
+          <p style="color: ${brand.muted}; font-size: 15px; margin: 0;"><strong style="color: ${brand.foreground};">${senderName}</strong> accepted your booking</p>
+        </div>
+        
+        ${dateBadge(formattedDate)}
+        
+        <div style="margin: 20px 0; padding: 20px; background: ${brand.success}10; border: 1px solid ${brand.success}25; border-radius: 14px; text-align: center;">
+          <p style="color: ${brand.foreground}; font-size: 15px; margin: 0; line-height: 1.6;">
+            You're all set! Check your dashboard for the full booking details.
+          </p>
+        </div>
+        ${ctaButton('View Booking', url, brand.success)}
+      `;
+      return { subject: `Booking Accepted by ${senderName}`, content };
+    }
+
+    case 'declined': {
+      const content = `
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 40px; margin-bottom: 12px;">📋</div>
+          <h1 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em;">Booking Update</h1>
+          <p style="color: ${brand.muted}; font-size: 15px; margin: 0;">from <strong style="color: ${brand.foreground};">${senderName}</strong></p>
+        </div>
+        
+        ${dateBadge(formattedDate)}
+        
+        <div style="margin: 20px 0; padding: 20px; background: #1a1a1e; border-radius: 14px; text-align: center;">
+          <p style="color: ${brand.foreground}; font-size: 15px; margin: 0 0 8px; line-height: 1.6;">
+            ${senderName} was unable to accept this booking request.
+          </p>
+          <p style="color: ${brand.muted}; font-size: 14px; margin: 0; line-height: 1.6;">
+            Don't worry — keep exploring to find the perfect match!
+          </p>
+        </div>
+        ${ctaButton('Browse Artists', url, brand.primary)}
+      `;
+      return { subject: `Booking Update from ${senderName}`, content };
+    }
+
+    default:
+      return { subject: 'Booking Update', content: '<p style="color: #ffffff;">You have a booking update. Check your dashboard for details.</p>' };
+  }
+}
+
+function generateReviewEmailContent(
+  revieweeName: string,
+  formattedDate: string,
+  revieweeType: 'artist' | 'venue',
+  appUrl: string,
+): string {
+  const isArtist = revieweeType === 'artist';
+  const accentColor = isArtist ? brand.artistPink : brand.venuePurple;
   
   return `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      </head>
-      <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0a0a0a; margin: 0; padding: 40px 20px;">
-        <div style="max-width: 560px; margin: 0 auto; background-color: #18181b; border-radius: 16px; padding: 40px; border: 1px solid #27272a;">
-          <div style="text-align: center; margin-bottom: 32px;">
-            <span style="font-size: 28px; font-weight: 900; letter-spacing: -0.05em;">
-              <span style="color: #0ea5e9;">ON</span><span style="color: #ffffff;">TOUR</span>
-            </span>
-          </div>
-          
-          <h1 style="color: #ffffff; font-size: 24px; text-align: center; margin-bottom: 24px;">${heading}</h1>
-          
-          <div style="color: #a1a1aa; font-size: 16px; line-height: 1.6;">
-            ${bodyContent}
-          </div>
-          
-          <div style="text-align: center; margin-top: 32px;">
-            <a href="${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}" 
-               style="display: inline-block; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 16px;">
-              Leave a Review
-            </a>
-          </div>
-          
-          <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #27272a; text-align: center;">
-            <p style="color: #52525b; font-size: 14px; margin: 0;">
-              Reviews help build trust in our community. Thank you for sharing your experience!
-            </p>
-          </div>
-        </div>
-      </body>
-    </html>
+    <div style="text-align: center; margin-bottom: 24px;">
+      <div style="font-size: 40px; margin-bottom: 12px;">⭐</div>
+      <h1 style="color: #ffffff; font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em;">
+        ${isArtist ? `How was ${revieweeName}'s performance?` : `How was your gig at ${revieweeName}?`}
+      </h1>
+    </div>
+    
+    ${dateBadge(formattedDate)}
+    
+    <div style="margin: 20px 0; padding: 20px; background: ${accentColor}10; border: 1px solid ${accentColor}25; border-radius: 14px; text-align: center;">
+      <p style="color: ${brand.foreground}; font-size: 15px; margin: 0; line-height: 1.6;">
+        ${isArtist 
+          ? 'Your feedback helps other venues make better booking decisions.' 
+          : 'Your feedback helps other artists know what to expect.'}
+      </p>
+    </div>
+
+    <div style="text-align: center; margin: 20px 0;">
+      <span style="font-size: 28px; letter-spacing: 4px;">★★★★★</span>
+    </div>
+    
+    ${ctaButton('Leave a Review', appUrl, accentColor)}
   `;
 }
 
@@ -65,8 +243,8 @@ function generateReviewEmail(revieweeName: string, date: string, revieweeType: '
 const BookingNotificationSchema = z.object({
   type: z.enum(['new_offer', 'counter_offer', 'accepted', 'declined', 'completed']),
   booking_request_id: z.string().uuid(),
-  sender_name: z.string().min(1).max(200).optional(), // Optional for 'completed' type
-  recipient_user_id: z.string().uuid().optional(), // Optional for 'completed' type (sends to both parties)
+  sender_name: z.string().min(1).max(200).optional(),
+  recipient_user_id: z.string().uuid().optional(),
   requested_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   offer_amount: z.number().positive().optional(),
   counter_offer: z.number().positive().optional(),
@@ -74,7 +252,6 @@ const BookingNotificationSchema = z.object({
 });
 
 serve(async (req: Request) => {
-  // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
@@ -83,6 +260,7 @@ serve(async (req: Request) => {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const appUrl = supabaseUrl.replace('.supabase.co', '.lovableproject.com');
 
     // --- JWT AUTHENTICATION ---
     const authHeader = req.headers.get('Authorization');
@@ -94,7 +272,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // Create client with user's auth token for verification
     const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } }
     });
@@ -127,7 +304,6 @@ serve(async (req: Request) => {
     const body = parseResult.data;
     console.log('Validated booking notification request:', body);
 
-    // Use service role client for database operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const {
@@ -162,7 +338,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // Check if user is either the artist or venue in this booking
     const artistUserId = (booking.artists as any)?.user_id;
     const venueUserId = (booking.venues as any)?.user_id;
     const artistName = (booking.artists as any)?.artist_name;
@@ -176,7 +351,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // Format the date for display
     const formattedDate = new Date(requested_date).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
@@ -184,11 +358,10 @@ serve(async (req: Request) => {
       day: 'numeric',
     });
 
-    // --- HANDLE COMPLETED TYPE SPECIALLY (sends to both parties) ---
+    // --- HANDLE COMPLETED TYPE (sends to both parties) ---
     if (type === 'completed') {
       console.log('Processing completed booking notification - sending to both parties');
       
-      // Get both profiles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select('user_id, email, email_notifications_enabled')
@@ -207,7 +380,7 @@ serve(async (req: Request) => {
 
       const results = { artist: { email_sent: false, notification_created: false }, venue: { email_sent: false, notification_created: false } };
 
-      // Send to artist (asking them to review the venue)
+      // Send to artist (review the venue)
       if (artistProfile) {
         const { error: artistNotifError } = await supabase
           .from('notifications')
@@ -222,19 +395,20 @@ serve(async (req: Request) => {
         results.artist.notification_created = !artistNotifError;
 
         if (resend && artistProfile.email_notifications_enabled !== false) {
-          const artistHtml = generateReviewEmail(venueName, formattedDate, 'venue');
+          const reviewContent = generateReviewEmailContent(venueName, formattedDate, 'venue', appUrl);
+          const html = emailShell(reviewContent, supabaseUrl);
           const { error: emailError } = await resend.emails.send({
-            from: 'OnTour <noreply@resend.dev>',
+            from: 'On Tour Live <noreply@resend.dev>',
             to: [artistProfile.email],
             subject: `How was your gig at ${venueName}? Leave a review!`,
-            html: artistHtml,
+            html,
           });
           results.artist.email_sent = !emailError;
           if (emailError) console.error('Error sending artist review email:', emailError);
         }
       }
 
-      // Send to venue (asking them to review the artist)
+      // Send to venue (review the artist)
       if (venueProfile) {
         const { error: venueNotifError } = await supabase
           .from('notifications')
@@ -249,12 +423,13 @@ serve(async (req: Request) => {
         results.venue.notification_created = !venueNotifError;
 
         if (resend && venueProfile.email_notifications_enabled !== false) {
-          const venueHtml = generateReviewEmail(artistName, formattedDate, 'artist');
+          const reviewContent = generateReviewEmailContent(artistName, formattedDate, 'artist', appUrl);
+          const html = emailShell(reviewContent, supabaseUrl);
           const { error: emailError } = await resend.emails.send({
-            from: 'OnTour <noreply@resend.dev>',
+            from: 'On Tour Live <noreply@resend.dev>',
             to: [venueProfile.email],
             subject: `How was ${artistName}'s performance? Leave a review!`,
-            html: venueHtml,
+            html,
           });
           results.venue.email_sent = !emailError;
           if (emailError) console.error('Error sending venue review email:', emailError);
@@ -268,7 +443,7 @@ serve(async (req: Request) => {
       );
     }
 
-    // --- STANDARD NOTIFICATION FLOW (for non-completed types) ---
+    // --- STANDARD NOTIFICATION FLOW ---
     if (!sender_name || !recipient_user_id) {
       return new Response(
         JSON.stringify({ error: 'sender_name and recipient_user_id are required for this notification type' }),
@@ -276,7 +451,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // Get recipient's email and notification preferences from profiles
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('email, email_notifications_enabled')
@@ -288,61 +462,9 @@ serve(async (req: Request) => {
       throw new Error('Recipient not found');
     }
 
-    // Check if user has opted out of email notifications
     const emailOptedOut = profile.email_notifications_enabled === false;
 
-    // Build email subject and content based on notification type
-    let subject = '';
-    let heading = '';
-    let bodyContent = '';
-    let ctaText = 'View Request';
-
-    switch (type) {
-      case 'new_offer':
-        subject = `New Booking Request from ${sender_name}`;
-        heading = '🎵 New Booking Request!';
-        bodyContent = `
-          <p><strong>${sender_name}</strong> wants to book you for <strong>${formattedDate}</strong>.</p>
-          ${offer_amount ? `<p style="font-size: 24px; font-weight: bold; color: #0ea5e9;">Offer: $${offer_amount.toLocaleString()}</p>` : ''}
-          ${message ? `<p style="color: #666; font-style: italic;">"${message}"</p>` : ''}
-          <p>Log in to your dashboard to accept, decline, or make a counter-offer.</p>
-        `;
-        break;
-
-      case 'counter_offer':
-        subject = `Counter-Offer from ${sender_name}`;
-        heading = '💰 Counter-Offer Received';
-        bodyContent = `
-          <p><strong>${sender_name}</strong> has responded to your booking request for <strong>${formattedDate}</strong>.</p>
-          ${offer_amount ? `<p style="color: #666;">Your original offer: $${offer_amount.toLocaleString()}</p>` : ''}
-          ${counter_offer ? `<p style="font-size: 24px; font-weight: bold; color: #a855f7;">Counter-offer: $${counter_offer.toLocaleString()}</p>` : ''}
-          <p>Log in to your dashboard to review and respond.</p>
-        `;
-        ctaText = 'Review Counter-Offer';
-        break;
-
-      case 'accepted':
-        subject = `Booking Accepted by ${sender_name}`;
-        heading = '✅ Booking Confirmed!';
-        bodyContent = `
-          <p>Great news! <strong>${sender_name}</strong> has accepted your booking for <strong>${formattedDate}</strong>.</p>
-          <p>You're all set! Check your dashboard for event details.</p>
-        `;
-        ctaText = 'View Booking';
-        break;
-
-      case 'declined':
-        subject = `Booking Update from ${sender_name}`;
-        heading = 'Booking Request Update';
-        bodyContent = `
-          <p><strong>${sender_name}</strong> was unable to accept your booking request for <strong>${formattedDate}</strong>.</p>
-          <p>Don't worry – keep exploring other artists or create an entertainment request to find the perfect match!</p>
-        `;
-        ctaText = 'Find More Artists';
-        break;
-    }
-
-    // Create in-app notification
+    // Build notification
     const notificationTitle = type === 'new_offer' 
       ? `New booking request from ${sender_name}`
       : type === 'counter_offer'
@@ -374,7 +496,6 @@ serve(async (req: Request) => {
       console.error('Error creating notification:', notificationError);
     }
 
-    // Check if user has opted out of email notifications
     if (emailOptedOut) {
       console.log('User has opted out of email notifications, skipping email');
       return new Response(
@@ -383,7 +504,6 @@ serve(async (req: Request) => {
       );
     }
 
-    // Send email if Resend is configured
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     if (!resendApiKey) {
       console.log('RESEND_API_KEY not configured, skipping email');
@@ -395,49 +515,16 @@ serve(async (req: Request) => {
 
     const resend = new Resend(resendApiKey);
 
-    const html = `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        </head>
-        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #0a0a0a; margin: 0; padding: 40px 20px;">
-          <div style="max-width: 560px; margin: 0 auto; background-color: #18181b; border-radius: 16px; padding: 40px; border: 1px solid #27272a;">
-            <div style="text-align: center; margin-bottom: 32px;">
-              <span style="font-size: 28px; font-weight: 900; letter-spacing: -0.05em;">
-                <span style="color: #0ea5e9;">ON</span><span style="color: #ffffff;">TOUR</span>
-              </span>
-            </div>
-            
-            <h1 style="color: #ffffff; font-size: 24px; text-align: center; margin-bottom: 24px;">${heading}</h1>
-            
-            <div style="color: #a1a1aa; font-size: 16px; line-height: 1.6;">
-              ${bodyContent}
-            </div>
-            
-            <div style="text-align: center; margin-top: 32px;">
-              <a href="${supabaseUrl.replace('.supabase.co', '.lovableproject.com')}" 
-                 style="display: inline-block; background: linear-gradient(135deg, #0ea5e9 0%, #a855f7 100%); color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 12px; font-weight: 600; font-size: 16px;">
-                ${ctaText}
-              </a>
-            </div>
-            
-            <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid #27272a; text-align: center;">
-              <p style="color: #52525b; font-size: 14px; margin: 0;">
-                You're receiving this because you have an account on OnTour.
-              </p>
-            </div>
-          </div>
-        </body>
-      </html>
-    `;
+    const { subject, content } = generateBookingEmailContent(
+      type, sender_name, formattedDate, offer_amount, counter_offer, message, appUrl
+    );
+    const html = emailShell(content, supabaseUrl);
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: 'OnTour <noreply@resend.dev>',
+      from: 'On Tour Live <noreply@resend.dev>',
       to: [profile.email],
-      subject: subject,
-      html: html,
+      subject,
+      html,
     });
 
     if (emailError) {
