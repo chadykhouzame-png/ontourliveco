@@ -256,6 +256,28 @@ function generateBookingEmailContent(
       return { subject: `Booking Update from ${senderName}`, content };
     }
 
+    case 'cancelled': {
+      const content = `
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div style="font-size: 40px; margin-bottom: 12px;">🚫</div>
+          <h1 style="color: #ef4444; font-size: 22px; font-weight: 700; margin: 0 0 6px; letter-spacing: -0.02em;">Booking Cancelled</h1>
+          <p style="color: ${brand.muted}; font-size: 15px; margin: 0;">by <strong style="color: ${brand.foreground};">${senderName}</strong></p>
+        </div>
+        
+        ${dateBadge(formattedDate)}
+        ${offerAmount ? amountBadge('Original Amount', offerAmount, '#ef4444') : ''}
+        ${message ? `<div style="margin: 16px 0; padding: 16px; background: #1a1a1e; border-radius: 12px; border-left: 3px solid #ef4444;"><p style="color: ${brand.foreground}; font-size: 14px; font-style: italic; margin: 0; line-height: 1.6;">"${message}"</p></div>` : ''}
+        
+        <div style="margin: 20px 0; padding: 20px; background: #ef444412; border: 1px solid #ef444425; border-radius: 14px; text-align: center;">
+          <p style="color: ${brand.foreground}; font-size: 14px; margin: 0; line-height: 1.6;">
+            This previously confirmed booking has been cancelled. Check your dashboard for details and to explore other opportunities.
+          </p>
+        </div>
+        ${ctaButton('View Dashboard', url, brand.primary)}
+      `;
+      return { subject: `Booking Cancelled by ${senderName}`, content };
+    }
+
     default:
       return { subject: 'Booking Update', content: '<p style="color: #ffffff;">You have a booking update. Check your dashboard for details.</p>' };
   }
@@ -298,7 +320,7 @@ function generateReviewEmailContent(
 
 // Input validation schema
 const BookingNotificationSchema = z.object({
-  type: z.enum(['new_offer', 'counter_offer', 'accepted', 'declined', 'completed']),
+  type: z.enum(['new_offer', 'counter_offer', 'accepted', 'declined', 'cancelled', 'completed']),
   booking_request_id: z.string().uuid(),
   sender_name: z.string().min(1).max(200).optional(),
   recipient_user_id: z.string().uuid().optional(),
@@ -527,7 +549,9 @@ serve(async (req: Request) => {
         ? `Counter-offer from ${sender_name}`
         : type === 'accepted'
           ? `${sender_name} accepted your booking`
-          : `${sender_name} declined your booking`;
+          : type === 'cancelled'
+            ? `${sender_name} cancelled your booking`
+            : `${sender_name} declined your booking`;
 
     const notificationMessage = type === 'new_offer'
       ? `${sender_name} wants to book you for ${formattedDate}${offer_amount ? ` • Offer: $${offer_amount.toLocaleString()}` : ''}`
@@ -535,7 +559,9 @@ serve(async (req: Request) => {
         ? `Counter-offer of $${counter_offer?.toLocaleString()} for ${formattedDate}`
         : type === 'accepted'
           ? `Your booking for ${formattedDate} has been confirmed!`
-          : `Your booking request for ${formattedDate} was declined`;
+          : type === 'cancelled'
+            ? `Your booking for ${formattedDate} has been cancelled by ${sender_name}`
+            : `Your booking request for ${formattedDate} was declined`;
 
     const { error: notificationError } = await supabase
       .from('notifications')
