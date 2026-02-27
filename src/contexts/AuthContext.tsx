@@ -10,7 +10,7 @@ interface AuthContextType {
   session: Session | null;
   userRole: UserRole;
   isLoading: boolean;
-  signUp: (email: string, password: string, role: 'artist' | 'venue') => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, role: 'artist' | 'venue') => Promise<{ error: Error | null; confirmEmail: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -84,33 +84,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo: redirectUrl,
+          data: { role } // Pass role via metadata for the DB trigger
         }
       });
 
       if (error) throw error;
 
-      if (data.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({ user_id: data.user.id, email });
-
-        if (profileError) throw profileError;
-
-        // Assign role
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({ user_id: data.user.id, role });
-
-        if (roleError) throw roleError;
-
+      // Profile and role are now created automatically by the handle_new_user trigger
+      // If the user got a session (auto-confirm enabled), set the role immediately
+      if (data.session) {
         setUserRole(role);
       }
 
-      return { error: null };
+      return { error: null, confirmEmail: !data.session };
     } catch (error) {
-      return { error: error as Error };
+      return { error: error as Error, confirmEmail: false };
     }
   };
 
