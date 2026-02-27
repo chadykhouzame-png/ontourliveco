@@ -79,6 +79,20 @@ serve(async (req) => {
     { auth: { persistSession: false } }
   );
 
+  // Log the incoming event
+  const { error: logError } = await supabase
+    .from("webhook_events")
+    .upsert({
+      event_id: event.id,
+      event_type: event.type,
+      status: "processing",
+      payload: event.data.object as Record<string, unknown>,
+    }, { onConflict: "event_id" });
+
+  if (logError) {
+    console.error("Failed to log webhook event:", logError);
+  }
+
   try {
     switch (event.type) {
       case "checkout.session.completed": {
@@ -96,7 +110,6 @@ serve(async (req) => {
 
           console.log(`Payment completed for booking ${bookingId}`);
 
-          // Create notification for the artist
           const { data: booking } = await supabase
             .from("booking_requests")
             .select("artist_id, artists!booking_requests_artist_id_fkey(user_id)")
@@ -134,10 +147,22 @@ serve(async (req) => {
         console.log(`Unhandled event type: ${event.type}`);
     }
 
+    // Mark as processed
+    await supabase
+      .from("webhook_events")
+      .update({ status: "processed", processed_at: new Date().toISOString() })
+      .eq("event_id", event.id);
+
     return new Response(JSON.stringify({ received: true }), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    // Log the failure
+    await supabase
+      .from("webhook_events")
+      .update({ status: "failed", error_message: error.message, processed_at: new Date().toISOString() })
+      .eq("event_id", event.id);
+
     console.error("Webhook error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { "Content-Type": "application/json" },
