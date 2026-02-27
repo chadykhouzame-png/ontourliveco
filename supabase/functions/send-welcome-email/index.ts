@@ -82,30 +82,32 @@ serve(async (req: Request) => {
 
     const token = authHeader.replace('Bearer ', '');
     let user: any = null;
+    let isServiceOrAnon = false;
 
-    // Check if this is a service role call (server-to-server)
-    if (token === supabaseServiceKey) {
-      console.log('Service role authentication - skipping user verification');
+    // Check if this is a service role or anon key call
+    if (token === supabaseServiceKey || token === supabaseAnonKey) {
+      console.log('System-level authentication (service role or anon key)');
+      isServiceOrAnon = true;
     } else {
       // Verify user with explicit token
       const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey);
       const { data: { user: authUser }, error: userError } = await supabaseAuth.auth.getUser(token);
       
       if (userError || !authUser) {
-        console.error('JWT verification failed:', userError);
-        return new Response(
-          JSON.stringify({ error: 'Unauthorized - Invalid token' }),
-          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-        );
+        // Token might be from unverified signup — allow through with rate limiting by email
+        console.log('JWT verification failed (likely unverified user), proceeding with email-based rate limit');
+        isServiceOrAnon = true;
+      } else {
+        user = authUser;
+        console.log('Authenticated user:', user.id);
       }
-      user = authUser;
-      console.log('Authenticated user:', user.id);
     }
 
     // --- RATE LIMITING CHECK ---
-    const rateLimit = checkRateLimit(user.id);
+    const rateLimitKey = user?.id || 'anon';
+    const rateLimit = checkRateLimit(rateLimitKey);
     if (!rateLimit.allowed) {
-      console.warn(`Rate limit exceeded for user: ${user.id}`);
+      console.warn(`Rate limit exceeded for: ${rateLimitKey}`);
       const retryAfterSeconds = Math.ceil((rateLimit.resetAt - Date.now()) / 1000);
       return new Response(
         JSON.stringify({ 
@@ -155,13 +157,25 @@ serve(async (req: Request) => {
 
     const { email, userType } = parseResult.data;
 
-    // --- AUTHORIZATION: Ensure user can only send welcome email to themselves ---
-    if (user.email?.toLowerCase() !== email.toLowerCase()) {
+    // --- AUTHORIZATION: If authenticated user, ensure they can only send to themselves ---
+    if (user && user.email?.toLowerCase() !== email.toLowerCase()) {
       console.error('Authorization failed - user trying to send email to different address');
       return new Response(
         JSON.stringify({ error: 'Forbidden - You can only request welcome emails for your own account' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // For anon/system calls, apply email-based rate limiting
+    if (isServiceOrAnon) {
+      const emailRateLimit = checkRateLimit(`email:${email.toLowerCase()}`);
+      if (!emailRateLimit.allowed) {
+        console.warn(`Rate limit exceeded for email: ${email}`);
+        return new Response(
+          JSON.stringify({ error: 'Too many requests for this email.' }),
+          { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
     }
 
     console.log('Welcome email requested for:', email, 'as', userType);
