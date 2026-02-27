@@ -34,6 +34,8 @@ export type Database = {
           show_fee_range: boolean | null
           soundcloud_url: string | null
           spotify_url: string | null
+          stripe_account_id: string | null
+          stripe_onboarding_complete: boolean | null
           tiktok_url: string | null
           total_reviews: number | null
           updated_at: string
@@ -58,6 +60,8 @@ export type Database = {
           show_fee_range?: boolean | null
           soundcloud_url?: string | null
           spotify_url?: string | null
+          stripe_account_id?: string | null
+          stripe_onboarding_complete?: boolean | null
           tiktok_url?: string | null
           total_reviews?: number | null
           updated_at?: string
@@ -82,6 +86,8 @@ export type Database = {
           show_fee_range?: boolean | null
           soundcloud_url?: string | null
           spotify_url?: string | null
+          stripe_account_id?: string | null
+          stripe_onboarding_complete?: boolean | null
           tiktok_url?: string | null
           total_reviews?: number | null
           updated_at?: string
@@ -135,9 +141,14 @@ export type Database = {
           id: string
           message: string | null
           offer_amount: number | null
+          payment_amount: number | null
+          payment_intent_id: string | null
+          payment_status: string | null
+          platform_fee: number | null
           requested_date: string
           requested_time: string | null
           status: Database["public"]["Enums"]["booking_status"] | null
+          stripe_checkout_session_id: string | null
           updated_at: string
           venue_id: string
         }
@@ -148,9 +159,14 @@ export type Database = {
           id?: string
           message?: string | null
           offer_amount?: number | null
+          payment_amount?: number | null
+          payment_intent_id?: string | null
+          payment_status?: string | null
+          platform_fee?: number | null
           requested_date: string
           requested_time?: string | null
           status?: Database["public"]["Enums"]["booking_status"] | null
+          stripe_checkout_session_id?: string | null
           updated_at?: string
           venue_id: string
         }
@@ -161,9 +177,14 @@ export type Database = {
           id?: string
           message?: string | null
           offer_amount?: number | null
+          payment_amount?: number | null
+          payment_intent_id?: string | null
+          payment_status?: string | null
+          platform_fee?: number | null
           requested_date?: string
           requested_time?: string | null
           status?: Database["public"]["Enums"]["booking_status"] | null
+          stripe_checkout_session_id?: string | null
           updated_at?: string
           venue_id?: string
         }

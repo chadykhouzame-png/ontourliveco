@@ -22,6 +22,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
+import StripeConnectSetup from '@/components/StripeConnectSetup';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
@@ -731,6 +732,13 @@ const ArtistDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Payment Setup */}
+        {artist && (
+          <div className="mt-6">
+            <StripeConnectSetup artistId={artist.id} />
+          </div>
+        )}
 
         {/* My Disputes */}
         <div className="mt-6">
