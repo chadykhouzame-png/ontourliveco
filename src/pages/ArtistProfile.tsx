@@ -22,6 +22,7 @@ import { SocialStatsDisplay, SocialPlatform } from '@/components/SocialConnectBu
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
 import ArtistAvailabilityCalendar from '@/components/ArtistAvailabilityCalendar';
+import ArtistEPKGallery from '@/components/ArtistEPKGallery';
 
 type SocialConnection = {
   platform: SocialPlatform;
@@ -408,6 +409,9 @@ const ArtistProfile = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* EPK / Press Kit Gallery */}
+            <ArtistEPKGallery artistId={artist.id} artistName={artist.artist_name} />
 
             {/* Reviews Section */}
             <ReviewsList 
