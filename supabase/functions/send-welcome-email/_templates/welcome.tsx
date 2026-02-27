@@ -1,12 +1,8 @@
 import {
   Body,
-  Button,
   Container,
   Head,
-  Heading,
-  Hr,
   Html,
-  Link,
   Preview,
   Section,
   Text,
@@ -19,86 +15,121 @@ interface WelcomeEmailProps {
   dashboardUrl: string;
 }
 
+const brand = {
+  bg: '#ffffff',
+  cardBg: '#0a0a0a',
+  cardBorder: '#1f1f23',
+  primary: '#c9a88c',
+  foreground: '#ddd5cd',
+  muted: '#8a7f77',
+  mutedDark: '#3d3d3d',
+  artistPink: '#d94f7a',
+  venuePurple: '#9966cc',
+};
+
 export const WelcomeEmail = ({
   userType,
   userEmail,
   dashboardUrl,
 }: WelcomeEmailProps) => {
   const isArtist = userType === 'artist';
-  
-  const headline = isArtist 
-    ? "Welcome to On Tour, Artist!" 
+  const accentColor = isArtist ? brand.artistPink : brand.venuePurple;
+
+  const headline = isArtist
+    ? "Welcome to On Tour, Artist!"
     : "Welcome to On Tour, Venue Partner!";
-  
+
   const subheadline = isArtist
     ? "You're now part of a global network connecting talented artists with amazing venues."
     : "You're now part of a global network connecting venues with incredible talent.";
 
   const features = isArtist ? [
-    { title: "📍 Set Your Travel Dates", description: "Let venues know when you'll be in their city" },
-    { title: "🎵 Showcase Your Sound", description: "Connect your Spotify, Instagram, and more" },
-    { title: "💼 Manage Bookings", description: "Accept gigs and negotiate offers directly" },
+    { icon: "📍", title: "Set Your Travel Dates", description: "Let venues know when you'll be in their city" },
+    { icon: "🎵", title: "Showcase Your Sound", description: "Connect your Spotify, Instagram, and more" },
+    { icon: "💼", title: "Manage Bookings", description: "Accept gigs and negotiate offers directly" },
   ] : [
-    { title: "🔍 Discover Artists", description: "Browse artists by genre, location, and availability" },
-    { title: "📅 Post Entertainment Requests", description: "Let artists come to you with their offers" },
-    { title: "⭐ Build Your Reputation", description: "Get reviews from artists you work with" },
+    { icon: "🔍", title: "Discover Artists", description: "Browse artists by genre, location, and availability" },
+    { icon: "📅", title: "Post Entertainment Requests", description: "Let artists come to you with their offers" },
+    { icon: "⭐", title: "Build Your Reputation", description: "Get reviews from artists you work with" },
   ];
 
   const ctaText = isArtist ? "Complete Your Profile" : "Start Discovering Artists";
-  const accentColor = isArtist ? "#A855F7" : "#3B82F6"; // Purple for artists, blue for venues
 
   return (
     <Html>
       <Head />
       <Preview>{headline}</Preview>
       <Body style={main}>
-        <Container style={container}>
-          {/* Logo */}
-          <Section style={logoSection}>
-            <Text style={logo}>
-              <span style={logoPrimary}>ON</span>
-              <span style={logoSecondary}>TOUR</span>
-            </Text>
-          </Section>
-
-          <Heading style={h1}>{headline}</Heading>
-          
-          <Text style={text}>
-            Hi there! 👋
-          </Text>
-          
-          <Text style={text}>
-            {subheadline}
-          </Text>
-
-          <Section style={buttonContainer}>
-            <Button style={{ ...button, backgroundColor: accentColor }} href={dashboardUrl}>
-              {ctaText}
-            </Button>
-          </Section>
-
-          <Hr style={hr} />
-
-          <Heading style={h2}>Here's what you can do:</Heading>
-
-          {features.map((feature, index) => (
-            <Section key={index} style={featureSection}>
-              <Text style={featureTitle}>{feature.title}</Text>
-              <Text style={featureDescription}>{feature.description}</Text>
+        <Container style={outerContainer}>
+          {/* Card */}
+          <Section style={card}>
+            {/* Header */}
+            <Section style={header}>
+              <Text style={logoText}>
+                <span style={{ color: brand.primary, fontWeight: 900 }}>ON</span>
+                <span style={{ color: '#ffffff', fontWeight: 900 }}>TOUR</span>
+              </Text>
+              <Text style={tagline}>Live Entertainment</Text>
             </Section>
-          ))}
 
-          <Hr style={hr} />
+            {/* Content */}
+            <Section style={content}>
+              <Text style={{ textAlign: 'center' as const, fontSize: '40px', margin: '0 0 12px' }}>🎉</Text>
+              <Text style={h1}>{headline}</Text>
+              <Text style={{ ...bodyText, textAlign: 'center' as const }}>
+                Hi there! 👋
+              </Text>
+              <Text style={{ ...bodyText, textAlign: 'center' as const }}>
+                {subheadline}
+              </Text>
 
-          <Text style={footerText}>
-            Need help getting started? Just reply to this email - we're here to help!
-          </Text>
+              {/* CTA */}
+              <Section style={{ textAlign: 'center' as const, margin: '28px 0' }}>
+                <a href={dashboardUrl} style={{
+                  display: 'inline-block',
+                  backgroundColor: accentColor,
+                  color: '#ffffff',
+                  textDecoration: 'none',
+                  padding: '14px 36px',
+                  borderRadius: '14px',
+                  fontWeight: 600,
+                  fontSize: '15px',
+                  letterSpacing: '0.01em',
+                }}>
+                  {ctaText}
+                </a>
+              </Section>
 
-          <Text style={footer}>
-            © 2026 On Tour. All rights reserved.
-            <br />
-            Connecting artists and venues worldwide.
-          </Text>
+              {/* Divider */}
+              <Section style={{ borderTop: `1px solid ${brand.cardBorder}`, margin: '28px 0' }} />
+
+              <Text style={{ color: '#ffffff', fontSize: '18px', fontWeight: 700, margin: '0 0 16px', letterSpacing: '-0.02em' }}>
+                Here's what you can do:
+              </Text>
+
+              {features.map((feature, index) => (
+                <Section key={index} style={{ background: '#1a1a1e', borderRadius: '12px', padding: '16px 20px', marginBottom: '10px' }}>
+                  <Text style={{ color: '#ffffff', fontSize: '15px', fontWeight: 600, margin: '0 0 4px' }}>
+                    {feature.icon} {feature.title}
+                  </Text>
+                  <Text style={{ color: brand.muted, fontSize: '14px', margin: '0', lineHeight: '1.5' }}>
+                    {feature.description}
+                  </Text>
+                </Section>
+              ))}
+            </Section>
+
+            {/* Footer */}
+            <Section style={footer}>
+              <Text style={{ color: brand.mutedDark, fontSize: '13px', margin: '0 0 8px', lineHeight: '1.5' }}>
+                You're receiving this because you signed up on{' '}
+                <a href={dashboardUrl} style={{ color: brand.primary, textDecoration: 'none' }}>On Tour Live</a>.
+              </Text>
+              <Text style={{ color: brand.mutedDark, fontSize: '12px', margin: '0' }}>
+                © {new Date().getFullYear()} On Tour Live. All rights reserved.
+              </Text>
+            </Section>
+          </Section>
         </Container>
       </Body>
     </Html>
@@ -108,111 +139,67 @@ export const WelcomeEmail = ({
 export default WelcomeEmail;
 
 const main = {
-  backgroundColor: '#0a0a0a',
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
+  backgroundColor: brand.bg,
+  fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif",
+  WebkitFontSmoothing: 'antialiased' as const,
 };
 
-const container = {
+const outerContainer = {
+  maxWidth: '600px',
   margin: '0 auto',
   padding: '40px 20px',
-  maxWidth: '560px',
 };
 
-const logoSection = {
+const card = {
+  backgroundColor: brand.cardBg,
+  borderRadius: '20px',
+  overflow: 'hidden' as const,
+  border: `1px solid ${brand.cardBorder}`,
+};
+
+const header = {
+  padding: '32px 40px 24px',
   textAlign: 'center' as const,
-  marginBottom: '32px',
+  borderBottom: `1px solid ${brand.cardBorder}`,
 };
 
-const logo = {
-  fontSize: '28px',
-  fontWeight: 'bold',
-  letterSpacing: '-0.5px',
+const logoText = {
+  fontSize: '32px',
+  letterSpacing: '-0.04em',
+  lineHeight: '1',
+  margin: '0 0 4px',
 };
 
-const logoPrimary = {
-  color: '#DAFF00',
+const tagline = {
+  fontSize: '11px',
+  letterSpacing: '0.2em',
+  color: brand.muted,
+  textTransform: 'uppercase' as const,
+  margin: '2px 0 0',
 };
 
-const logoSecondary = {
-  color: '#ffffff',
+const content = {
+  padding: '36px 40px',
 };
 
 const h1 = {
   color: '#ffffff',
-  fontSize: '28px',
-  fontWeight: 'bold',
+  fontSize: '22px',
+  fontWeight: 700,
   textAlign: 'center' as const,
-  margin: '30px 0 20px',
-  padding: '0',
+  margin: '0 0 6px',
+  letterSpacing: '-0.02em',
 };
 
-const h2 = {
-  color: '#ffffff',
-  fontSize: '20px',
-  fontWeight: 'bold',
-  margin: '24px 0 16px',
-  padding: '0',
-};
-
-const text = {
-  color: '#a1a1aa',
-  fontSize: '16px',
-  lineHeight: '26px',
-  margin: '16px 0',
-};
-
-const buttonContainer = {
-  textAlign: 'center' as const,
-  margin: '32px 0',
-};
-
-const button = {
-  borderRadius: '12px',
-  color: '#ffffff',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '14px 32px',
-};
-
-const hr = {
-  borderColor: '#27272a',
-  margin: '32px 0',
-};
-
-const featureSection = {
-  marginBottom: '16px',
-};
-
-const featureTitle = {
-  color: '#ffffff',
-  fontSize: '16px',
-  fontWeight: 'bold',
-  margin: '0 0 4px',
-};
-
-const featureDescription = {
-  color: '#71717a',
-  fontSize: '14px',
-  margin: '0',
-  lineHeight: '22px',
-};
-
-const footerText = {
-  color: '#71717a',
-  fontSize: '14px',
-  lineHeight: '22px',
-  margin: '12px 0',
-  textAlign: 'center' as const,
+const bodyText = {
+  color: brand.muted,
+  fontSize: '15px',
+  lineHeight: '1.6',
+  margin: '8px 0',
 };
 
 const footer = {
-  color: '#52525b',
-  fontSize: '12px',
-  lineHeight: '20px',
+  padding: '24px 40px',
+  borderTop: `1px solid ${brand.cardBorder}`,
   textAlign: 'center' as const,
-  marginTop: '24px',
 };
