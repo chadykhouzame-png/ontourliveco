@@ -25,6 +25,7 @@ import UserDisputes from '@/components/UserDisputes';
 import StripeConnectSetup from '@/components/StripeConnectSetup';
 import ArtistEPKUpload from '@/components/ArtistEPKUpload';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
+import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import logo from '@/assets/logo.png';
@@ -50,6 +51,11 @@ const ArtistDashboard = () => {
   const [counterOfferDialogOpen, setCounterOfferDialogOpen] = useState(false);
   const [counterOfferAmount, setCounterOfferAmount] = useState('');
   const [isSubmittingCounter, setIsSubmittingCounter] = useState(false);
+  
+  // Cancel booking dialog state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
   
   // Status filter state
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -307,30 +313,63 @@ const ArtistDashboard = () => {
             : "The venue has been notified of your decision.",
         });
       } else if (status === 'cancelled') {
-        // Send cancellation notification to venue
-        try {
-          await supabase.functions.invoke('send-booking-notification', {
-            body: {
-              type: 'cancelled',
-              booking_request_id: requestId,
-              sender_name: artist?.artist_name || 'An artist',
-              recipient_user_id: request.venue?.user_id,
-              requested_date: request.requested_date,
-              offer_amount: request.counter_offer || request.offer_amount,
-            },
-          });
-        } catch (notifyError) {
-          console.error('Failed to send cancellation notification:', notifyError);
-        }
-
-        toast({
-          title: "Booking cancelled",
-          description: "The venue has been notified of the cancellation.",
-          variant: "destructive",
-        });
+        // Handled by handleConfirmCancel with reason dialog
       }
     } catch (error) {
       showErrorWithTitle(error, "Error updating booking", 'update-booking-status');
+    }
+  };
+
+  const handleOpenCancelDialog = (bookingId: string) => {
+    setCancellingBookingId(bookingId);
+    setCancelDialogOpen(true);
+  };
+
+  const handleConfirmCancel = async (reason: string) => {
+    if (!cancellingBookingId || !artist) return;
+    const request = bookingRequests.find(r => r.id === cancellingBookingId);
+    if (!request) return;
+
+    setIsCancelling(true);
+    try {
+      await executeWithRetry(async () => {
+        const { error } = await supabase
+          .from('booking_requests')
+          .update({ status: 'cancelled' as BookingStatus })
+          .eq('id', cancellingBookingId);
+        if (error) throw error;
+      }, 'cancelling booking');
+
+      setBookingRequests(prev => prev.map(req =>
+        req.id === cancellingBookingId ? { ...req, status: 'cancelled' as BookingStatus } : req
+      ));
+
+      try {
+        await supabase.functions.invoke('send-booking-notification', {
+          body: {
+            type: 'cancelled',
+            booking_request_id: cancellingBookingId,
+            sender_name: artist.artist_name || 'An artist',
+            recipient_user_id: request.venue?.user_id,
+            requested_date: request.requested_date,
+            offer_amount: request.counter_offer || request.offer_amount,
+            message: reason || undefined,
+          },
+        });
+      } catch (notifyError) {
+        console.error('Failed to send cancellation notification:', notifyError);
+      }
+
+      toast({
+        title: "Booking cancelled",
+        description: "The venue has been notified of the cancellation.",
+        variant: "destructive",
+      });
+      setCancelDialogOpen(false);
+    } catch (error) {
+      showErrorWithTitle(error, "Error cancelling booking", 'cancel-booking');
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -735,7 +774,7 @@ const ArtistDashboard = () => {
                             size="sm"
                             variant="ghost"
                             className="text-destructive hover:text-destructive"
-                            onClick={() => handleUpdateRequestStatus(request.id, 'cancelled')}
+                            onClick={() => handleOpenCancelDialog(request.id)}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Cancel Booking
@@ -917,6 +956,16 @@ const ArtistDashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Booking Dialog */}
+      <CancelBookingDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onConfirm={handleConfirmCancel}
+        isSubmitting={isCancelling}
+        bookingDate={cancellingBookingId ? bookingRequests.find(r => r.id === cancellingBookingId)?.requested_date ? format(new Date(bookingRequests.find(r => r.id === cancellingBookingId)!.requested_date), 'MMMM d, yyyy') : undefined : undefined}
+        otherPartyName={cancellingBookingId ? bookingRequests.find(r => r.id === cancellingBookingId)?.venue?.venue_name : undefined}
+      />
     </div>
   );
 };

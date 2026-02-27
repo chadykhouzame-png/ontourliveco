@@ -25,6 +25,7 @@ import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
 import PayBookingButton from '@/components/PayBookingButton';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
+import CancelBookingDialog from '@/components/CancelBookingDialog';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import logo from '@/assets/logo.png';
@@ -52,6 +53,11 @@ const VenueDashboard = () => {
   const [updateOfferDialogOpen, setUpdateOfferDialogOpen] = useState(false);
   const [newOfferAmount, setNewOfferAmount] = useState('');
   const [isSubmittingOffer, setIsSubmittingOffer] = useState(false);
+  
+  // Cancel booking dialog state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
   
   // Status filter state
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -286,34 +292,40 @@ const VenueDashboard = () => {
     }
   };
 
-  const handleCancelBooking = async (requestId: string) => {
-    const request = bookingRequests.find(r => r.id === requestId);
-    if (!request || !venue) return;
+  const handleOpenCancelDialog = (bookingId: string) => {
+    setCancellingBookingId(bookingId);
+    setCancelDialogOpen(true);
+  };
 
+  const handleConfirmCancel = async (reason: string) => {
+    if (!cancellingBookingId || !venue) return;
+    const request = bookingRequests.find(r => r.id === cancellingBookingId);
+    if (!request) return;
+
+    setIsCancelling(true);
     try {
       await executeWithRetry(async () => {
         const { error } = await supabase
           .from('booking_requests')
           .update({ status: 'cancelled' as BookingStatus })
-          .eq('id', requestId);
-        
+          .eq('id', cancellingBookingId);
         if (error) throw error;
       }, 'cancelling booking');
-      
-      setBookingRequests(prev => prev.map(req => 
-        req.id === requestId ? { ...req, status: 'cancelled' as BookingStatus } : req
+
+      setBookingRequests(prev => prev.map(req =>
+        req.id === cancellingBookingId ? { ...req, status: 'cancelled' as BookingStatus } : req
       ));
-      
-      // Send cancellation notification to artist
+
       try {
         await supabase.functions.invoke('send-booking-notification', {
           body: {
             type: 'cancelled',
-            booking_request_id: requestId,
+            booking_request_id: cancellingBookingId,
             sender_name: venue.venue_name,
             recipient_user_id: request.artist?.user_id,
             requested_date: request.requested_date,
             offer_amount: request.counter_offer || request.offer_amount,
+            message: reason || undefined,
           },
         });
       } catch (notifyError) {
@@ -325,8 +337,11 @@ const VenueDashboard = () => {
         description: "The artist has been notified of the cancellation.",
         variant: "destructive",
       });
+      setCancelDialogOpen(false);
     } catch (error) {
       showErrorWithTitle(error, "Error cancelling booking", 'cancel-booking');
+    } finally {
+      setIsCancelling(false);
     }
   };
 
@@ -884,7 +899,7 @@ const VenueDashboard = () => {
                             size="sm"
                             variant="ghost"
                             className="text-destructive hover:text-destructive"
-                            onClick={() => handleCancelBooking(request.id)}
+                            onClick={() => handleOpenCancelDialog(request.id)}
                           >
                             <XCircle className="w-4 h-4 mr-1" />
                             Cancel Booking
@@ -1089,6 +1104,16 @@ const VenueDashboard = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Cancel Booking Dialog */}
+      <CancelBookingDialog
+        open={cancelDialogOpen}
+        onOpenChange={setCancelDialogOpen}
+        onConfirm={handleConfirmCancel}
+        isSubmitting={isCancelling}
+        bookingDate={cancellingBookingId ? bookingRequests.find(r => r.id === cancellingBookingId)?.requested_date ? format(new Date(bookingRequests.find(r => r.id === cancellingBookingId)!.requested_date), 'MMMM d, yyyy') : undefined : undefined}
+        otherPartyName={cancellingBookingId ? bookingRequests.find(r => r.id === cancellingBookingId)?.artist?.artist_name : undefined}
+      />
     </div>
   );
 };
