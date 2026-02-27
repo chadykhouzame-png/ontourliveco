@@ -64,9 +64,66 @@ export function useBookingNotifications({
 
   // Initialize audio element
   useEffect(() => {
-    // Create audio element with a pleasant notification sound
-    audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2teleWY2Z5W0xZJtQCSVzt/Fo2E6MYnRxqNrNQ+M09/IoGc3J43FwJJkNhCO0dSuglc5FIu8rIhbNhKNxbqRYjcFiLykjmNAGIuwsop1TDIRgqWih2xJNRF8oJWDelMxCHqakIpmPxV0lIuBdFk2DHiUjYNvTjUOeJWPhXJLNgt1k4yEckwyDneTjIRySzILdZSMhHFLMwx2k4yEcksyCnWUjIRxSzMLdpOMhHJLMgt1lIyEcUsyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEcksyC3WUjIRySzILdZOMhHJLMgt1lIyEcksyC3WUjIRySzILdZSMhHJLMgt1lIyEckoyC3WUjIRySzMLdpOMhHJLMgt1lIyEcksyC3WUjIRySjILdZSMhHJKMgt2lIyEckoyC3aUjIRySjILdpSMhHFKMgt2lIyEcUoyC3aUjIRxSjILdpSMhHFKMgt2lIyEcUoyC3aUjYRxSjILdpSNhHFKMQt2lI2EcEoxC3aUjYRwSjELdpSNhHBKMQt2lI2EcEoxC3aUjYRwSjELdpSNhHBKMQt2lI2DcEoxC3aUjYNwSjELdpSNg3BKMQt2lI2DcEoxC3aUjYNwSjELdpSNg3BKMQt2lI2DcEoxC3aUjYNwSjELdpSNg29KMQt2lI2Db0oxC3aVjYNvSjELdpWNg29KMQt2lY2Db0oxC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjYNvSjALdpWNg29KMAt2lY2Db0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt2lYyDb0owC3aVjINvSjALdpWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29KMAt1lYyDb0owC3WVjINvSjALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwC3WVjINvSTALdZWMg29JMAt1lYyDb0kwCw==');
-    audioRef.current.volume = 0.5;
+    // Create audio element with a pleasant notification chime
+    // Generate a two-tone chime using AudioContext for a richer sound
+    const createNotificationSound = (): HTMLAudioElement => {
+      try {
+        const sampleRate = 44100;
+        const duration = 0.6;
+        const numSamples = Math.floor(sampleRate * duration);
+        const numChannels = 1;
+        const bitsPerSample = 16;
+        const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+        const blockAlign = numChannels * (bitsPerSample / 8);
+        const dataSize = numSamples * blockAlign;
+        const buffer = new ArrayBuffer(44 + dataSize);
+        const view = new DataView(buffer);
+
+        // WAV header
+        const writeString = (offset: number, str: string) => {
+          for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+        };
+        writeString(0, 'RIFF');
+        view.setUint32(4, 36 + dataSize, true);
+        writeString(8, 'WAVE');
+        writeString(12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true);
+        view.setUint16(22, numChannels, true);
+        view.setUint32(24, sampleRate, true);
+        view.setUint32(28, byteRate, true);
+        view.setUint16(32, blockAlign, true);
+        view.setUint16(34, bitsPerSample, true);
+        writeString(36, 'data');
+        view.setUint32(40, dataSize, true);
+
+        // Generate a two-tone chime (E5 → G5)
+        for (let i = 0; i < numSamples; i++) {
+          const t = i / sampleRate;
+          const envelope = Math.exp(-t * 5) * Math.max(0, 1 - t / duration);
+          const freq1 = 659.25; // E5
+          const freq2 = 783.99; // G5
+          const crossfade = Math.min(1, t * 5);
+          const sample =
+            envelope * (
+              Math.sin(2 * Math.PI * freq1 * t) * (1 - crossfade * 0.5) +
+              Math.sin(2 * Math.PI * freq2 * t) * crossfade * 0.7 +
+              Math.sin(2 * Math.PI * freq1 * 2 * t) * 0.15 * envelope
+            );
+          const clamped = Math.max(-1, Math.min(1, sample));
+          view.setInt16(44 + i * 2, clamped * 0x7fff, true);
+        }
+
+        const blob = new Blob([buffer], { type: 'audio/wav' });
+        return new Audio(URL.createObjectURL(blob));
+      } catch {
+        // Fallback to silent audio if generation fails
+        return new Audio();
+      }
+    };
+
+    audioRef.current = createNotificationSound();
+    audioRef.current.volume = 0.6;
 
     // Check and request notification permission
     if ('Notification' in window) {
