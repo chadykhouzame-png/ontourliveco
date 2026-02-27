@@ -7,9 +7,48 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// In-memory rate limiter: max 100 requests per 60 seconds per IP
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 100;
+const ipHits = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = ipHits.get(ip);
+
+  if (!entry || now >= entry.resetAt) {
+    ipHits.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
+// Periodically clean stale entries (every ~500 requests)
+let cleanupCounter = 0;
+function maybeCleanup() {
+  if (++cleanupCounter % 500 !== 0) return;
+  const now = Date.now();
+  for (const [ip, entry] of ipHits) {
+    if (now >= entry.resetAt) ipHits.delete(ip);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Rate limiting
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  maybeCleanup();
+  if (isRateLimited(clientIp)) {
+    console.warn(`Rate limited webhook request from ${clientIp}`);
+    return new Response(JSON.stringify({ error: "Too many requests" }), {
+      status: 429,
+      headers: { ...corsHeaders, "Retry-After": "60" },
+    });
   }
 
   const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY")!, {
