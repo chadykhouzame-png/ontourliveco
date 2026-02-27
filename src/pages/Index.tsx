@@ -595,9 +595,15 @@ const Index = () => {
               </a>
             </div>
             
-            <p className="text-muted-foreground text-sm">
-              © 2026 On Tour. All rights reserved.
-            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-6">
+              <p className="text-muted-foreground text-sm">
+                © 2026 On Tour. All rights reserved.
+              </p>
+              <div className="flex items-center gap-4 text-sm">
+                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
+                <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
+              </div>
+            </div>
           </div>
         </div>
       </footer>

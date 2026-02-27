@@ -23,6 +23,8 @@ import ResetPassword from '@/pages/ResetPassword';
 import Messages from '@/pages/Messages';
 import Analytics from '@/pages/Analytics';
 import AdminDashboard from '@/pages/AdminDashboard';
+import TermsOfService from '@/pages/TermsOfService';
+import PrivacyPolicy from '@/pages/PrivacyPolicy';
 
 // Wrapper that combines PageTransition with RouteErrorBoundary
 const ProtectedRoute = ({ children }: { children: ReactNode }) => (
@@ -69,6 +71,10 @@ const AnimatedRoutes = () => {
         
         {/* Admin */}
         <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+        
+        {/* Legal */}
+        <Route path="/terms" element={<ProtectedRoute><TermsOfService /></ProtectedRoute>} />
+        <Route path="/privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
         
         {/* Catch-all */}
         <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
