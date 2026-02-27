@@ -97,7 +97,7 @@ const JoinArtist = () => {
         await recordLoginAttempt(email, true);
         navigate('/artist/dashboard');
       } else {
-        const { error } = await signUp(email, password, 'artist');
+        const { error, confirmEmail } = await signUp(email, password, 'artist');
         if (error) throw error;
         
         // Send welcome email (fire and forget)
@@ -105,11 +105,18 @@ const JoinArtist = () => {
           body: { email, userType: 'artist' },
         }).catch(err => console.error('Failed to send welcome email:', err));
         
-        toast({
-          title: "Welcome to On Tour!",
-          description: "Let's set up your artist profile.",
-        });
-        navigate('/artist/setup');
+        if (confirmEmail) {
+          toast({
+            title: "Check your email!",
+            description: "We've sent you a confirmation link. Please verify your email to continue.",
+          });
+        } else {
+          toast({
+            title: "Welcome to On Tour!",
+            description: "Let's set up your artist profile.",
+          });
+          navigate('/artist/setup');
+        }
       }
     } catch (error: unknown) {
       showErrorWithTitle(error, isLogin ? "Login failed" : "Sign up failed", 'auth');
