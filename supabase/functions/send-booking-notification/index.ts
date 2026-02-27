@@ -397,7 +397,7 @@ serve(async (req: Request) => {
           const reviewContent = generateReviewEmailContent(venueName, formattedDate, 'venue', appUrl);
           const html = emailShell(reviewContent, supabaseUrl);
           const { error: emailError } = await resend.emails.send({
-            from: 'On Tour Live <noreply@resend.dev>',
+            from: 'On Tour <noreply@ontourlive.co>',
             to: [artistProfile.email],
             subject: `How was your gig at ${venueName}? Leave a review!`,
             html,
@@ -425,7 +425,7 @@ serve(async (req: Request) => {
           const reviewContent = generateReviewEmailContent(artistName, formattedDate, 'artist', appUrl);
           const html = emailShell(reviewContent, supabaseUrl);
           const { error: emailError } = await resend.emails.send({
-            from: 'On Tour Live <noreply@resend.dev>',
+            from: 'On Tour <noreply@ontourlive.co>',
             to: [venueProfile.email],
             subject: `How was ${artistName}'s performance? Leave a review!`,
             html,
@@ -520,7 +520,7 @@ serve(async (req: Request) => {
     const html = emailShell(content, supabaseUrl);
 
     const { data: emailData, error: emailError } = await resend.emails.send({
-      from: 'On Tour Live <noreply@resend.dev>',
+      from: 'On Tour <noreply@ontourlive.co>',
       to: [profile.email],
       subject,
       html,

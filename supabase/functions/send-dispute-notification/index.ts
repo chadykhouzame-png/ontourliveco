@@ -239,7 +239,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending ${type} notification to ${recipientEmail}`);
 
     const emailResponse = await resend.emails.send({
-      from: "On Tour <noreply@ontourapp.com>",
+      from: "On Tour <noreply@ontourlive.co>",
       to: [recipientEmail],
       subject,
       html,
