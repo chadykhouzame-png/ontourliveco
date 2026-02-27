@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AnimatedRoutes from "@/components/AnimatedRoutes";
 import FloatingActionButton from "@/components/FloatingActionButton";
+import CookieConsent from "@/components/CookieConsent";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
@@ -20,6 +21,7 @@ const App = () => (
           <AuthProvider>
             <AnimatedRoutes />
             <FloatingActionButton />
+            <CookieConsent />
           </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
