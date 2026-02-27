@@ -48,6 +48,8 @@ const ArtistSetup = () => {
   const [selectedGenres, setSelectedGenres] = useState<Genre[]>([]);
   const [feeRangeMin, setFeeRangeMin] = useState<string>('');
   const [feeRangeMax, setFeeRangeMax] = useState<string>('');
+  const [artistAge, setArtistAge] = useState<string>('');
+  const [artistMobile, setArtistMobile] = useState<string>('');
   const [showFeeRange, setShowFeeRange] = useState(false);
   const [artistId, setArtistId] = useState<string | null>(null);
   const [socialConnections, setSocialConnections] = useState<SocialConnection[]>([]);
@@ -102,9 +104,22 @@ const ArtistSetup = () => {
         setFeeRangeMin(data.fee_range_min?.toString() || '');
         setFeeRangeMax(data.fee_range_max?.toString() || '');
         setShowFeeRange(data.show_fee_range || false);
+        setArtistAge((data as any).age?.toString() || '');
+        setArtistMobile((data as any).mobile || '');
         
         // Fetch social connections
         fetchSocialConnections(data.id);
+      } else {
+        // Pre-fill from signup metadata if no artist profile exists yet
+        const meta = user.user_metadata;
+        if (meta) {
+          if (meta.first_name) setFirstName(meta.first_name);
+          if (meta.last_name) setLastName(meta.last_name);
+          if (meta.city) setPrimaryCity(meta.city);
+          if (meta.preferred_genre) setSelectedGenres([meta.preferred_genre]);
+          if (meta.age) setArtistAge(meta.age.toString());
+          if (meta.mobile) setArtistMobile(meta.mobile);
+        }
       }
     };
     
@@ -143,7 +158,7 @@ const ArtistSetup = () => {
     setIsLoading(true);
 
     try {
-      const artistData = {
+      const artistData: Record<string, any> = {
         user_id: user.id,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
@@ -156,19 +171,21 @@ const ArtistSetup = () => {
         fee_range_max: feeRangeMax ? parseInt(feeRangeMax) : null,
         show_fee_range: showFeeRange,
         is_profile_complete: true,
+        age: artistAge ? parseInt(artistAge) : null,
+        mobile: artistMobile.trim() || null,
       };
 
       if (existingArtist) {
         const { error } = await supabase
           .from('artists')
-          .update(artistData)
+          .update(artistData as any)
           .eq('user_id', user.id);
         
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('artists')
-          .insert(artistData);
+          .insert(artistData as any);
         
         if (error) throw error;
       }

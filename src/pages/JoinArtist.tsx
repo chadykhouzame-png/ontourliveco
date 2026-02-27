@@ -15,6 +15,14 @@ import SocialLoginButtons from '@/components/SocialLoginButtons';
 import { PasswordStrengthIndicator } from '@/components/PasswordStrengthIndicator';
 import { signupSchema, loginSchema } from '@/lib/passwordValidation';
 import { checkAccountLockout, recordLoginAttempt, formatLockoutMessage } from '@/hooks/useAccountLockout';
+import { Genre, GENRE_LABELS } from '@/types/database';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const GENRES: Genre[] = [
+  'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
+  'amapiano', 'latin', 'pop', 'rock', 'jazz', 'soul', 'funk',
+  'drum_and_bass', 'uk_garage', 'reggae', 'dancehall', 'other'
+];
 
 const JoinArtist = () => {
   const navigate = useNavigate();
@@ -27,9 +35,17 @@ const JoinArtist = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [lockoutMessage, setLockoutMessage] = useState<string | null>(null);
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
+  
+  // Signup-only fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [age, setAge] = useState('');
+  const [city, setCity] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState<Genre | ''>('');
 
   // Redirect if already logged in
   if (user) {
@@ -38,23 +54,31 @@ const JoinArtist = () => {
   }
 
   const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    
     try {
-      // Use stricter validation for signup, simpler for login
       const schema = isLogin ? loginSchema : signupSchema;
       schema.parse({ email, password });
-      setErrors({});
-      return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const newErrors: { email?: string; password?: string } = {};
         error.errors.forEach((err) => {
           if (err.path[0] === 'email') newErrors.email = err.message;
           if (err.path[0] === 'password') newErrors.password = err.message;
         });
-        setErrors(newErrors);
       }
-      return false;
     }
+
+    if (!isLogin) {
+      if (!firstName.trim()) newErrors.firstName = 'First name is required';
+      if (!lastName.trim()) newErrors.lastName = 'Last name is required';
+      if (!city.trim()) newErrors.city = 'City is required';
+      if (age && (isNaN(Number(age)) || Number(age) < 16 || Number(age) > 100)) {
+        newErrors.age = 'Age must be between 16 and 100';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,6 +123,22 @@ const JoinArtist = () => {
       } else {
         const { error, confirmEmail } = await signUp(email, password, 'artist');
         if (error) throw error;
+        
+        // Save extra signup fields to user metadata for use during setup
+        // We store them in metadata since the artist profile row is created by the setup page
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          await supabase.auth.updateUser({
+            data: {
+              first_name: firstName.trim(),
+              last_name: lastName.trim(),
+              age: age ? Number(age) : null,
+              city: city.trim(),
+              mobile: mobile.trim(),
+              preferred_genre: selectedGenre || null,
+            }
+          });
+        }
         
         // Send welcome email (fire and forget)
         supabase.functions.invoke('send-welcome-email', {
@@ -218,6 +258,98 @@ const JoinArtist = () => {
                 )}
                 {!isLogin && <PasswordStrengthIndicator password={password} />}
               </div>
+
+              {!isLogin && (
+                <>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        placeholder="John"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className={errors.firstName ? 'border-destructive' : ''}
+                      />
+                      {errors.firstName && (
+                        <p className="text-sm text-destructive">{errors.firstName}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        placeholder="Doe"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        className={errors.lastName ? 'border-destructive' : ''}
+                      />
+                      {errors.lastName && (
+                        <p className="text-sm text-destructive">{errors.lastName}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="age">Age</Label>
+                      <Input
+                        id="age"
+                        type="number"
+                        placeholder="25"
+                        value={age}
+                        onChange={(e) => setAge(e.target.value)}
+                        className={errors.age ? 'border-destructive' : ''}
+                        min={16}
+                        max={100}
+                      />
+                      {errors.age && (
+                        <p className="text-sm text-destructive">{errors.age}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="mobile">Mobile</Label>
+                      <Input
+                        id="mobile"
+                        type="tel"
+                        placeholder="+44 7700 900000"
+                        value={mobile}
+                        onChange={(e) => setMobile(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City *</Label>
+                    <Input
+                      id="city"
+                      placeholder="London"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className={errors.city ? 'border-destructive' : ''}
+                    />
+                    {errors.city && (
+                      <p className="text-sm text-destructive">{errors.city}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="genre">Music Genre</Label>
+                    <Select value={selectedGenre} onValueChange={(val) => setSelectedGenre(val as Genre)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a genre" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {GENRES.map((genre) => (
+                          <SelectItem key={genre} value={genre}>
+                            {GENRE_LABELS[genre]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
 
               <Button 
                 type="submit" 

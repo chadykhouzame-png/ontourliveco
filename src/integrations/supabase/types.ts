@@ -60,6 +60,7 @@ export type Database = {
       }
       artists: {
         Row: {
+          age: number | null
           artist_name: string
           average_rating: number | null
           bio: string | null
@@ -72,6 +73,7 @@ export type Database = {
           instagram_url: string | null
           is_profile_complete: boolean | null
           last_name: string | null
+          mobile: string | null
           primary_city: string
           profile_image_url: string | null
           review_status: string
@@ -86,6 +88,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          age?: number | null
           artist_name: string
           average_rating?: number | null
           bio?: string | null
@@ -98,6 +101,7 @@ export type Database = {
           instagram_url?: string | null
           is_profile_complete?: boolean | null
           last_name?: string | null
+          mobile?: string | null
           primary_city: string
           profile_image_url?: string | null
           review_status?: string
@@ -112,6 +116,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          age?: number | null
           artist_name?: string
           average_rating?: number | null
           bio?: string | null
@@ -124,6 +129,7 @@ export type Database = {
           instagram_url?: string | null
           is_profile_complete?: boolean | null
           last_name?: string | null
+          mobile?: string | null
           primary_city?: string
           profile_image_url?: string | null
           review_status?: string
