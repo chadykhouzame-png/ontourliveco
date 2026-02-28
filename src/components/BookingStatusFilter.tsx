@@ -13,13 +13,14 @@ interface BookingStatusFilterProps {
     accepted: number;
     completed: number;
     declined: number;
+    cancelled: number;
   };
 }
 
 export function BookingStatusFilter({ value, onChange, counts }: BookingStatusFilterProps) {
   return (
     <Tabs value={value} onValueChange={(v) => onChange(v as StatusFilter)} className="w-full">
-      <TabsList className="w-full grid grid-cols-5 h-auto p-1 bg-secondary/50">
+      <TabsList className="w-full grid grid-cols-6 h-auto p-1 bg-secondary/50">
         <TabsTrigger 
           value="all" 
           className="text-xs sm:text-sm py-1.5 data-[state=active]:bg-background"
@@ -72,6 +73,17 @@ export function BookingStatusFilter({ value, onChange, counts }: BookingStatusFi
           {counts.declined > 0 && (
             <Badge variant="outline" className="ml-1.5 h-5 px-1.5 text-xs">
               {counts.declined}
+            </Badge>
+          )}
+        </TabsTrigger>
+        <TabsTrigger 
+          value="cancelled" 
+          className="text-xs sm:text-sm py-1.5 data-[state=active]:bg-background"
+        >
+          Cancelled
+          {counts.cancelled > 0 && (
+            <Badge variant="outline" className="ml-1.5 h-5 px-1.5 text-xs">
+              {counts.cancelled}
             </Badge>
           )}
         </TabsTrigger>
