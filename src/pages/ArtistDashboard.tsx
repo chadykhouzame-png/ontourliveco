@@ -336,7 +336,7 @@ const ArtistDashboard = () => {
     setCompleteDialogOpen(true);
   };
 
-  const handleConfirmComplete = async (_notes: string) => {
+  const handleConfirmComplete = async (notes: string) => {
     if (!completingBookingId) return;
     const request = bookingRequests.find(r => r.id === completingBookingId);
     if (!request) return;
@@ -346,7 +346,7 @@ const ArtistDashboard = () => {
       await executeWithRetry(async () => {
         const { error } = await supabase
           .from('booking_requests')
-          .update({ status: 'completed' as BookingStatus })
+          .update({ status: 'completed' as BookingStatus, completion_notes: notes || null })
           .eq('id', completingBookingId);
         if (error) throw error;
       }, 'marking booking complete');
@@ -361,6 +361,7 @@ const ArtistDashboard = () => {
             type: 'completed',
             booking_request_id: completingBookingId,
             requested_date: request.requested_date,
+            completion_notes: notes || undefined,
           },
         });
       } catch (notifError) {

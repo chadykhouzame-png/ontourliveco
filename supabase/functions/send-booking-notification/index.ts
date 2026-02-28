@@ -288,10 +288,18 @@ function generateReviewEmailContent(
   formattedDate: string,
   revieweeType: 'artist' | 'venue',
   appUrl: string,
+  completionNotes?: string,
 ): string {
   const isArtist = revieweeType === 'artist';
   const accentColor = isArtist ? brand.artistPink : brand.venuePurple;
   
+  const notesBlock = completionNotes ? `
+    <div style="margin: 16px 0; padding: 16px; background: #1a1a1e; border-radius: 12px; border-left: 3px solid ${brand.primary};">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: ${brand.muted}; margin-bottom: 6px;">Completion Notes</div>
+      <p style="color: ${brand.foreground}; font-size: 14px; font-style: italic; margin: 0; line-height: 1.6;">"${completionNotes}"</p>
+    </div>
+  ` : '';
+
   return `
     <div style="text-align: center; margin-bottom: 24px;">
       <div style="font-size: 40px; margin-bottom: 12px;">⭐</div>
@@ -301,6 +309,7 @@ function generateReviewEmailContent(
     </div>
     
     ${dateBadge(formattedDate)}
+    ${notesBlock}
     
     <div style="margin: 20px 0; padding: 20px; background: ${accentColor}10; border: 1px solid ${accentColor}25; border-radius: 14px; text-align: center;">
       <p style="color: ${brand.foreground}; font-size: 15px; margin: 0; line-height: 1.6;">
@@ -328,6 +337,7 @@ const BookingNotificationSchema = z.object({
   offer_amount: z.number().positive().optional(),
   counter_offer: z.number().positive().optional(),
   message: z.string().max(2000).optional(),
+  completion_notes: z.string().max(500).optional(),
 });
 
 serve(async (req: Request) => {
@@ -393,6 +403,7 @@ serve(async (req: Request) => {
       offer_amount,
       counter_offer,
       message,
+      completion_notes,
     } = body;
 
     // --- AUTHORIZATION: Verify user is part of this booking ---
@@ -465,7 +476,7 @@ serve(async (req: Request) => {
           .insert({
             user_id: artistUserId,
             title: `How was your gig at ${venueName}?`,
-            message: `Your booking on ${formattedDate} is complete! Leave a review to help other artists.`,
+            message: `Your booking on ${formattedDate} is complete! Leave a review to help other artists.${completion_notes ? ` Notes: "${completion_notes}"` : ''}`,
             type: 'review_request',
             reference_id: booking_request_id,
             reference_type: 'booking_request',
@@ -473,7 +484,7 @@ serve(async (req: Request) => {
         results.artist.notification_created = !artistNotifError;
 
         if (resend && artistProfile.email_notifications_enabled !== false) {
-          const reviewContent = generateReviewEmailContent(venueName, formattedDate, 'venue', appUrl);
+          const reviewContent = generateReviewEmailContent(venueName, formattedDate, 'venue', appUrl, completion_notes);
           const html = emailShell(reviewContent, supabaseUrl);
           const { error: emailError } = await resend.emails.send({
             from: 'On Tour <noreply@ontourlive.co>',
@@ -493,7 +504,7 @@ serve(async (req: Request) => {
           .insert({
             user_id: venueUserId,
             title: `How was ${artistName}'s performance?`,
-            message: `Your booking on ${formattedDate} is complete! Leave a review to help other venues.`,
+            message: `Your booking on ${formattedDate} is complete! Leave a review to help other venues.${completion_notes ? ` Notes: "${completion_notes}"` : ''}`,
             type: 'review_request',
             reference_id: booking_request_id,
             reference_type: 'booking_request',
@@ -501,7 +512,7 @@ serve(async (req: Request) => {
         results.venue.notification_created = !venueNotifError;
 
         if (resend && venueProfile.email_notifications_enabled !== false) {
-          const reviewContent = generateReviewEmailContent(artistName, formattedDate, 'artist', appUrl);
+          const reviewContent = generateReviewEmailContent(artistName, formattedDate, 'artist', appUrl, completion_notes);
           const html = emailShell(reviewContent, supabaseUrl);
           const { error: emailError } = await resend.emails.send({
             from: 'On Tour <noreply@ontourlive.co>',
