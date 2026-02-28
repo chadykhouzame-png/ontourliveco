@@ -279,7 +279,7 @@ const VenueDashboard = () => {
       }, 'marking booking complete');
 
       setBookingRequests(prev => prev.map(req =>
-        req.id === completingBookingId ? { ...req, status: 'completed' as BookingStatus } : req
+        req.id === completingBookingId ? { ...req, status: 'completed' as BookingStatus, completion_notes: notes || null } : req
       ));
 
       try {
@@ -919,6 +919,12 @@ const VenueDashboard = () => {
                             <XCircle className="w-4 h-4 mr-1" />
                             Cancel Booking
                           </Button>
+                        </div>
+                      )}
+                      {request.status === 'completed' && (request as any).completion_notes && (
+                        <div className="px-3 py-2 rounded-lg bg-muted/50 border border-border/50 mb-3">
+                          <p className="text-xs font-medium text-muted-foreground mb-0.5">Completion Notes</p>
+                          <p className="text-sm text-foreground">"{(request as any).completion_notes}"</p>
                         </div>
                       )}
                       {request.status === 'completed' && (
