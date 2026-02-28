@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, XCircle, DollarSign, Building2, Users, BarChart3, Shield } from 'lucide-react';
+import { Music, Calendar, MapPin, MessageSquare, Settings, Plus, LogOut, Star, CheckCircle, XCircle, DollarSign, Building2, Users, BarChart3, Shield, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { TravelDate, BookingRequest, Artist, BOOKING_STATUS_LABELS, BookingStatus } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
@@ -27,6 +27,7 @@ import ArtistEPKUpload from '@/components/ArtistEPKUpload';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import CompleteBookingDialog from '@/components/CompleteBookingDialog';
+import BookingDetailModal from '@/components/BookingDetailModal';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import logo from '@/assets/logo.png';
@@ -65,6 +66,9 @@ const ArtistDashboard = () => {
   
   // Status filter state
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+
+  // Booking detail modal state
+  const [detailBooking, setDetailBooking] = useState<BookingRequest | null>(null);
   
   // Negotiation limit check
   const { hasReachedLimit, remainingRounds, roundCount } = useNegotiationLimit(selectedBooking?.id);
@@ -861,6 +865,17 @@ const ArtistDashboard = () => {
                           )}
                         </div>
                       )}
+                      <div className="mt-2 pt-2 border-t border-border/30">
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs text-muted-foreground"
+                          onClick={() => setDetailBooking(request)}
+                        >
+                          <FileText className="w-3 h-3 mr-1" />
+                          View Details
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1036,6 +1051,14 @@ const ArtistDashboard = () => {
         isSubmitting={isCompleting}
         bookingDate={completingBookingId ? bookingRequests.find(r => r.id === completingBookingId)?.requested_date ? format(new Date(bookingRequests.find(r => r.id === completingBookingId)!.requested_date), 'MMMM d, yyyy') : undefined : undefined}
         otherPartyName={completingBookingId ? bookingRequests.find(r => r.id === completingBookingId)?.venue?.venue_name : undefined}
+      />
+
+      {/* Booking Detail Modal */}
+      <BookingDetailModal
+        open={!!detailBooking}
+        onOpenChange={(open) => !open && setDetailBooking(null)}
+        booking={detailBooking}
+        currentUserType="artist"
       />
     </div>
   );
