@@ -26,6 +26,7 @@ import UserDisputes from '@/components/UserDisputes';
 import PayBookingButton from '@/components/PayBookingButton';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
+import CompleteBookingDialog from '@/components/CompleteBookingDialog';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import logo from '@/assets/logo.png';
@@ -58,6 +59,11 @@ const VenueDashboard = () => {
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+
+  // Complete booking dialog state
+  const [completeDialogOpen, setCompleteDialogOpen] = useState(false);
+  const [completingBookingId, setCompletingBookingId] = useState<string | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
   
   // Status filter state
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -252,30 +258,35 @@ const VenueDashboard = () => {
     navigate('/');
   };
 
-  const handleMarkCompleted = async (requestId: string) => {
-    const request = bookingRequests.find(r => r.id === requestId);
+  const handleOpenCompleteDialog = (bookingId: string) => {
+    setCompletingBookingId(bookingId);
+    setCompleteDialogOpen(true);
+  };
+
+  const handleConfirmComplete = async (_notes: string) => {
+    if (!completingBookingId) return;
+    const request = bookingRequests.find(r => r.id === completingBookingId);
     if (!request) return;
 
+    setIsCompleting(true);
     try {
       await executeWithRetry(async () => {
         const { error } = await supabase
           .from('booking_requests')
           .update({ status: 'completed' as BookingStatus })
-          .eq('id', requestId);
-        
+          .eq('id', completingBookingId);
         if (error) throw error;
       }, 'marking booking complete');
-      
-      setBookingRequests(prev => prev.map(req => 
-        req.id === requestId ? { ...req, status: 'completed' as BookingStatus } : req
+
+      setBookingRequests(prev => prev.map(req =>
+        req.id === completingBookingId ? { ...req, status: 'completed' as BookingStatus } : req
       ));
-      
-      // Send review request notifications to both parties (fire and forget)
+
       try {
         await supabase.functions.invoke('send-booking-notification', {
           body: {
             type: 'completed',
-            booking_request_id: requestId,
+            booking_request_id: completingBookingId,
             requested_date: request.requested_date,
           },
         });
@@ -287,8 +298,11 @@ const VenueDashboard = () => {
         title: "Booking marked as completed",
         description: "You can now leave a review for the artist.",
       });
+      setCompleteDialogOpen(false);
     } catch (error) {
       showErrorWithTitle(error, "Error marking booking complete", 'mark-complete');
+    } finally {
+      setIsCompleting(false);
     }
   };
 
@@ -889,7 +903,7 @@ const VenueDashboard = () => {
                             <Button 
                               size="sm"
                               variant="outline"
-                              onClick={() => handleMarkCompleted(request.id)}
+                              onClick={() => handleOpenCompleteDialog(request.id)}
                             >
                               <CheckCircle className="w-4 h-4 mr-1" />
                               Mark as Completed
@@ -1113,6 +1127,16 @@ const VenueDashboard = () => {
         isSubmitting={isCancelling}
         bookingDate={cancellingBookingId ? bookingRequests.find(r => r.id === cancellingBookingId)?.requested_date ? format(new Date(bookingRequests.find(r => r.id === cancellingBookingId)!.requested_date), 'MMMM d, yyyy') : undefined : undefined}
         otherPartyName={cancellingBookingId ? bookingRequests.find(r => r.id === cancellingBookingId)?.artist?.artist_name : undefined}
+      />
+
+      {/* Complete Booking Dialog */}
+      <CompleteBookingDialog
+        open={completeDialogOpen}
+        onOpenChange={setCompleteDialogOpen}
+        onConfirm={handleConfirmComplete}
+        isSubmitting={isCompleting}
+        bookingDate={completingBookingId ? bookingRequests.find(r => r.id === completingBookingId)?.requested_date ? format(new Date(bookingRequests.find(r => r.id === completingBookingId)!.requested_date), 'MMMM d, yyyy') : undefined : undefined}
+        otherPartyName={completingBookingId ? bookingRequests.find(r => r.id === completingBookingId)?.artist?.artist_name : undefined}
       />
     </div>
   );
