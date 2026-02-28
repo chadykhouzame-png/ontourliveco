@@ -518,7 +518,8 @@ const ArtistDashboard = () => {
     accepted: acceptedRequests.length,
     completed: completedRequests.length,
     declined: declinedRequests.length,
-  }), [bookingRequests.length, pendingRequests.length, acceptedRequests.length, completedRequests.length, declinedRequests.length]);
+    cancelled: bookingRequests.filter(r => r.status === 'cancelled').length,
+  }), [bookingRequests.length, pendingRequests.length, acceptedRequests.length, completedRequests.length, declinedRequests.length, bookingRequests]);
   
   // Filtered booking requests based on status filter
   const filteredBookingRequests = useMemo(() => {
