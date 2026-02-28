@@ -186,6 +186,7 @@ export type Database = {
       booking_requests: {
         Row: {
           artist_id: string
+          completion_notes: string | null
           counter_offer: number | null
           created_at: string
           id: string
@@ -204,6 +205,7 @@ export type Database = {
         }
         Insert: {
           artist_id: string
+          completion_notes?: string | null
           counter_offer?: number | null
           created_at?: string
           id?: string
@@ -222,6 +224,7 @@ export type Database = {
         }
         Update: {
           artist_id?: string
+          completion_notes?: string | null
           counter_offer?: number | null
           created_at?: string
           id?: string
