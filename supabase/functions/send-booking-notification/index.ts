@@ -108,7 +108,8 @@ function generateBookingEmailContent(
   const url = appUrl || '#';
   
   switch (type) {
-    case 'new_offer': {
+    case 'new_offer':
+    case 'artist_offer': {
       const content = `
         <div style="text-align: center; margin-bottom: 24px;">
           <div style="font-size: 40px; margin-bottom: 12px;">🎵</div>
@@ -329,7 +330,7 @@ function generateReviewEmailContent(
 
 // Input validation schema
 const BookingNotificationSchema = z.object({
-  type: z.enum(['new_offer', 'counter_offer', 'accepted', 'declined', 'cancelled', 'completed']),
+  type: z.enum(['new_offer', 'artist_offer', 'counter_offer', 'accepted', 'declined', 'cancelled', 'completed']),
   booking_request_id: z.string().uuid(),
   sender_name: z.string().min(1).max(200).optional(),
   recipient_user_id: z.string().uuid().optional(),
@@ -554,7 +555,7 @@ serve(async (req: Request) => {
     const emailOptedOut = profile.email_notifications_enabled === false;
 
     // Build notification
-    const notificationTitle = type === 'new_offer' 
+    const notificationTitle = (type === 'new_offer' || type === 'artist_offer')
       ? `New booking request from ${sender_name}`
       : type === 'counter_offer'
         ? `Counter-offer from ${sender_name}`
@@ -564,8 +565,8 @@ serve(async (req: Request) => {
             ? `${sender_name} cancelled your booking`
             : `${sender_name} declined your booking`;
 
-    const notificationMessage = type === 'new_offer'
-      ? `${sender_name} wants to book you for ${formattedDate}${offer_amount ? ` • Offer: $${offer_amount.toLocaleString()}` : ''}`
+    const notificationMessage = (type === 'new_offer' || type === 'artist_offer')
+      ? `${sender_name} wants to book for ${formattedDate}${offer_amount ? ` • Offer: $${offer_amount.toLocaleString()}` : ''}`
       : type === 'counter_offer'
         ? `Counter-offer of $${counter_offer?.toLocaleString()} for ${formattedDate}`
         : type === 'accepted'
