@@ -39,7 +39,7 @@ export default function BookingDetailModal({
     : booking.artist?.artist_name || 'Unknown Artist';
   const artistName = booking.artist?.artist_name || 'Unknown Artist';
   const venueName = booking.venue?.venue_name || 'Unknown Venue';
-  const completionNotes = (booking as any).completion_notes as string | undefined;
+  const completionNotes = booking.completion_notes;
 
   const agreedAmount = booking.counter_offer || booking.offer_amount;
   const isNegotiating = booking.status === 'pending' && !!booking.counter_offer;
@@ -66,7 +66,7 @@ export default function BookingDetailModal({
               </div>
               <div className="flex items-center gap-2">
                 {isNegotiating && (
-                  <Badge variant="outline" className={`border-${currentUserType === 'artist' ? 'artist' : 'venue'}/50 text-${currentUserType === 'artist' ? 'artist' : 'venue'}`}>
+                  <Badge variant="outline" className={currentUserType === 'artist' ? 'border-artist/50 text-artist' : 'border-venue/50 text-venue'}>
                     Negotiating
                   </Badge>
                 )}
@@ -153,7 +153,7 @@ export default function BookingDetailModal({
                   </div>
                 )}
               </div>
-              {booking.status === 'accepted' && agreedAmount != null && (
+              {(booking.status === 'accepted' || booking.status === 'completed') && agreedAmount != null && (
                 <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
                   <CheckCircle className="w-4 h-4 text-primary" />
                   <div>
