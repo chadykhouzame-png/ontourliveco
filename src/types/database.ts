@@ -100,6 +100,7 @@ export interface BookingRequest {
   payment_amount?: number;
   payment_intent_id?: string;
   platform_fee?: number;
+  completion_notes?: string;
   created_at: string;
   updated_at: string;
   artist?: Artist;
