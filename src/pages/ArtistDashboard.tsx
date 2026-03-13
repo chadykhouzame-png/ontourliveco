@@ -24,6 +24,7 @@ import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
 import StripeConnectSetup from '@/components/StripeConnectSetup';
 import ArtistEPKUpload from '@/components/ArtistEPKUpload';
+import SocialMediaDashboard from '@/components/SocialMediaDashboard';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import CompleteBookingDialog from '@/components/CompleteBookingDialog';
