@@ -885,6 +885,13 @@ const ArtistDashboard = () => {
           </Card>
         </div>
 
+        {/* Social Media Dashboard */}
+        {artist && (
+          <div className="mt-6">
+            <SocialMediaDashboard artistId={artist.id} />
+          </div>
+        )}
+
         {/* Payment Setup */}
         {artist && (
           <div className="mt-6">
