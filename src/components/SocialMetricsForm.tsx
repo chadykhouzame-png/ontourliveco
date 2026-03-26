@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, type MouseEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
@@ -124,34 +124,45 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   };
 
   const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null);
-  const [lastRemoved, setLastRemoved] = useState<{ platform: PlatformMetrics; index: number } | null>(null);
+
+  const requestRemovePlatform = (index: number, event?: MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    setPendingRemoveIndex(index);
+  };
 
   const confirmRemovePlatform = () => {
-    if (pendingRemoveIndex !== null) {
-      const removed = platforms[pendingRemoveIndex];
-      setPlatforms(prev => prev.filter((_, i) => i !== pendingRemoveIndex));
-      setLastRemoved({ platform: removed, index: pendingRemoveIndex });
+    if (pendingRemoveIndex === null) return;
+
+    const removedIndex = pendingRemoveIndex;
+    const removed = platforms[removedIndex];
+
+    if (!removed) {
       setPendingRemoveIndex(null);
-      toast({
-        title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
-        description: 'Click Undo to restore it.',
-        action: (
-          <ToastAction
-            altText="Undo remove platform"
-            onClick={() => {
-              setPlatforms(prev => {
-                const copy = [...prev];
-                copy.splice(pendingRemoveIndex, 0, removed);
-                return copy;
-              });
-              setLastRemoved(null);
-            }}
-          >
-            Undo
-          </ToastAction>
-        ),
-      });
+      return;
     }
+
+    setPlatforms(prev => prev.filter((_, i) => i !== removedIndex));
+    setPendingRemoveIndex(null);
+
+    toast({
+      title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
+      description: 'Click Undo to restore it.',
+      action: (
+        <ToastAction
+          altText="Undo remove platform"
+          onClick={() => {
+            setPlatforms(prev => {
+              const copy = [...prev];
+              copy.splice(removedIndex, 0, removed);
+              return copy;
+            });
+          }}
+        >
+          Undo
+        </ToastAction>
+      ),
+    });
   };
 
   const updateField = (index: number, field: keyof PlatformMetrics, value: string | number | null) => {
@@ -267,10 +278,12 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
                   <span className="font-semibold text-sm">{config.name}</span>
                 </div>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setPendingRemoveIndex(index)}
+                  onClick={(event) => requestRemovePlatform(index, event)}
                   className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                  aria-label={`Remove ${config.name}`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -418,24 +431,26 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
       </CardContent>
     </Card>
 
-      <AlertDialog open={pendingRemoveIndex !== null} onOpenChange={(open) => !open && setPendingRemoveIndex(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove platform?</AlertDialogTitle>
-            <AlertDialogDescription>
+      <Dialog open={pendingRemoveIndex !== null} onOpenChange={(open) => !open && setPendingRemoveIndex(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Remove platform?</DialogTitle>
+            <DialogDescription>
               {pendingRemoveIndex !== null && platforms[pendingRemoveIndex] && (
                 <>This will remove <strong>{PLATFORM_CONFIG[platforms[pendingRemoveIndex].platform].name}</strong> and its metrics. You can re-add it later.</>
               )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmRemovePlatform} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setPendingRemoveIndex(null)}>
+              Cancel
+            </Button>
+            <Button type="button" variant="destructive" onClick={confirmRemovePlatform}>
               Remove
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
