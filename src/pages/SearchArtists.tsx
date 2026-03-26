@@ -562,6 +562,18 @@ const SearchArtists = () => {
                   <X className="w-3 h-3 cursor-pointer" onClick={() => { setFilterByRating(false); setMinRating(0); }} />
                 </Badge>
               )}
+              {filterByReach && minFollowers > 0 && (
+                <Badge variant="secondary" className="gap-1 flex items-center">
+                  <Users className="w-3 h-3" /> {formatFollowers(minFollowers)}+
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => { setFilterByReach(false); setMinFollowers(0); }} />
+                </Badge>
+              )}
+              {sortBy !== 'name' && (
+                <Badge variant="secondary" className="gap-1 flex items-center">
+                  <ArrowUpDown className="w-3 h-3" /> {sortBy === 'followers' ? 'Most Followers' : sortBy === 'engagement' ? 'Engagement' : 'Rating'}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setSortBy('name')} />
+                </Badge>
+              )}
               <Button variant="ghost" size="sm" onClick={clearFilters}>
                 Clear all
               </Button>
