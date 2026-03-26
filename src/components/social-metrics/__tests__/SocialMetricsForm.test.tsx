@@ -46,9 +46,10 @@ vi.mock('@/integrations/supabase/client', () => ({
   },
 }));
 
+const mockToast = vi.fn();
 vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({
-    toast: vi.fn(),
+    toast: mockToast,
   }),
 }));
 
@@ -57,6 +58,7 @@ describe('SocialMetricsForm', () => {
     vi.clearAllMocks();
     selectCallCount = 0;
     selectReturnData = [[]];
+    mockToast.mockClear();
   });
 
   it('renders loading state then form', async () => {
@@ -344,6 +346,132 @@ describe('SocialMetricsForm - pre-existing platforms', () => {
       );
       expect(mockUpdate).not.toHaveBeenCalled();
       expect(mockInsert).not.toHaveBeenCalled();
+  });
+});
+
+describe('SocialMetricsForm - validation errors', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    selectCallCount = 0;
+    selectReturnData = [[]];
+    mockToast.mockClear();
+  });
+
+  it('shows validation error for username exceeding 100 chars', async () => {
+    render(<SocialMetricsForm artistId="artist-123" />);
+    await waitFor(() => {
+      expect(screen.getByText('Spotify')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Spotify'));
+    const usernameInput = screen.getByPlaceholderText('@username');
+    fireEvent.change(usernameInput, { target: { value: 'a'.repeat(101) } });
+
+    fireEvent.click(screen.getByText('Save Social Metrics'));
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variant: 'destructive',
+          title: expect.stringContaining('Spotify'),
+        })
+      );
+      // Should NOT call insert since validation failed
+      expect(mockInsert).not.toHaveBeenCalled();
     });
   });
+
+  it('shows validation error for invalid URL format', async () => {
+    render(<SocialMetricsForm artistId="artist-123" />);
+    await waitFor(() => {
+      expect(screen.getByText('Spotify')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Spotify'));
+    const urlInput = screen.getByPlaceholderText('https://...');
+    fireEvent.change(urlInput, { target: { value: 'ftp://invalid-protocol.com' } });
+
+    fireEvent.click(screen.getByText('Save Social Metrics'));
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variant: 'destructive',
+          title: expect.stringContaining('Spotify'),
+        })
+      );
+      expect(mockInsert).not.toHaveBeenCalled();
+    });
+  });
+
+  it('allows valid http and https URLs', async () => {
+    render(<SocialMetricsForm artistId="artist-123" />);
+    await waitFor(() => {
+      expect(screen.getByText('Spotify')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('Spotify'));
+    const urlInput = screen.getByPlaceholderText('https://...');
+    fireEvent.change(urlInput, { target: { value: 'https://open.spotify.com/artist/123' } });
+
+    fireEvent.click(screen.getByText('Save Social Metrics'));
+
+    await waitFor(() => {
+      expect(mockInsert).toHaveBeenCalled();
+      // Toast should not be called with destructive variant
+      const destructiveCalls = mockToast.mock.calls.filter(
+        (call: any[]) => call[0]?.variant === 'destructive'
+      );
+      expect(destructiveCalls).toHaveLength(0);
+    });
+  });
+
+  it('allows empty optional fields without validation error', async () => {
+    render(<SocialMetricsForm artistId="artist-123" />);
+    await waitFor(() => {
+      expect(screen.getByText('Spotify')).toBeInTheDocument();
+    });
+
+    // Add platform but leave all fields empty (defaults)
+    fireEvent.click(screen.getByText('Spotify'));
+    fireEvent.click(screen.getByText('Save Social Metrics'));
+
+    await waitFor(() => {
+      expect(mockInsert).toHaveBeenCalled();
+      const destructiveCalls = mockToast.mock.calls.filter(
+        (call: any[]) => call[0]?.variant === 'destructive'
+      );
+      expect(destructiveCalls).toHaveLength(0);
+    });
+  });
+
+  it('blocks save when any platform has invalid data', async () => {
+    render(<SocialMetricsForm artistId="artist-123" />);
+    await waitFor(() => {
+      expect(screen.getByText('Spotify')).toBeInTheDocument();
+    });
+
+    // Add two platforms
+    fireEvent.click(screen.getByText('Spotify'));
+    fireEvent.click(screen.getByText('Instagram'));
+
+    // Make Instagram invalid with bad URL
+    const urlInputs = screen.getAllByPlaceholderText('https://...');
+    fireEvent.change(urlInputs[1], { target: { value: 'not-a-url' } });
+
+    fireEvent.click(screen.getByText('Save Social Metrics'));
+
+    await waitFor(() => {
+      expect(mockToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variant: 'destructive',
+          title: expect.stringContaining('Instagram'),
+        })
+      );
+      // Neither platform should be saved
+      expect(mockInsert).not.toHaveBeenCalled();
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+  });
+});
 });
