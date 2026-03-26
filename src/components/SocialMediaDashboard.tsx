@@ -24,6 +24,7 @@ interface SocialConnection {
 interface SocialMediaDashboardProps {
   artistId: string;
   className?: string;
+  usePublicView?: boolean;
 }
 
 const PLATFORM_CONFIG: Record<string, {
@@ -78,25 +79,25 @@ const formatEngagementRate = (rate: number): string => {
   return `${rate.toFixed(2)}%`;
 };
 
-export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboardProps) => {
+export const SocialMediaDashboard = ({ artistId, className, usePublicView = false }: SocialMediaDashboardProps) => {
   const [connections, setConnections] = useState<SocialConnection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchConnections = async () => {
-      const { data, error } = await supabase
-        .from('social_connections')
-        .select('id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at, likes_count, comments_count, shares_count, engagement_rate, avg_likes_per_post, avg_comments_per_post')
-        .eq('artist_id', artistId);
+      const selectCols = 'id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at, likes_count, comments_count, shares_count, engagement_rate, avg_likes_per_post, avg_comments_per_post';
+      const result = usePublicView
+        ? await supabase.from('social_connections_public').select(selectCols).eq('artist_id', artistId)
+        : await supabase.from('social_connections').select(selectCols).eq('artist_id', artistId);
 
-      if (!error && data) {
-        setConnections(data as SocialConnection[]);
+      if (!result.error && result.data) {
+        setConnections(result.data as unknown as SocialConnection[]);
       }
       setIsLoading(false);
     };
 
     fetchConnections();
-  }, [artistId]);
+  }, [artistId, usePublicView]);
 
   const connectedPlatforms = connections.filter(c => c.is_connected);
   const totalFollowers = connectedPlatforms.reduce((sum, c) => sum + (c.follower_count || 0), 0);
