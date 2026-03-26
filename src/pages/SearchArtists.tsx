@@ -663,6 +663,22 @@ const SearchArtists = () => {
                     </div>
                   )}
 
+                  {/* Social Reach */}
+                  {artist.socialReach && artist.socialReach.total_followers > 0 && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Users className="w-3.5 h-3.5" />
+                        <span className="text-sm font-medium">{formatFollowers(artist.socialReach.total_followers)}</span>
+                      </div>
+                      {artist.socialReach.avg_engagement_rate != null && artist.socialReach.avg_engagement_rate > 0 && (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <TrendingUp className="w-3.5 h-3.5" />
+                          <span className="text-sm font-medium">{artist.socialReach.avg_engagement_rate.toFixed(1)}% eng.</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   {/* Social Link */}
                   {artist.instagram_url && (
                     <div className="mt-3 flex items-center gap-2 text-muted-foreground">
