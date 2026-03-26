@@ -10,7 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagram, Filter, X, LogOut, DollarSign, Star } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagram, Filter, X, LogOut, DollarSign, Star, Users, TrendingUp, ArrowUpDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
