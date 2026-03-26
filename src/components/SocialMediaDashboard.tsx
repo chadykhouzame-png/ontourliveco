@@ -84,22 +84,58 @@ const formatEngagementRate = (rate: number): string => {
 export const SocialMediaDashboard = ({ artistId, className, usePublicView = false }: SocialMediaDashboardProps) => {
   const [connections, setConnections] = useState<SocialConnection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const { toast } = useToast();
+
+  const fetchConnections = useCallback(async () => {
+    const selectCols = 'id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at, likes_count, comments_count, shares_count, engagement_rate, avg_likes_per_post, avg_comments_per_post';
+    const result = usePublicView
+      ? await supabase.from('social_connections_public').select(selectCols).eq('artist_id', artistId)
+      : await supabase.from('social_connections').select(selectCols).eq('artist_id', artistId);
+
+    if (!result.error && result.data) {
+      setConnections(result.data as unknown as SocialConnection[]);
+    }
+    setIsLoading(false);
+  }, [artistId, usePublicView]);
 
   useEffect(() => {
-    const fetchConnections = async () => {
-      const selectCols = 'id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at, likes_count, comments_count, shares_count, engagement_rate, avg_likes_per_post, avg_comments_per_post';
-      const result = usePublicView
-        ? await supabase.from('social_connections_public').select(selectCols).eq('artist_id', artistId)
-        : await supabase.from('social_connections').select(selectCols).eq('artist_id', artistId);
-
-      if (!result.error && result.data) {
-        setConnections(result.data as unknown as SocialConnection[]);
-      }
-      setIsLoading(false);
-    };
-
     fetchConnections();
-  }, [artistId, usePublicView]);
+  }, [fetchConnections]);
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({ title: 'Please log in to sync', variant: 'destructive' });
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke('sync-social-stats', {
+        body: { artist_id: artistId },
+      });
+
+      if (error) throw error;
+
+      const synced = Object.entries(data?.results || {}).filter(([, v]: [string, any]) => v.synced);
+      const skipped = Object.entries(data?.results || {}).filter(([, v]: [string, any]) => !v.synced);
+
+      if (synced.length > 0) {
+        toast({ title: `Synced ${synced.map(([k]) => k).join(', ')}` });
+        await fetchConnections();
+      } else if (skipped.length > 0) {
+        toast({
+          title: 'No platforms synced',
+          description: 'API credentials are not yet configured. Use manual entry for now.',
+        });
+      }
+    } catch (err: any) {
+      toast({ title: 'Sync failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const connectedPlatforms = connections.filter(c => c.is_connected);
   const totalFollowers = connectedPlatforms.reduce((sum, c) => sum + (c.follower_count || 0), 0);
