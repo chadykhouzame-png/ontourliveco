@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ToastAction } from '@/components/ui/toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Music, Instagram, Save, Plus, Trash2, Loader2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -122,32 +122,12 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
     setPlatforms(prev => [...prev, emptyMetrics(platform)]);
   };
 
-  const removePlatform = (index: number) => {
-    const removed = platforms[index];
-    if (!removed) return;
+  const [removeDialogIndex, setRemoveDialogIndex] = useState<number | null>(null);
 
-    setPlatforms(prev => prev.filter((_, i) => i !== index));
-
-    const platformName = PLATFORM_CONFIG[removed.platform]?.name ?? 'Platform';
-
-    toast({
-      title: `${platformName} removed`,
-      description: 'Click Undo to restore it.',
-      action: (
-        <ToastAction
-          altText={`Undo removing ${platformName}`}
-          onClick={() => {
-            setPlatforms(prev => {
-              const copy = [...prev];
-              copy.splice(index, 0, removed);
-              return copy;
-            });
-          }}
-        >
-          Undo
-        </ToastAction>
-      ),
-    });
+  const confirmRemovePlatform = () => {
+    if (removeDialogIndex === null) return;
+    setPlatforms(prev => prev.filter((_, i) => i !== removeDialogIndex));
+    setRemoveDialogIndex(null);
   };
 
   const updateField = (index: number, field: keyof PlatformMetrics, value: string | number | null) => {
