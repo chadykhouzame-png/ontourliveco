@@ -222,6 +222,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   }
 
   return (
+    <>
     <Card className="glass border-border/50 rounded-2xl overflow-hidden">
       <CardHeader className="border-b border-border/30 bg-secondary/20">
         <CardTitle className="flex items-center gap-2 text-lg">
