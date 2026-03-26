@@ -99,9 +99,33 @@ export const SocialMediaDashboard = ({ artistId, className, usePublicView = fals
     setIsLoading(false);
   }, [artistId, usePublicView]);
 
+  // Auto-sync on load (non-public view only, throttled to once per hour)
+  const triggerAutoSync = useCallback(async () => {
+    if (usePublicView) return;
+
+    const SYNC_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
+    const cacheKey = `social_sync_${artistId}`;
+    const lastSync = localStorage.getItem(cacheKey);
+    if (lastSync && Date.now() - Number(lastSync) < SYNC_COOLDOWN_MS) return;
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      localStorage.setItem(cacheKey, String(Date.now()));
+      await supabase.functions.invoke('sync-social-stats', {
+        body: { artist_id: artistId },
+      });
+      // Refresh data after background sync
+      await fetchConnections();
+    } catch (err) {
+      console.error('Auto-sync failed:', err);
+    }
+  }, [artistId, usePublicView, fetchConnections]);
+
   useEffect(() => {
-    fetchConnections();
-  }, [fetchConnections]);
+    fetchConnections().then(() => triggerAutoSync());
+  }, [fetchConnections, triggerAutoSync]);
 
   const handleSync = async () => {
     setIsSyncing(true);
@@ -377,7 +401,7 @@ export const SocialMediaDashboard = ({ artistId, className, usePublicView = fals
             {/* Footer */}
             {connectedPlatforms.some(c => c.last_synced_at) && (
               <p className="text-[10px] text-muted-foreground text-center">
-                Data from connected accounts • Coming soon: auto-sync
+                Data syncs automatically • Last updated {new Date(Math.max(...connectedPlatforms.filter(c => c.last_synced_at).map(c => new Date(c.last_synced_at!).getTime()))).toLocaleDateString()}
               </p>
             )}
           </div>

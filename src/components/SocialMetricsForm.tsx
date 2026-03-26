@@ -152,7 +152,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
             <Settings className="w-5 h-5 text-primary" />
             Social Media Metrics
           </CardTitle>
-          <CardDescription>Manually enter your follower counts and engagement stats</CardDescription>
+          <CardDescription>Your stats sync automatically. You can also manually adjust values here.</CardDescription>
         </CardHeader>
         <CardContent className="pt-6 space-y-6">
           {platforms.map((platform, index) => (
