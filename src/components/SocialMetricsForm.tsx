@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -121,8 +121,13 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
     setPlatforms(prev => [...prev, emptyMetrics(platform)]);
   };
 
-  const removePlatform = (index: number) => {
-    setPlatforms(prev => prev.filter((_, i) => i !== index));
+  const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null);
+
+  const confirmRemovePlatform = () => {
+    if (pendingRemoveIndex !== null) {
+      setPlatforms(prev => prev.filter((_, i) => i !== pendingRemoveIndex));
+      setPendingRemoveIndex(null);
+    }
   };
 
   const updateField = (index: number, field: keyof PlatformMetrics, value: string | number | null) => {
