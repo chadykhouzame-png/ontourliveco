@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Instagram, TrendingUp, Users, ExternalLink, Link2, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react';
+import { Music, Instagram, TrendingUp, Users, ExternalLink, Link2, Heart, MessageCircle, Share2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SocialConnection {
@@ -15,6 +13,12 @@ interface SocialConnection {
   is_connected: boolean;
   profile_url: string | null;
   last_synced_at: string | null;
+  likes_count: number | null;
+  comments_count: number | null;
+  shares_count: number | null;
+  engagement_rate: number | null;
+  avg_likes_per_post: number | null;
+  avg_comments_per_post: number | null;
 }
 
 interface SocialMediaDashboardProps {
@@ -64,14 +68,14 @@ const PLATFORM_CONFIG: Record<string, {
   },
 };
 
-const formatFollowerCount = (count: number): string => {
+const formatCount = (count: number): string => {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
   if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
   return count.toString();
 };
 
-const formatFullCount = (count: number): string => {
-  return count.toLocaleString();
+const formatEngagementRate = (rate: number): string => {
+  return `${rate.toFixed(2)}%`;
 };
 
 export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboardProps) => {
@@ -82,7 +86,7 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
     const fetchConnections = async () => {
       const { data, error } = await supabase
         .from('social_connections')
-        .select('id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at')
+        .select('id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at, likes_count, comments_count, shares_count, engagement_rate, avg_likes_per_post, avg_comments_per_post')
         .eq('artist_id', artistId);
 
       if (!error && data) {
@@ -96,7 +100,11 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
 
   const connectedPlatforms = connections.filter(c => c.is_connected);
   const totalFollowers = connectedPlatforms.reduce((sum, c) => sum + (c.follower_count || 0), 0);
+  const totalLikes = connectedPlatforms.reduce((sum, c) => sum + (c.likes_count || 0), 0);
+  const totalComments = connectedPlatforms.reduce((sum, c) => sum + (c.comments_count || 0), 0);
+  const totalShares = connectedPlatforms.reduce((sum, c) => sum + (c.shares_count || 0), 0);
   const platformsWithFollowers = connectedPlatforms.filter(c => c.follower_count && c.follower_count > 0);
+  const hasEngagementData = connectedPlatforms.some(c => c.likes_count || c.comments_count || c.shares_count || c.engagement_rate);
 
   if (isLoading) {
     return (
@@ -136,21 +144,29 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
           </div>
         ) : (
           <div className="space-y-6">
-            {/* Total Reach Summary */}
-            {totalFollowers > 0 && (
-              <div className="p-4 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-sm font-medium text-muted-foreground">Total Reach</span>
-                  <Users className="w-4 h-4 text-primary" />
-                </div>
-                <p className="text-3xl font-bold tracking-tight">
-                  {formatFollowerCount(totalFollowers)}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  across {platformsWithFollowers.length} {platformsWithFollowers.length === 1 ? 'platform' : 'platforms'}
-                </p>
+            {/* Summary Stats Row */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3 rounded-xl bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20 text-center">
+                <Users className="w-4 h-4 text-primary mx-auto mb-1" />
+                <p className="text-xl font-bold tracking-tight">{formatCount(totalFollowers)}</p>
+                <p className="text-[10px] text-muted-foreground">Followers</p>
               </div>
-            )}
+              <div className="p-3 rounded-xl bg-gradient-to-br from-destructive/5 to-destructive/10 border border-destructive/20 text-center">
+                <Heart className="w-4 h-4 text-destructive mx-auto mb-1" />
+                <p className="text-xl font-bold tracking-tight">{formatCount(totalLikes)}</p>
+                <p className="text-[10px] text-muted-foreground">Likes</p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-accent/20 to-accent/30 border border-accent/30 text-center">
+                <MessageCircle className="w-4 h-4 text-accent-foreground mx-auto mb-1" />
+                <p className="text-xl font-bold tracking-tight">{formatCount(totalComments)}</p>
+                <p className="text-[10px] text-muted-foreground">Comments</p>
+              </div>
+              <div className="p-3 rounded-xl bg-gradient-to-br from-secondary/50 to-secondary/70 border border-border/50 text-center">
+                <Share2 className="w-4 h-4 text-foreground mx-auto mb-1" />
+                <p className="text-xl font-bold tracking-tight">{formatCount(totalShares)}</p>
+                <p className="text-[10px] text-muted-foreground">Shares</p>
+              </div>
+            </div>
 
             {/* Platform Breakdown */}
             <div className="space-y-3">
@@ -158,8 +174,8 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
                 const config = PLATFORM_CONFIG[connection.platform];
                 if (!config) return null;
                 const Icon = config.icon;
-                const percentage = totalFollowers > 0 && connection.follower_count 
-                  ? Math.round((connection.follower_count / totalFollowers) * 100) 
+                const percentage = totalFollowers > 0 && connection.follower_count
+                  ? Math.round((connection.follower_count / totalFollowers) * 100)
                   : 0;
 
                 return (
@@ -172,10 +188,7 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <div className={cn(
-                          "w-9 h-9 rounded-lg flex items-center justify-center",
-                          config.bgColor
-                        )}>
+                        <div className={cn("w-9 h-9 rounded-lg flex items-center justify-center", config.bgColor)}>
                           <Icon className={cn("w-4 h-4", config.color)} />
                         </div>
                         <div>
@@ -186,10 +199,10 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {connection.follower_count !== null && connection.follower_count !== undefined && (
+                        {connection.follower_count != null && (
                           <div className="text-right">
                             <p className="font-bold text-lg leading-none">
-                              {formatFollowerCount(connection.follower_count)}
+                              {formatCount(connection.follower_count)}
                             </p>
                             <p className="text-[10px] text-muted-foreground">followers</p>
                           </div>
@@ -206,6 +219,47 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
                         )}
                       </div>
                     </div>
+
+                    {/* Engagement metrics row */}
+                    {(connection.likes_count || connection.comments_count || connection.shares_count || connection.engagement_rate) && (
+                      <div className="flex flex-wrap items-center gap-3 mb-3 text-xs text-muted-foreground">
+                        {connection.likes_count != null && (
+                          <span className="flex items-center gap-1">
+                            <Heart className="w-3 h-3 text-destructive" />
+                            {formatCount(connection.likes_count)}
+                          </span>
+                        )}
+                        {connection.comments_count != null && (
+                          <span className="flex items-center gap-1">
+                            <MessageCircle className="w-3 h-3" />
+                            {formatCount(connection.comments_count)}
+                          </span>
+                        )}
+                        {connection.shares_count != null && (
+                          <span className="flex items-center gap-1">
+                            <Share2 className="w-3 h-3" />
+                            {formatCount(connection.shares_count)}
+                          </span>
+                        )}
+                        {connection.engagement_rate != null && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 font-mono">
+                            {formatEngagementRate(connection.engagement_rate)} eng. rate
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Avg per post */}
+                    {(connection.avg_likes_per_post || connection.avg_comments_per_post) && (
+                      <div className="flex gap-4 mb-3 text-[10px] text-muted-foreground">
+                        {connection.avg_likes_per_post != null && (
+                          <span>~{formatCount(connection.avg_likes_per_post)} likes/post</span>
+                        )}
+                        {connection.avg_comments_per_post != null && (
+                          <span>~{formatCount(connection.avg_comments_per_post)} comments/post</span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Share of total bar */}
                     {totalFollowers > 0 && connection.follower_count && connection.follower_count > 0 && (
@@ -227,7 +281,7 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
               })}
             </div>
 
-            {/* Platform Distribution Chart */}
+            {/* Audience Distribution Chart */}
             {platformsWithFollowers.length > 1 && (
               <div className="p-4 rounded-xl bg-secondary/30 border border-border/30">
                 <p className="text-xs font-medium text-muted-foreground mb-3 uppercase tracking-wider">
@@ -237,16 +291,15 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
                   {platformsWithFollowers.map((connection) => {
                     const config = PLATFORM_CONFIG[connection.platform];
                     if (!config) return null;
-                    const percentage = totalFollowers > 0 && connection.follower_count
+                    const pct = totalFollowers > 0 && connection.follower_count
                       ? (connection.follower_count / totalFollowers) * 100
                       : 0;
-
                     return (
                       <div
                         key={connection.id}
                         className={cn("bg-gradient-to-r h-full transition-all", config.gradientFrom, config.gradientTo)}
-                        style={{ width: `${percentage}%` }}
-                        title={`${config.name}: ${formatFullCount(connection.follower_count || 0)} (${Math.round(percentage)}%)`}
+                        style={{ width: `${pct}%` }}
+                        title={`${config.name}: ${connection.follower_count?.toLocaleString() || 0} (${Math.round(pct)}%)`}
                       />
                     );
                   })}
@@ -255,12 +308,11 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
                   {platformsWithFollowers.map((connection) => {
                     const config = PLATFORM_CONFIG[connection.platform];
                     if (!config) return null;
-
                     return (
                       <div key={connection.id} className="flex items-center gap-1.5">
                         <div className={cn("w-2.5 h-2.5 rounded-full bg-gradient-to-r", config.gradientFrom, config.gradientTo)} />
                         <span className="text-[11px] text-muted-foreground">
-                          {config.name} ({formatFollowerCount(connection.follower_count || 0)})
+                          {config.name} ({formatCount(connection.follower_count || 0)})
                         </span>
                       </div>
                     );
@@ -269,10 +321,10 @@ export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboa
               </div>
             )}
 
-            {/* Last synced info */}
+            {/* Footer */}
             {connectedPlatforms.some(c => c.last_synced_at) && (
               <p className="text-[10px] text-muted-foreground text-center">
-                Data from connected accounts • Coming soon: auto-sync & engagement metrics
+                Data from connected accounts • Coming soon: auto-sync
               </p>
             )}
           </div>

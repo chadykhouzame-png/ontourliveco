@@ -786,51 +786,69 @@ export type Database = {
         Row: {
           access_token: string | null
           artist_id: string
+          avg_comments_per_post: number | null
+          avg_likes_per_post: number | null
+          comments_count: number | null
           connected_at: string | null
           created_at: string
+          engagement_rate: number | null
           follower_count: number | null
           id: string
           is_connected: boolean
           last_synced_at: string | null
+          likes_count: number | null
           platform: Database["public"]["Enums"]["social_platform"]
           platform_user_id: string | null
           platform_username: string | null
           profile_url: string | null
           refresh_token: string | null
+          shares_count: number | null
           token_expires_at: string | null
           updated_at: string
         }
         Insert: {
           access_token?: string | null
           artist_id: string
+          avg_comments_per_post?: number | null
+          avg_likes_per_post?: number | null
+          comments_count?: number | null
           connected_at?: string | null
           created_at?: string
+          engagement_rate?: number | null
           follower_count?: number | null
           id?: string
           is_connected?: boolean
           last_synced_at?: string | null
+          likes_count?: number | null
           platform: Database["public"]["Enums"]["social_platform"]
           platform_user_id?: string | null
           platform_username?: string | null
           profile_url?: string | null
           refresh_token?: string | null
+          shares_count?: number | null
           token_expires_at?: string | null
           updated_at?: string
         }
         Update: {
           access_token?: string | null
           artist_id?: string
+          avg_comments_per_post?: number | null
+          avg_likes_per_post?: number | null
+          comments_count?: number | null
           connected_at?: string | null
           created_at?: string
+          engagement_rate?: number | null
           follower_count?: number | null
           id?: string
           is_connected?: boolean
           last_synced_at?: string | null
+          likes_count?: number | null
           platform?: Database["public"]["Enums"]["social_platform"]
           platform_user_id?: string | null
           platform_username?: string | null
           profile_url?: string | null
           refresh_token?: string | null
+          shares_count?: number | null
           token_expires_at?: string | null
           updated_at?: string
         }
@@ -1022,41 +1040,59 @@ export type Database = {
       social_connections_public: {
         Row: {
           artist_id: string | null
+          avg_comments_per_post: number | null
+          avg_likes_per_post: number | null
+          comments_count: number | null
           connected_at: string | null
           created_at: string | null
+          engagement_rate: number | null
           follower_count: number | null
           id: string | null
           is_connected: boolean | null
           last_synced_at: string | null
+          likes_count: number | null
           platform: Database["public"]["Enums"]["social_platform"] | null
           platform_username: string | null
           profile_url: string | null
+          shares_count: number | null
           updated_at: string | null
         }
         Insert: {
           artist_id?: string | null
+          avg_comments_per_post?: number | null
+          avg_likes_per_post?: number | null
+          comments_count?: number | null
           connected_at?: string | null
           created_at?: string | null
+          engagement_rate?: number | null
           follower_count?: number | null
           id?: string | null
           is_connected?: boolean | null
           last_synced_at?: string | null
+          likes_count?: number | null
           platform?: Database["public"]["Enums"]["social_platform"] | null
           platform_username?: string | null
           profile_url?: string | null
+          shares_count?: number | null
           updated_at?: string | null
         }
         Update: {
           artist_id?: string | null
+          avg_comments_per_post?: number | null
+          avg_likes_per_post?: number | null
+          comments_count?: number | null
           connected_at?: string | null
           created_at?: string | null
+          engagement_rate?: number | null
           follower_count?: number | null
           id?: string | null
           is_connected?: boolean | null
           last_synced_at?: string | null
+          likes_count?: number | null
           platform?: Database["public"]["Enums"]["social_platform"] | null
           platform_username?: string | null
           profile_url?: string | null
+          shares_count?: number | null
           updated_at?: string | null
         }
         Relationships: [
