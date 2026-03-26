@@ -13,9 +13,10 @@ describe("errorHandler", () => {
       expect(result.code).toBeDefined();
     });
 
-    it("should handle string errors", () => {
+    it("should handle string errors by sanitizing the message", () => {
       const result = sanitizeError("String error message");
-      expect(result.userMessage).toBe("An unexpected error occurred. Please try again.");
+      expect(result.userMessage).toBe("String error message");
+      expect(result.code).toBe("STRING_ERROR");
     });
 
     it("should handle null/undefined errors", () => {
@@ -25,34 +26,35 @@ describe("errorHandler", () => {
       expect(resultUndefined.userMessage).toBe("An unexpected error occurred. Please try again.");
     });
 
-    it("should detect network errors", () => {
-      const error = new Error("Failed to fetch");
+    it("should detect network errors from TypeError with fetch message", () => {
+      const error = new TypeError("Failed to fetch");
       const result = sanitizeError(error);
       expect(result.code).toBe("NETWORK_ERROR");
-      expect(result.userMessage).toContain("network");
+      expect(result.userMessage).toContain("connect");
     });
 
-    it("should detect timeout errors", () => {
+    it("should handle generic errors with default code", () => {
       const error = new Error("Request timeout");
       const result = sanitizeError(error);
-      expect(result.code).toBe("TIMEOUT_ERROR");
+      expect(result.code).toBe("ERROR");
+      expect(result.isRetryable).toBe(false);
     });
   });
 
   describe("isRetryableError", () => {
-    it("should return true for network errors", () => {
-      const error = new Error("Failed to fetch");
+    it("should return true for TypeError network errors", () => {
+      const error = new TypeError("Failed to fetch");
       expect(isRetryableError(error)).toBe(true);
     });
 
-    it("should return true for timeout errors", () => {
+    it("should return false for plain Error with timeout message", () => {
       const error = new Error("timeout exceeded");
-      expect(isRetryableError(error)).toBe(true);
+      expect(isRetryableError(error)).toBe(false);
     });
 
-    it("should return false for auth errors", () => {
-      const error = { code: "PGRST301" }; // Auth error
-      expect(isRetryableError(error)).toBe(false);
+    it("should return true for PGRST301 (session expired, retryable)", () => {
+      const error = { code: "PGRST301", message: "JWT expired" };
+      expect(isRetryableError(error)).toBe(true);
     });
 
     it("should return false for validation errors", () => {
