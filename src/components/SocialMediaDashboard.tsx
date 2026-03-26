@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Instagram, TrendingUp, Users, ExternalLink, Link2, Heart, MessageCircle, Share2 } from 'lucide-react';
+import { Music, Instagram, TrendingUp, Users, ExternalLink, Link2, Heart, MessageCircle, Share2, RefreshCw, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface SocialConnection {
   id: string;
