@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
-import { Music, Instagram, Save, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Music, Instagram, Save, Plus, Trash2, Loader2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
