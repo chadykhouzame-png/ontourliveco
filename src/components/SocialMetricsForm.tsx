@@ -396,6 +396,25 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
       </CardContent>
     </Card>
 
+    <AlertDialog open={removeDialogIndex !== null} onOpenChange={(open) => { if (!open) setRemoveDialogIndex(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remove platform?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {removeDialogIndex !== null && platforms[removeDialogIndex]
+              ? `Are you sure you want to remove ${PLATFORM_CONFIG[platforms[removeDialogIndex].platform]?.name}? Any unsaved data for this platform will be lost.`
+              : 'Are you sure you want to remove this platform?'}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmRemovePlatform} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     </>
   );
 };
