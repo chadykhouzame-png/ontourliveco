@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useRecordProfileView } from '@/hooks/useAnalytics';
 import { Artist, TravelDate, Venue, GENRE_LABELS } from '@/types/database';
 import { SocialStatsDisplay, SocialPlatform } from '@/components/SocialConnectButton';
+import SocialMediaDashboard from '@/components/SocialMediaDashboard';
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
 import ArtistAvailabilityCalendar from '@/components/ArtistAvailabilityCalendar';
@@ -350,17 +351,9 @@ const ArtistProfile = () => {
               </Card>
             )}
 
-            {/* Social Stats */}
-            {socialConnections.length > 0 && (
-              <Card className="glass border-border/50 rounded-2xl overflow-hidden">
-                <CardHeader className="border-b border-border/30 bg-secondary/20">
-                  <CardTitle className="text-lg">Social Stats</CardTitle>
-                  <CardDescription>Verified follower counts</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-4">
-                  <SocialStatsDisplay connections={socialConnections} />
-                </CardContent>
-              </Card>
+            {/* Social Media Dashboard */}
+            {socialConnections.length > 0 && artist && (
+              <SocialMediaDashboard artistId={artist.id} usePublicView className="" />
             )}
 
             {/* Social Links (legacy URLs) */}
