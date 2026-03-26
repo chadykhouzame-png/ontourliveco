@@ -98,6 +98,65 @@ describe('metricsSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  // Helper for concise boundary tests
+  const parseMetrics = (overrides: Record<string, any>) =>
+    metricsSchema.safeParse({
+      platform_username: '',
+      profile_url: '',
+      follower_count: null,
+      likes_count: null,
+      comments_count: null,
+      shares_count: null,
+      engagement_rate: null,
+      avg_likes_per_post: null,
+      avg_comments_per_post: null,
+      ...overrides,
+    });
+
+  it('accepts URL at exactly 500 chars', () => {
+    const url = 'https://' + 'a'.repeat(492);
+    expect(url).toHaveLength(500);
+    expect(parseMetrics({ profile_url: url }).success).toBe(true);
+  });
+
+  it('rejects URL exceeding 500 chars', () => {
+    const url = 'https://' + 'a'.repeat(493);
+    expect(url).toHaveLength(501);
+    const result = parseMetrics({ profile_url: url });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.errors[0].message).toContain('URL too long');
+    }
+  });
+
+  it('accepts engagement_rate at 0', () => {
+    expect(parseMetrics({ engagement_rate: 0 }).success).toBe(true);
+  });
+
+  it('accepts engagement_rate at 100', () => {
+    expect(parseMetrics({ engagement_rate: 100 }).success).toBe(true);
+  });
+
+  it('rejects engagement_rate at -0.01', () => {
+    expect(parseMetrics({ engagement_rate: -0.01 }).success).toBe(false);
+  });
+
+  it('rejects engagement_rate at 100.01', () => {
+    expect(parseMetrics({ engagement_rate: 100.01 }).success).toBe(false);
+  });
+
+  it('accepts engagement_rate as null', () => {
+    expect(parseMetrics({ engagement_rate: null }).success).toBe(true);
+  });
+
+  it('accepts empty URL string', () => {
+    expect(parseMetrics({ profile_url: '' }).success).toBe(true);
+  });
+
+  it('accepts username at exactly 100 chars', () => {
+    expect(parseMetrics({ platform_username: 'a'.repeat(100) }).success).toBe(true);
+  });
 });
 
 describe('constants', () => {
