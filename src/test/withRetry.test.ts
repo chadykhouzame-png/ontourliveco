@@ -5,6 +5,8 @@ import { withRetry } from '@/lib/errorHandler';
 vi.mock('@/lib/errorTracking', () => ({
   trackError: vi.fn(),
 }));
+
+describe('withRetry', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
