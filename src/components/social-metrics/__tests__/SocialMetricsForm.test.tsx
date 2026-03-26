@@ -224,13 +224,13 @@ describe('SocialMetricsForm - pre-existing platforms', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('dj_existing')).toBeInTheDocument();
     });
-    // Spotify and Instagram are loaded, so only TikTok and SoundCloud add buttons should exist
-    const addButtons = screen.getAllByRole('button').filter(
-      btn => btn.textContent?.includes('+')
-    );
-    expect(addButtons).toHaveLength(2);
+    // Spotify and Instagram are loaded, so only TikTok and SoundCloud add buttons remain
     expect(screen.getByText('TikTok')).toBeInTheDocument();
     expect(screen.getByText('SoundCloud')).toBeInTheDocument();
+    // Spotify/Instagram should not appear as add buttons (they're card headers now)
+    const allButtons = screen.getAllByRole('button');
+    const spotifyAdd = allButtons.find(b => b.textContent?.includes('Spotify') && !b.getAttribute('aria-label'));
+    expect(spotifyAdd).toBeUndefined();
   });
 
   it('calls update (not insert) when saving existing platforms', async () => {
