@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
@@ -121,8 +122,13 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
     setPlatforms(prev => [...prev, emptyMetrics(platform)]);
   };
 
-  const removePlatform = (index: number) => {
-    setPlatforms(prev => prev.filter((_, i) => i !== index));
+  const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null);
+
+  const confirmRemovePlatform = () => {
+    if (pendingRemoveIndex !== null) {
+      setPlatforms(prev => prev.filter((_, i) => i !== pendingRemoveIndex));
+      setPendingRemoveIndex(null);
+    }
   };
 
   const updateField = (index: number, field: keyof PlatformMetrics, value: string | number | null) => {
@@ -216,6 +222,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   }
 
   return (
+    <>
     <Card className="glass border-border/50 rounded-2xl overflow-hidden">
       <CardHeader className="border-b border-border/30 bg-secondary/20">
         <CardTitle className="flex items-center gap-2 text-lg">
@@ -239,7 +246,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
                 <Button
                   variant="ghost"
                   size="sm"
-                  onClick={() => removePlatform(index)}
+                  onClick={() => setPendingRemoveIndex(index)}
                   className="text-destructive hover:text-destructive h-8 w-8 p-0"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -387,6 +394,26 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
         </Button>
       </CardContent>
     </Card>
+
+      <AlertDialog open={pendingRemoveIndex !== null} onOpenChange={(open) => !open && setPendingRemoveIndex(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove platform?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingRemoveIndex !== null && platforms[pendingRemoveIndex] && (
+                <>This will remove <strong>{PLATFORM_CONFIG[platforms[pendingRemoveIndex].platform].name}</strong> and its metrics. You can re-add it later.</>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemovePlatform} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
