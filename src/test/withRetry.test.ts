@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { withRetry } from '@/lib/errorHandler';
 
-describe('withRetry', () => {
+// Suppress dynamic import of errorTracking inside sanitizeError
+vi.mock('@/lib/errorTracking', () => ({
+  trackError: vi.fn(),
+}));
   beforeEach(() => {
     vi.useFakeTimers();
   });
