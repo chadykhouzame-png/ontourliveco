@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Music, Instagram, Save, Plus, Trash2, Loader2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 import { z } from 'zod';
 
 type SocialPlatform = 'spotify' | 'instagram' | 'tiktok' | 'soundcloud';
@@ -123,11 +124,33 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   };
 
   const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null);
+  const [lastRemoved, setLastRemoved] = useState<{ platform: PlatformMetrics; index: number } | null>(null);
 
   const confirmRemovePlatform = () => {
     if (pendingRemoveIndex !== null) {
+      const removed = platforms[pendingRemoveIndex];
       setPlatforms(prev => prev.filter((_, i) => i !== pendingRemoveIndex));
+      setLastRemoved({ platform: removed, index: pendingRemoveIndex });
       setPendingRemoveIndex(null);
+      toast({
+        title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
+        description: 'Click Undo to restore it.',
+        action: (
+          <ToastAction
+            altText="Undo remove platform"
+            onClick={() => {
+              setPlatforms(prev => {
+                const copy = [...prev];
+                copy.splice(pendingRemoveIndex, 0, removed);
+                return copy;
+              });
+              setLastRemoved(null);
+            }}
+          >
+            Undo
+          </ToastAction>
+        ),
+      });
     }
   };
 
