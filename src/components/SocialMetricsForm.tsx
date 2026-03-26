@@ -1,7 +1,7 @@
 import { useState, useEffect, type MouseEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
@@ -125,9 +125,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
 
   const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null);
 
-  const requestRemovePlatform = (index: number, event?: MouseEvent<HTMLButtonElement>) => {
-    event?.preventDefault();
-    event?.stopPropagation();
+  const requestRemovePlatform = (index: number) => {
     setPendingRemoveIndex(index);
   };
 
@@ -281,7 +279,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={(event) => requestRemovePlatform(index, event)}
+                  onClick={() => requestRemovePlatform(index)}
                   className="text-destructive hover:text-destructive h-8 w-8 p-0"
                   aria-label={`Remove ${config.name}`}
                 >
@@ -431,26 +429,31 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
       </CardContent>
     </Card>
 
-      <Dialog open={pendingRemoveIndex !== null} onOpenChange={(open) => !open && setPendingRemoveIndex(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Remove platform?</DialogTitle>
-            <DialogDescription>
-              {pendingRemoveIndex !== null && platforms[pendingRemoveIndex] && (
-                <>This will remove <strong>{PLATFORM_CONFIG[platforms[pendingRemoveIndex].platform].name}</strong> and its metrics. You can re-add it later.</>
-              )}
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setPendingRemoveIndex(null)}>
-              Cancel
-            </Button>
-            <Button type="button" variant="destructive" onClick={confirmRemovePlatform}>
-              Remove
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {pendingRemoveIndex !== null && platforms[pendingRemoveIndex] && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="remove-platform-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-lg">
+            <div className="space-y-2">
+              <h3 id="remove-platform-title" className="text-lg font-semibold">Remove platform?</h3>
+              <p className="text-sm text-muted-foreground">
+                This will remove <strong>{PLATFORM_CONFIG[platforms[pendingRemoveIndex].platform].name}</strong> and its metrics. You can re-add it later.
+              </p>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setPendingRemoveIndex(null)}>
+                Cancel
+              </Button>
+              <Button type="button" variant="destructive" onClick={confirmRemovePlatform}>
+                Remove
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
