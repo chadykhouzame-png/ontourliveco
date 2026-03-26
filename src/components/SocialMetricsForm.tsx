@@ -145,12 +145,25 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
 
     setIsSaving(true);
     try {
-      // Delete existing connections for this artist
-      await supabase.from('social_connections').delete().eq('artist_id', artistId);
+      // Fetch current records to determine what to delete
+      const { data: existing } = await supabase
+        .from('social_connections')
+        .select('id, platform')
+        .eq('artist_id', artistId);
 
-      // Insert all current platforms
-      if (platforms.length > 0) {
-        const rows = platforms.map(p => ({
+      const currentPlatformSet = new Set(platforms.map(p => p.platform));
+      const removedIds = (existing || [])
+        .filter(e => !currentPlatformSet.has(e.platform as SocialPlatform))
+        .map(e => e.id);
+
+      // Delete removed platforms
+      if (removedIds.length > 0) {
+        await supabase.from('social_connections').delete().in('id', removedIds);
+      }
+
+      // Upsert existing and new platforms
+      for (const p of platforms) {
+        const row = {
           artist_id: artistId,
           platform: p.platform,
           platform_username: p.platform_username || null,
@@ -165,10 +178,22 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
           is_connected: true,
           connected_at: new Date().toISOString(),
           last_synced_at: new Date().toISOString(),
-        }));
+        };
 
-        const { error } = await supabase.from('social_connections').insert(rows);
-        if (error) throw error;
+        if (p.id) {
+          // Update existing record by id
+          const { error } = await supabase
+            .from('social_connections')
+            .update(row)
+            .eq('id', p.id);
+          if (error) throw error;
+        } else {
+          // Insert new record
+          const { error } = await supabase
+            .from('social_connections')
+            .insert(row);
+          if (error) throw error;
+        }
       }
 
       toast({ title: 'Social metrics saved!' });
