@@ -85,14 +85,10 @@ export const SocialMediaDashboard = ({ artistId, className, usePublicView = fals
 
   useEffect(() => {
     const fetchConnections = async () => {
-      const table = usePublicView ? 'social_connections_public' : 'social_connections';
-      const { data, error } = await supabase
-        .from(table)
-        .select('id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at, likes_count, comments_count, shares_count, engagement_rate, avg_likes_per_post, avg_comments_per_post')
-        .eq('artist_id', artistId);
-
-      if (!error && data) {
-        setConnections(data as SocialConnection[]);
+      const selectCols = 'id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at, likes_count, comments_count, shares_count, engagement_rate, avg_likes_per_post, avg_comments_per_post';
+      const { data, error } = usePublicView
+        ? await supabase.from('social_connections_public').select(selectCols).eq('artist_id', artistId)
+        : await supabase.from('social_connections').select(selectCols).eq('artist_id', artistId);
       }
       setIsLoading(false);
     };
