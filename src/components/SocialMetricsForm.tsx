@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Music, Instagram, Save, Plus, Trash2, Loader2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 import { z } from 'zod';
 
 type SocialPlatform = 'spotify' | 'instagram' | 'tiktok' | 'soundcloud';
@@ -135,9 +136,8 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
         title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
         description: 'Click Undo to restore it.',
         action: (
-          <Button
-            variant="outline"
-            size="sm"
+          <ToastAction
+            altText="Undo remove platform"
             onClick={() => {
               setPlatforms(prev => {
                 const copy = [...prev];
@@ -148,7 +148,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
             }}
           >
             Undo
-          </Button>
+          </ToastAction>
         ),
       });
     }
