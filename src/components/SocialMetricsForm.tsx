@@ -278,10 +278,12 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
                   <span className="font-semibold text-sm">{config.name}</span>
                 </div>
                 <Button
+                  type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setPendingRemoveIndex(index)}
+                  onClick={(event) => requestRemovePlatform(index, event)}
                   className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                  aria-label={`Remove ${config.name}`}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>
