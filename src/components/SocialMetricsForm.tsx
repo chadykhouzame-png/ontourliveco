@@ -128,23 +128,18 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
 
     setPlatforms(prev => prev.filter((_, i) => i !== index));
 
-    toast({
-      title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
+    sonnerToast(`${PLATFORM_CONFIG[removed.platform].name} removed`, {
       description: 'Click Undo to restore it.',
-      action: (
-        <ToastAction
-          altText="Undo remove platform"
-          onClick={() => {
-            setPlatforms(prev => {
-              const copy = [...prev];
-              copy.splice(index, 0, removed);
-              return copy;
-            });
-          }}
-        >
-          Undo
-        </ToastAction>
-      ),
+      action: {
+        label: 'Undo',
+        onClick: () => {
+          setPlatforms(prev => {
+            const copy = [...prev];
+            copy.splice(index, 0, removed);
+            return copy;
+          });
+        },
+      },
     });
   };
 
