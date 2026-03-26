@@ -165,11 +165,25 @@ export const SocialMediaDashboard = ({ artistId, className, usePublicView = fals
             <TrendingUp className="w-5 h-5 text-primary" />
             Social Media
           </div>
-          {connectedPlatforms.length > 0 && (
-            <Badge variant="secondary" className="font-mono text-xs">
-              {connectedPlatforms.length} connected
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {!usePublicView && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSync}
+                disabled={isSyncing}
+                className="h-8 gap-1.5 text-xs"
+              >
+                {isSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                Sync
+              </Button>
+            )}
+            {connectedPlatforms.length > 0 && (
+              <Badge variant="secondary" className="font-mono text-xs">
+                {connectedPlatforms.length} connected
+              </Badge>
+            )}
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
