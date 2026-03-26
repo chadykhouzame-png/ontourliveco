@@ -124,12 +124,18 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   };
 
   const removePlatform = (index: number) => {
+    console.log('[SocialMetricsForm] removePlatform called with index:', index, 'platforms:', platforms.length);
     const removed = platforms[index];
-    if (!removed) return;
+    if (!removed) {
+      console.log('[SocialMetricsForm] No platform at index', index);
+      return;
+    }
 
     const confirmed = window.confirm(
       `Remove ${PLATFORM_CONFIG[removed.platform].name} and its metrics?`
     );
+
+    console.log('[SocialMetricsForm] confirm result:', confirmed);
 
     if (!confirmed) return;
 
