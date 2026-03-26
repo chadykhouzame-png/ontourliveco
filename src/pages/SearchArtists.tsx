@@ -155,6 +155,54 @@ const SearchArtists = () => {
         );
       }
 
+      // Fetch social reach data for all result artists
+      const artistIds = results.map(a => a.id);
+      if (artistIds.length > 0) {
+        const { data: socialData } = await supabase
+          .from('social_connections_public')
+          .select('artist_id, follower_count, engagement_rate')
+          .in('artist_id', artistIds)
+          .eq('is_connected', true);
+
+        if (socialData) {
+          const reachMap = new Map<string, SocialReach>();
+          for (const sc of socialData) {
+            const existing = reachMap.get(sc.artist_id!) || { total_followers: 0, avg_engagement_rate: null };
+            existing.total_followers += sc.follower_count || 0;
+            if (sc.engagement_rate != null) {
+              const prevRate = existing.avg_engagement_rate ?? 0;
+              const prevCount = prevRate > 0 ? 1 : 0;
+              existing.avg_engagement_rate = ((prevRate * prevCount) + Number(sc.engagement_rate)) / (prevCount + 1);
+            }
+            reachMap.set(sc.artist_id!, existing);
+          }
+          results = results.map(a => ({
+            ...a,
+            socialReach: reachMap.get(a.id) || { total_followers: 0, avg_engagement_rate: null },
+          }));
+        }
+      }
+
+      // Filter by minimum reach
+      if (filterByReach && minFollowers > 0) {
+        results = results.filter(a => (a.socialReach?.total_followers || 0) >= minFollowers);
+      }
+
+      // Sort results
+      results.sort((a, b) => {
+        switch (sortBy) {
+          case 'followers':
+            return (b.socialReach?.total_followers || 0) - (a.socialReach?.total_followers || 0);
+          case 'engagement':
+            return (b.socialReach?.avg_engagement_rate || 0) - (a.socialReach?.avg_engagement_rate || 0);
+          case 'rating':
+            return ((b as any).average_rating || 0) - ((a as any).average_rating || 0);
+          case 'name':
+          default:
+            return a.artist_name.localeCompare(b.artist_name);
+        }
+      });
+
       setArtists(results);
     } catch (error) {
       showError(error, 'searching artists');
