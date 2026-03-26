@@ -25,6 +25,7 @@ import UserDisputes from '@/components/UserDisputes';
 import StripeConnectSetup from '@/components/StripeConnectSetup';
 import ArtistEPKUpload from '@/components/ArtistEPKUpload';
 import SocialMediaDashboard from '@/components/SocialMediaDashboard';
+import SocialMetricsForm from '@/components/SocialMetricsForm';
 import { BookingStatusFilter, StatusFilter } from '@/components/BookingStatusFilter';
 import CancelBookingDialog from '@/components/CancelBookingDialog';
 import CompleteBookingDialog from '@/components/CompleteBookingDialog';
@@ -885,10 +886,11 @@ const ArtistDashboard = () => {
           </Card>
         </div>
 
-        {/* Social Media Dashboard */}
+        {/* Social Media Dashboard & Metrics Form */}
         {artist && (
-          <div className="mt-6">
-            <SocialMediaDashboard artistId={artist.id} />
+          <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <SocialMediaDashboard artistId={artist.id} key={`dashboard-${artist.id}`} />
+            <SocialMetricsForm artistId={artist.id} onSaved={() => window.location.reload()} />
           </div>
         )}
 
