@@ -470,11 +470,66 @@ const SearchArtists = () => {
                   </div>
                 )}
               </div>
+
+              {/* Reach Filter */}
+              <div className="pt-4 border-t border-border">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Minimum Reach
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={filterByReach}
+                      onCheckedChange={setFilterByReach}
+                      id="filter-reach"
+                    />
+                    <Label htmlFor="filter-reach" className="text-sm cursor-pointer">
+                      Filter by reach
+                    </Label>
+                  </div>
+                </div>
+                {filterByReach && (
+                  <div className="space-y-3">
+                    <Slider
+                      value={[minFollowers]}
+                      onValueChange={(value) => setMinFollowers(value[0])}
+                      min={0}
+                      max={100000}
+                      step={1000}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>{formatFollowers(minFollowers)} followers</span>
+                      <span>100K+</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sort By */}
+              <div className="pt-4 border-t border-border">
+                <Label className="flex items-center gap-2 mb-3">
+                  <ArrowUpDown className="w-4 h-4" />
+                  Sort Results
+                </Label>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name (A-Z)</SelectItem>
+                    <SelectItem value="rating">Highest Rating</SelectItem>
+                    <SelectItem value="followers">Most Followers</SelectItem>
+                    <SelectItem value="engagement">Highest Engagement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
 
           {/* Active Filters */}
-          {(city || selectedDate || selectedGenres.length > 0 || filterByFee || filterByRating) && (
+          {(city || selectedDate || selectedGenres.length > 0 || filterByFee || filterByRating || filterByReach || sortBy !== 'name') && (
             <div className="mt-4 flex items-center gap-2 flex-wrap">
               <span className="text-sm text-muted-foreground">Active filters:</span>
               {city && (
