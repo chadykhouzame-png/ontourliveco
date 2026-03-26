@@ -10,7 +10,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagram, Filter, X, LogOut, DollarSign, Star } from 'lucide-react';
+import { Search as SearchIcon, MapPin, Calendar as CalendarIcon, Music, Instagram, Filter, X, LogOut, DollarSign, Star, Users, TrendingUp, ArrowUpDown } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -19,10 +20,18 @@ import { RatingDisplay } from '@/components/StarRating';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import logo from '@/assets/logo.png';
 
+interface SocialReach {
+  total_followers: number;
+  avg_engagement_rate: number | null;
+}
+
 interface ArtistWithTravel extends Artist {
   travel_dates: TravelDate[];
   matchingDates?: TravelDate[];
+  socialReach?: SocialReach;
 }
+
+type SortOption = 'name' | 'rating' | 'followers' | 'engagement';
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
@@ -44,6 +53,9 @@ const SearchArtists = () => {
   const [filterByFee, setFilterByFee] = useState(false);
   const [minRating, setMinRating] = useState<number>(0);
   const [filterByRating, setFilterByRating] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [minFollowers, setMinFollowers] = useState<number>(0);
+  const [filterByReach, setFilterByReach] = useState(false);
   
   const [artists, setArtists] = useState<ArtistWithTravel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -143,6 +155,54 @@ const SearchArtists = () => {
         );
       }
 
+      // Fetch social reach data for all result artists
+      const artistIds = results.map(a => a.id);
+      if (artistIds.length > 0) {
+        const { data: socialData } = await supabase
+          .from('social_connections_public')
+          .select('artist_id, follower_count, engagement_rate')
+          .in('artist_id', artistIds)
+          .eq('is_connected', true);
+
+        if (socialData) {
+          const reachMap = new Map<string, SocialReach>();
+          for (const sc of socialData) {
+            const existing = reachMap.get(sc.artist_id!) || { total_followers: 0, avg_engagement_rate: null };
+            existing.total_followers += sc.follower_count || 0;
+            if (sc.engagement_rate != null) {
+              const prevRate = existing.avg_engagement_rate ?? 0;
+              const prevCount = prevRate > 0 ? 1 : 0;
+              existing.avg_engagement_rate = ((prevRate * prevCount) + Number(sc.engagement_rate)) / (prevCount + 1);
+            }
+            reachMap.set(sc.artist_id!, existing);
+          }
+          results = results.map(a => ({
+            ...a,
+            socialReach: reachMap.get(a.id) || { total_followers: 0, avg_engagement_rate: null },
+          }));
+        }
+      }
+
+      // Filter by minimum reach
+      if (filterByReach && minFollowers > 0) {
+        results = results.filter(a => (a.socialReach?.total_followers || 0) >= minFollowers);
+      }
+
+      // Sort results
+      results.sort((a, b) => {
+        switch (sortBy) {
+          case 'followers':
+            return (b.socialReach?.total_followers || 0) - (a.socialReach?.total_followers || 0);
+          case 'engagement':
+            return (b.socialReach?.avg_engagement_rate || 0) - (a.socialReach?.avg_engagement_rate || 0);
+          case 'rating':
+            return ((b as any).average_rating || 0) - ((a as any).average_rating || 0);
+          case 'name':
+          default:
+            return a.artist_name.localeCompare(b.artist_name);
+        }
+      });
+
       setArtists(results);
     } catch (error) {
       showError(error, 'searching artists');
@@ -168,8 +228,17 @@ const SearchArtists = () => {
     setFilterByFee(false);
     setMinRating(0);
     setFilterByRating(false);
+    setSortBy('name');
+    setMinFollowers(0);
+    setFilterByReach(false);
     setArtists([]);
     setHasSearched(false);
+  };
+
+  const formatFollowers = (count: number): string => {
+    if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+    if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
+    return count.toString();
   };
 
   const handleSignOut = async () => {
@@ -401,11 +470,66 @@ const SearchArtists = () => {
                   </div>
                 )}
               </div>
+
+              {/* Reach Filter */}
+              <div className="pt-4 border-t border-border">
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Minimum Reach
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={filterByReach}
+                      onCheckedChange={setFilterByReach}
+                      id="filter-reach"
+                    />
+                    <Label htmlFor="filter-reach" className="text-sm cursor-pointer">
+                      Filter by reach
+                    </Label>
+                  </div>
+                </div>
+                {filterByReach && (
+                  <div className="space-y-3">
+                    <Slider
+                      value={[minFollowers]}
+                      onValueChange={(value) => setMinFollowers(value[0])}
+                      min={0}
+                      max={100000}
+                      step={1000}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>{formatFollowers(minFollowers)} followers</span>
+                      <span>100K+</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Sort By */}
+              <div className="pt-4 border-t border-border">
+                <Label className="flex items-center gap-2 mb-3">
+                  <ArrowUpDown className="w-4 h-4" />
+                  Sort Results
+                </Label>
+                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name">Name (A-Z)</SelectItem>
+                    <SelectItem value="rating">Highest Rating</SelectItem>
+                    <SelectItem value="followers">Most Followers</SelectItem>
+                    <SelectItem value="engagement">Highest Engagement</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           )}
 
           {/* Active Filters */}
-          {(city || selectedDate || selectedGenres.length > 0 || filterByFee || filterByRating) && (
+          {(city || selectedDate || selectedGenres.length > 0 || filterByFee || filterByRating || filterByReach || sortBy !== 'name') && (
             <div className="mt-4 flex items-center gap-2 flex-wrap">
               <span className="text-sm text-muted-foreground">Active filters:</span>
               {city && (
@@ -436,6 +560,18 @@ const SearchArtists = () => {
                 <Badge variant="secondary" className="gap-1 flex items-center">
                   {minRating}+ <Star className="w-3 h-3 fill-current" />
                   <X className="w-3 h-3 cursor-pointer" onClick={() => { setFilterByRating(false); setMinRating(0); }} />
+                </Badge>
+              )}
+              {filterByReach && minFollowers > 0 && (
+                <Badge variant="secondary" className="gap-1 flex items-center">
+                  <Users className="w-3 h-3" /> {formatFollowers(minFollowers)}+
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => { setFilterByReach(false); setMinFollowers(0); }} />
+                </Badge>
+              )}
+              {sortBy !== 'name' && (
+                <Badge variant="secondary" className="gap-1 flex items-center">
+                  <ArrowUpDown className="w-3 h-3" /> {sortBy === 'followers' ? 'Most Followers' : sortBy === 'engagement' ? 'Engagement' : 'Rating'}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setSortBy('name')} />
                 </Badge>
               )}
               <Button variant="ghost" size="sm" onClick={clearFilters}>
@@ -524,6 +660,22 @@ const SearchArtists = () => {
                           : 'Contact for rates'
                         }
                       </span>
+                    </div>
+                  )}
+
+                  {/* Social Reach */}
+                  {artist.socialReach && artist.socialReach.total_followers > 0 && (
+                    <div className="mt-3 flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Users className="w-3.5 h-3.5" />
+                        <span className="text-sm font-medium">{formatFollowers(artist.socialReach.total_followers)}</span>
+                      </div>
+                      {artist.socialReach.avg_engagement_rate != null && artist.socialReach.avg_engagement_rate > 0 && (
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                          <TrendingUp className="w-3.5 h-3.5" />
+                          <span className="text-sm font-medium">{artist.socialReach.avg_engagement_rate.toFixed(1)}% eng.</span>
+                        </div>
+                      )}
                     </div>
                   )}
 
