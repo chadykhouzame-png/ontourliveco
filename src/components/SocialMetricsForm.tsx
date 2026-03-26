@@ -365,7 +365,5 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   );
 };
 
-// Fix: need Settings import
-import { Settings } from 'lucide-react';
 
 export default SocialMetricsForm;
