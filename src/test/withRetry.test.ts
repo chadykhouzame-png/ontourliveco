@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { withRetry } from '@/lib/errorHandler';
 
-// Suppress dynamic import of errorTracking inside sanitizeError
 vi.mock('@/lib/errorTracking', () => ({
   trackError: vi.fn(),
 }));
@@ -9,16 +8,18 @@ vi.mock('@/lib/errorTracking', () => ({
 describe('withRetry', () => {
   beforeEach(() => {
     vi.useFakeTimers();
+    // Ensure DEV mode is off so sanitizeError doesn't trigger dynamic imports
+    vi.stubEnv('DEV', '');
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.unstubAllEnvs();
   });
 
   it('returns result on first success without retrying', async () => {
     const op = vi.fn().mockResolvedValue('ok');
-    const promise = withRetry(op, { maxRetries: 3, baseDelayMs: 100 });
-    const result = await promise;
+    const result = await withRetry(op, { maxRetries: 3, baseDelayMs: 100 });
     expect(result).toBe('ok');
     expect(op).toHaveBeenCalledTimes(1);
   });
@@ -31,13 +32,9 @@ describe('withRetry', () => {
       .mockResolvedValue('recovered');
 
     const promise = withRetry(op, { maxRetries: 3, baseDelayMs: 100 });
-
-    // Advance through first retry delay
-    await vi.advanceTimersByTimeAsync(200);
-    // Advance through second retry delay
-    await vi.advanceTimersByTimeAsync(500);
-
+    await vi.runAllTimersAsync();
     const result = await promise;
+
     expect(result).toBe('recovered');
     expect(op).toHaveBeenCalledTimes(3);
   });
@@ -56,13 +53,10 @@ describe('withRetry', () => {
     const op = vi.fn().mockRejectedValue(networkError);
 
     const promise = withRetry(op, { maxRetries: 2, baseDelayMs: 100 });
-
-    // Advance enough time for all retry delays
-    await vi.advanceTimersByTimeAsync(10000);
+    await vi.runAllTimersAsync();
 
     await expect(promise).rejects.toThrow('Failed to fetch');
-    // initial + 2 retries = 3 calls
-    expect(op).toHaveBeenCalledTimes(3);
+    expect(op).toHaveBeenCalledTimes(3); // initial + 2 retries
   });
 
   it('respects custom maxRetries config', async () => {
@@ -70,7 +64,7 @@ describe('withRetry', () => {
     const op = vi.fn().mockRejectedValue(networkError);
 
     const promise = withRetry(op, { maxRetries: 1, baseDelayMs: 50 });
-    await vi.advanceTimersByTimeAsync(5000);
+    await vi.runAllTimersAsync();
 
     await expect(promise).rejects.toThrow('Failed to fetch');
     expect(op).toHaveBeenCalledTimes(2); // initial + 1 retry
@@ -82,29 +76,26 @@ describe('withRetry', () => {
     expect(result).toBe('done');
   });
 
-  it('uses exponential backoff between retries', async () => {
+  it('applies exponential backoff delays between retries', async () => {
     const networkError = new TypeError('Failed to fetch');
-    let callTimes: number[] = [];
+    const callTimes: number[] = [];
     const op = vi.fn().mockImplementation(() => {
       callTimes.push(Date.now());
       return Promise.reject(networkError);
     });
 
     const promise = withRetry(op, { maxRetries: 2, baseDelayMs: 1000, backoffMultiplier: 2, maxDelayMs: 10000 });
+    await vi.runAllTimersAsync();
+    await promise.catch(() => {}); // swallow expected rejection
 
-    // Advance enough for all retries to complete
-    for (let i = 0; i < 10; i++) {
-      await vi.advanceTimersByTimeAsync(2000);
-    }
+    expect(op).toHaveBeenCalledTimes(3);
 
-    await expect(promise).rejects.toThrow('Failed to fetch');
-    expect(op).toHaveBeenCalledTimes(3); // initial + 2 retries
-
-    // Verify second delay is >= first delay (exponential, with jitter tolerance)
-    if (callTimes.length >= 3) {
-      const gap1 = callTimes[1] - callTimes[0];
-      const gap2 = callTimes[2] - callTimes[1];
-      expect(gap2).toBeGreaterThanOrEqual(gap1 * 0.5);
-    }
+    // Verify delays increase (with jitter tolerance)
+    const gap1 = callTimes[1] - callTimes[0];
+    const gap2 = callTimes[2] - callTimes[1];
+    // Base delay is 1000ms, second should be ~2000ms (2x backoff, ±25% jitter)
+    expect(gap1).toBeGreaterThanOrEqual(750);  // 1000 * 0.75
+    expect(gap2).toBeGreaterThanOrEqual(1500); // 2000 * 0.75
+    expect(gap2).toBeGreaterThan(gap1 * 0.75);
   });
 });
