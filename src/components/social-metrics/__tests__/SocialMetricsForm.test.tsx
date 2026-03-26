@@ -58,6 +58,7 @@ describe('SocialMetricsForm', () => {
     vi.clearAllMocks();
     selectCallCount = 0;
     selectReturnData = [[]];
+    mockToast.mockClear();
   });
 
   it('renders loading state then form', async () => {
