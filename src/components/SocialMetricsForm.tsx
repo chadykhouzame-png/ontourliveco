@@ -3,11 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ToastAction } from '@/components/ui/toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Music, Instagram, Save, Plus, Trash2, Loader2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { toast as sonnerToast } from 'sonner';
 import { z } from 'zod';
 
 type SocialPlatform = 'spotify' | 'instagram' | 'tiktok' | 'soundcloud';
@@ -128,18 +128,25 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
 
     setPlatforms(prev => prev.filter((_, i) => i !== index));
 
-    sonnerToast(`${PLATFORM_CONFIG[removed.platform].name} removed`, {
+    const platformName = PLATFORM_CONFIG[removed.platform]?.name ?? 'Platform';
+
+    toast({
+      title: `${platformName} removed`,
       description: 'Click Undo to restore it.',
-      action: {
-        label: 'Undo',
-        onClick: () => {
-          setPlatforms(prev => {
-            const copy = [...prev];
-            copy.splice(index, 0, removed);
-            return copy;
-          });
-        },
-      },
+      action: (
+        <ToastAction
+          altText={`Undo removing ${platformName}`}
+          onClick={() => {
+            setPlatforms(prev => {
+              const copy = [...prev];
+              copy.splice(index, 0, removed);
+              return copy;
+            });
+          }}
+        >
+          Undo
+        </ToastAction>
+      ),
     });
   };
 
