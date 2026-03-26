@@ -271,7 +271,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => requestRemovePlatform(index)}
+                  onClick={() => removePlatform(index)}
                   className="text-destructive hover:text-destructive h-8 w-8 p-0"
                   aria-label={`Remove ${config.name}`}
                 >
