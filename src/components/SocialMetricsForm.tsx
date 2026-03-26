@@ -421,31 +421,6 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
       </CardContent>
     </Card>
 
-      {pendingRemoveIndex !== null && platforms[pendingRemoveIndex] && (
-        <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="remove-platform-title"
-        >
-          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-lg">
-            <div className="space-y-2">
-              <h3 id="remove-platform-title" className="text-lg font-semibold">Remove platform?</h3>
-              <p className="text-sm text-muted-foreground">
-                This will remove <strong>{PLATFORM_CONFIG[platforms[pendingRemoveIndex].platform].name}</strong> and its metrics. You can re-add it later.
-              </p>
-            </div>
-            <div className="mt-6 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setPendingRemoveIndex(null)}>
-                Cancel
-              </Button>
-              <Button type="button" variant="destructive" onClick={confirmRemovePlatform}>
-                Remove
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
