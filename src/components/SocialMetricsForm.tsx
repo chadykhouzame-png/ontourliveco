@@ -124,34 +124,45 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   };
 
   const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null);
-  const [lastRemoved, setLastRemoved] = useState<{ platform: PlatformMetrics; index: number } | null>(null);
+
+  const requestRemovePlatform = (index: number, event?: MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    setPendingRemoveIndex(index);
+  };
 
   const confirmRemovePlatform = () => {
-    if (pendingRemoveIndex !== null) {
-      const removed = platforms[pendingRemoveIndex];
-      setPlatforms(prev => prev.filter((_, i) => i !== pendingRemoveIndex));
-      setLastRemoved({ platform: removed, index: pendingRemoveIndex });
+    if (pendingRemoveIndex === null) return;
+
+    const removedIndex = pendingRemoveIndex;
+    const removed = platforms[removedIndex];
+
+    if (!removed) {
       setPendingRemoveIndex(null);
-      toast({
-        title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
-        description: 'Click Undo to restore it.',
-        action: (
-          <ToastAction
-            altText="Undo remove platform"
-            onClick={() => {
-              setPlatforms(prev => {
-                const copy = [...prev];
-                copy.splice(pendingRemoveIndex, 0, removed);
-                return copy;
-              });
-              setLastRemoved(null);
-            }}
-          >
-            Undo
-          </ToastAction>
-        ),
-      });
+      return;
     }
+
+    setPlatforms(prev => prev.filter((_, i) => i !== removedIndex));
+    setPendingRemoveIndex(null);
+
+    toast({
+      title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
+      description: 'Click Undo to restore it.',
+      action: (
+        <ToastAction
+          altText="Undo remove platform"
+          onClick={() => {
+            setPlatforms(prev => {
+              const copy = [...prev];
+              copy.splice(removedIndex, 0, removed);
+              return copy;
+            });
+          }}
+        >
+          Undo
+        </ToastAction>
+      ),
+    });
   };
 
   const updateField = (index: number, field: keyof PlatformMetrics, value: string | number | null) => {
