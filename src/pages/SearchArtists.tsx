@@ -53,6 +53,9 @@ const SearchArtists = () => {
   const [filterByFee, setFilterByFee] = useState(false);
   const [minRating, setMinRating] = useState<number>(0);
   const [filterByRating, setFilterByRating] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [minFollowers, setMinFollowers] = useState<number>(0);
+  const [filterByReach, setFilterByReach] = useState(false);
   
   const [artists, setArtists] = useState<ArtistWithTravel[]>([]);
   const [isLoading, setIsLoading] = useState(false);
