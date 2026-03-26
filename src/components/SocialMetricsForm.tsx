@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ToastAction } from '@/components/ui/toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Music, Instagram, Save, Plus, Trash2, Loader2, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -122,32 +122,12 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
     setPlatforms(prev => [...prev, emptyMetrics(platform)]);
   };
 
-  const removePlatform = (index: number) => {
-    const removed = platforms[index];
-    if (!removed) return;
+  const [removeDialogIndex, setRemoveDialogIndex] = useState<number | null>(null);
 
-    setPlatforms(prev => prev.filter((_, i) => i !== index));
-
-    const platformName = PLATFORM_CONFIG[removed.platform]?.name ?? 'Platform';
-
-    toast({
-      title: `${platformName} removed`,
-      description: 'Click Undo to restore it.',
-      action: (
-        <ToastAction
-          altText={`Undo removing ${platformName}`}
-          onClick={() => {
-            setPlatforms(prev => {
-              const copy = [...prev];
-              copy.splice(index, 0, removed);
-              return copy;
-            });
-          }}
-        >
-          Undo
-        </ToastAction>
-      ),
-    });
+  const confirmRemovePlatform = () => {
+    if (removeDialogIndex === null) return;
+    setPlatforms(prev => prev.filter((_, i) => i !== removeDialogIndex));
+    setRemoveDialogIndex(null);
   };
 
   const updateField = (index: number, field: keyof PlatformMetrics, value: string | number | null) => {
@@ -266,7 +246,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => removePlatform(index)}
+                  onClick={() => setRemoveDialogIndex(index)}
                   className="text-destructive hover:text-destructive h-8 w-8 p-0"
                   aria-label={`Remove ${config.name}`}
                 >
@@ -415,6 +395,25 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
         </Button>
       </CardContent>
     </Card>
+
+    <AlertDialog open={removeDialogIndex !== null} onOpenChange={(open) => { if (!open) setRemoveDialogIndex(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remove platform?</AlertDialogTitle>
+          <AlertDialogDescription>
+            {removeDialogIndex !== null && platforms[removeDialogIndex]
+              ? `Are you sure you want to remove ${PLATFORM_CONFIG[platforms[removeDialogIndex].platform]?.name}? Any unsaved data for this platform will be lost.`
+              : 'Are you sure you want to remove this platform?'}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmRemovePlatform} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
 
     </>
   );
