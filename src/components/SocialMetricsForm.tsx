@@ -123,25 +123,17 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
     setPlatforms(prev => [...prev, emptyMetrics(platform)]);
   };
 
-  const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null);
+  const removePlatform = (index: number) => {
+    const removed = platforms[index];
+    if (!removed) return;
 
-  const requestRemovePlatform = (index: number) => {
-    setPendingRemoveIndex(index);
-  };
+    const confirmed = window.confirm(
+      `Remove ${PLATFORM_CONFIG[removed.platform].name} and its metrics?`
+    );
 
-  const confirmRemovePlatform = () => {
-    if (pendingRemoveIndex === null) return;
+    if (!confirmed) return;
 
-    const removedIndex = pendingRemoveIndex;
-    const removed = platforms[removedIndex];
-
-    if (!removed) {
-      setPendingRemoveIndex(null);
-      return;
-    }
-
-    setPlatforms(prev => prev.filter((_, i) => i !== removedIndex));
-    setPendingRemoveIndex(null);
+    setPlatforms(prev => prev.filter((_, i) => i !== index));
 
     toast({
       title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
@@ -152,7 +144,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
           onClick={() => {
             setPlatforms(prev => {
               const copy = [...prev];
-              copy.splice(removedIndex, 0, removed);
+              copy.splice(index, 0, removed);
               return copy;
             });
           }}
