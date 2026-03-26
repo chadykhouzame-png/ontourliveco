@@ -24,6 +24,7 @@ interface SocialConnection {
 interface SocialMediaDashboardProps {
   artistId: string;
   className?: string;
+  usePublicView?: boolean;
 }
 
 const PLATFORM_CONFIG: Record<string, {
@@ -78,14 +79,15 @@ const formatEngagementRate = (rate: number): string => {
   return `${rate.toFixed(2)}%`;
 };
 
-export const SocialMediaDashboard = ({ artistId, className }: SocialMediaDashboardProps) => {
+export const SocialMediaDashboard = ({ artistId, className, usePublicView = false }: SocialMediaDashboardProps) => {
   const [connections, setConnections] = useState<SocialConnection[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchConnections = async () => {
+      const table = usePublicView ? 'social_connections_public' : 'social_connections';
       const { data, error } = await supabase
-        .from('social_connections')
+        .from(table)
         .select('id, platform, platform_username, follower_count, is_connected, profile_url, last_synced_at, likes_count, comments_count, shares_count, engagement_rate, avg_likes_per_post, avg_comments_per_post')
         .eq('artist_id', artistId);
 
