@@ -9,16 +9,6 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { ToastAction } from '@/components/ui/toast';
 import { z } from 'zod';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 
 type SocialPlatform = 'spotify' | 'instagram' | 'tiktok' | 'soundcloud';
 
@@ -99,8 +89,6 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   const [platforms, setPlatforms] = useState<PlatformMetrics[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
-  const [removeIndex, setRemoveIndex] = useState<number | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -134,20 +122,16 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
     setPlatforms(prev => [...prev, emptyMetrics(platform)]);
   };
 
-  const requestRemovePlatform = (index: number) => {
-    setRemoveIndex(index);
-    setRemoveDialogOpen(true);
-  };
-
-  const confirmRemovePlatform = () => {
-    if (removeIndex === null) return;
-    const removed = platforms[removeIndex];
+  const removePlatform = (index: number) => {
+    const removed = platforms[index];
     if (!removed) return;
-    const idx = removeIndex;
 
-    setPlatforms(prev => prev.filter((_, i) => i !== idx));
-    setRemoveDialogOpen(false);
-    setRemoveIndex(null);
+    const confirmed = window.confirm(
+      `Remove ${PLATFORM_CONFIG[removed.platform].name} and its metrics?`
+    );
+    if (!confirmed) return;
+
+    setPlatforms(prev => prev.filter((_, i) => i !== index));
 
     toast({
       title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
@@ -158,7 +142,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
           onClick={() => {
             setPlatforms(prev => {
               const copy = [...prev];
-              copy.splice(idx, 0, removed);
+              copy.splice(index, 0, removed);
               return copy;
             });
           }}
@@ -285,7 +269,7 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => requestRemovePlatform(index)}
+                  onClick={() => removePlatform(index)}
                   className="text-destructive hover:text-destructive h-8 w-8 p-0"
                   aria-label={`Remove ${config.name}`}
                 >
