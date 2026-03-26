@@ -338,6 +338,13 @@ export const SocialMediaDashboard = ({ artistId, className, usePublicView = fals
                       </div>
                     )}
 
+                    {/* Last synced timestamp */}
+                    {connection.last_synced_at && (
+                      <p className="text-[10px] text-muted-foreground/70 mt-2">
+                        Synced {new Date(connection.last_synced_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} at {new Date(connection.last_synced_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    )}
+
                     {/* Share of total bar */}
                     {totalFollowers > 0 && connection.follower_count && connection.follower_count > 0 && (
                       <div className="space-y-1">
