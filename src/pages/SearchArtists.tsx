@@ -20,10 +20,18 @@ import { RatingDisplay } from '@/components/StarRating';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import logo from '@/assets/logo.png';
 
+interface SocialReach {
+  total_followers: number;
+  avg_engagement_rate: number | null;
+}
+
 interface ArtistWithTravel extends Artist {
   travel_dates: TravelDate[];
   matchingDates?: TravelDate[];
+  socialReach?: SocialReach;
 }
+
+type SortOption = 'name' | 'rating' | 'followers' | 'engagement';
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
