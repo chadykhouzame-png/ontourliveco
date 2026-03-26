@@ -126,11 +126,6 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
     const removed = platforms[index];
     if (!removed) return;
 
-    const confirmed = window.confirm(
-      `Remove ${PLATFORM_CONFIG[removed.platform].name} and its metrics?`
-    );
-    if (!confirmed) return;
-
     setPlatforms(prev => prev.filter((_, i) => i !== index));
 
     toast({
