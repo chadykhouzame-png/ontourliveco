@@ -123,11 +123,34 @@ export const SocialMetricsForm = ({ artistId, onSaved }: SocialMetricsFormProps)
   };
 
   const [pendingRemoveIndex, setPendingRemoveIndex] = useState<number | null>(null);
+  const [lastRemoved, setLastRemoved] = useState<{ platform: PlatformMetrics; index: number } | null>(null);
 
   const confirmRemovePlatform = () => {
     if (pendingRemoveIndex !== null) {
+      const removed = platforms[pendingRemoveIndex];
       setPlatforms(prev => prev.filter((_, i) => i !== pendingRemoveIndex));
+      setLastRemoved({ platform: removed, index: pendingRemoveIndex });
       setPendingRemoveIndex(null);
+      toast({
+        title: `${PLATFORM_CONFIG[removed.platform].name} removed`,
+        description: 'Click Undo to restore it.',
+        action: (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setPlatforms(prev => {
+                const copy = [...prev];
+                copy.splice(pendingRemoveIndex, 0, removed);
+                return copy;
+              });
+              setLastRemoved(null);
+            }}
+          >
+            Undo
+          </Button>
+        ),
+      });
     }
   };
 
