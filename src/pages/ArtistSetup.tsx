@@ -105,7 +105,14 @@ const ArtistSetup = () => {
         setFeeRangeMax(data.fee_range_max?.toString() || '');
         setShowFeeRange(data.show_fee_range || false);
         setArtistAge((data as any).age?.toString() || '');
-        setArtistMobile((data as any).mobile || '');
+        // Mobile is stored on artists but not exposed via the Data API for privacy.
+        // Fetch it through a security-definer RPC that only returns the caller's own value.
+        try {
+          const { data: mobileData } = await supabase.rpc('get_my_artist_mobile' as any);
+          setArtistMobile((mobileData as string) || '');
+        } catch {
+          setArtistMobile('');
+        }
         
         // Fetch social connections
         fetchSocialConnections(data.id);
