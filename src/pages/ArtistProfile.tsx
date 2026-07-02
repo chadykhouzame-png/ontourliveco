@@ -222,11 +222,8 @@ const ArtistProfile = () => {
       setBookingMessage('');
       setOfferAmount('');
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error sending request",
-        description: error.message || "Something went wrong.",
-      });
+      const { getErrorToast } = await import('@/lib/errorHandler');
+      toast(getErrorToast(error, 'send-booking-request'));
     } finally {
       setIsSubmitting(false);
     }
