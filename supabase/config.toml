@@ -1,16 +1,16 @@
 project_id = "wjyyfqxblicvrbaycoaq"
 
 [functions.notify-artists]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-booking-notification]
-verify_jwt = false
+verify_jwt = true
 
 [functions.send-password-reset]
 verify_jwt = false
 
 [functions.send-welcome-email]
-verify_jwt = false
+verify_jwt = true
 
 [functions.log-error]
 verify_jwt = false
