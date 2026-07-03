@@ -862,6 +862,44 @@ export type Database = {
           },
         ]
       }
+      social_stats_snapshots: {
+        Row: {
+          artist_id: string
+          created_at: string
+          engagement_rate: number | null
+          follower_count: number | null
+          id: string
+          platform: Database["public"]["Enums"]["social_platform"]
+          snapshot_date: string
+        }
+        Insert: {
+          artist_id: string
+          created_at?: string
+          engagement_rate?: number | null
+          follower_count?: number | null
+          id?: string
+          platform: Database["public"]["Enums"]["social_platform"]
+          snapshot_date?: string
+        }
+        Update: {
+          artist_id?: string
+          created_at?: string
+          engagement_rate?: number | null
+          follower_count?: number | null
+          id?: string
+          platform?: Database["public"]["Enums"]["social_platform"]
+          snapshot_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_stats_snapshots_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       travel_dates: {
         Row: {
           artist_id: string
@@ -1098,6 +1136,44 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "social_connections_artist_id_fkey"
+            columns: ["artist_id"]
+            isOneToOne: false
+            referencedRelation: "artists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_stats_snapshots_public: {
+        Row: {
+          artist_id: string | null
+          created_at: string | null
+          engagement_rate: number | null
+          follower_count: number | null
+          id: string | null
+          platform: Database["public"]["Enums"]["social_platform"] | null
+          snapshot_date: string | null
+        }
+        Insert: {
+          artist_id?: string | null
+          created_at?: string | null
+          engagement_rate?: number | null
+          follower_count?: number | null
+          id?: string | null
+          platform?: Database["public"]["Enums"]["social_platform"] | null
+          snapshot_date?: string | null
+        }
+        Update: {
+          artist_id?: string | null
+          created_at?: string | null
+          engagement_rate?: number | null
+          follower_count?: number | null
+          id?: string | null
+          platform?: Database["public"]["Enums"]["social_platform"] | null
+          snapshot_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_stats_snapshots_artist_id_fkey"
             columns: ["artist_id"]
             isOneToOne: false
             referencedRelation: "artists"

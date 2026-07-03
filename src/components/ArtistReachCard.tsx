@@ -96,9 +96,8 @@ export default function ArtistReachCard({ artistId, className }: ArtistReachCard
         .eq('is_connected', true);
 
       // Growth baseline from the snapshot history.
-      // NOTE: `social_stats_snapshots_public` is added by the new migration.
-      // The `as any` cast can be removed once Supabase types are regenerated.
-      const { data: snaps } = await (supabase as any)
+      const { data: snaps } = await supabase
+
         .from('social_stats_snapshots_public')
         .select('follower_count, snapshot_date')
         .eq('artist_id', artistId)
