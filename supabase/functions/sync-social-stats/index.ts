@@ -296,6 +296,21 @@ serve(async (req) => {
               last_synced_at: new Date().toISOString(),
             });
         }
+        // Record a daily snapshot for growth history (one row per artist/platform/day)
+        if (stats.follower_count != null) {
+          await supabase
+            .from('social_stats_snapshots')
+            .upsert(
+              {
+                artist_id,
+                platform,
+                follower_count: stats.follower_count,
+                engagement_rate: stats.engagement_rate ?? null,
+              },
+              { onConflict: 'artist_id,platform,snapshot_date' }
+            );
+        }
+
         results[platform] = { synced: true };
       } else {
         results[platform] = { synced: false, error: 'No credentials configured or API error' };

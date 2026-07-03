@@ -20,6 +20,7 @@ import { useRecordProfileView } from '@/hooks/useAnalytics';
 import { Artist, TravelDate, Venue, GENRE_LABELS } from '@/types/database';
 import { SocialStatsDisplay, SocialPlatform } from '@/components/SocialConnectButton';
 import SocialMediaDashboard from '@/components/SocialMediaDashboard';
+import ArtistReachCard from '@/components/ArtistReachCard';
 import { RatingDisplay } from '@/components/StarRating';
 import { ReviewsList, Review } from '@/components/ReviewsList';
 import ArtistAvailabilityCalendar from '@/components/ArtistAvailabilityCalendar';
@@ -347,6 +348,9 @@ const ArtistProfile = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Venue-facing audience summary */}
+            {artist && <ArtistReachCard artistId={artist.id} />}
 
             {/* Social Media Dashboard */}
             {socialConnections.length > 0 && artist && (

@@ -56,6 +56,17 @@ serve(async (req) => {
               ...stats,
               last_synced_at: new Date().toISOString(),
             }).eq('id', spotifyConn.id);
+            if (stats.follower_count != null) {
+              await supabase.from('social_stats_snapshots').upsert(
+                {
+                  artist_id: artistId,
+                  platform: 'spotify',
+                  follower_count: stats.follower_count,
+                  engagement_rate: stats.engagement_rate ?? null,
+                },
+                { onConflict: 'artist_id,platform,snapshot_date' }
+              );
+            }
           }
         }
 
@@ -69,6 +80,17 @@ serve(async (req) => {
               ...stats,
               last_synced_at: new Date().toISOString(),
             }).eq('id', scConn.id);
+            if (stats.follower_count != null) {
+              await supabase.from('social_stats_snapshots').upsert(
+                {
+                  artist_id: artistId,
+                  platform: 'soundcloud',
+                  follower_count: stats.follower_count,
+                  engagement_rate: stats.engagement_rate ?? null,
+                },
+                { onConflict: 'artist_id,platform,snapshot_date' }
+              );
+            }
           }
         }
 

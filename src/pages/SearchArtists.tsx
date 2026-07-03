@@ -17,6 +17,8 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Artist, TravelDate, Genre, GENRE_LABELS } from '@/types/database';
 import { RatingDisplay } from '@/components/StarRating';
+import ReachBadge from '@/components/ReachBadge';
+import { computeReachScore } from '@/lib/reachScore';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import logo from '@/assets/logo.png';
 
@@ -31,7 +33,7 @@ interface ArtistWithTravel extends Artist {
   socialReach?: SocialReach;
 }
 
-type SortOption = 'name' | 'rating' | 'followers' | 'engagement';
+type SortOption = 'reach' | 'name' | 'rating' | 'followers' | 'engagement';
 
 const GENRES: Genre[] = [
   'house', 'techno', 'disco', 'hip_hop', 'rnb', 'afrobeats',
@@ -53,7 +55,7 @@ const SearchArtists = () => {
   const [filterByFee, setFilterByFee] = useState(false);
   const [minRating, setMinRating] = useState<number>(0);
   const [filterByRating, setFilterByRating] = useState(false);
-  const [sortBy, setSortBy] = useState<SortOption>('name');
+  const [sortBy, setSortBy] = useState<SortOption>('reach');
   const [minFollowers, setMinFollowers] = useState<number>(0);
   const [filterByReach, setFilterByReach] = useState(false);
   
@@ -191,6 +193,19 @@ const SearchArtists = () => {
       // Sort results
       results.sort((a, b) => {
         switch (sortBy) {
+          case 'reach': {
+            const sa = computeReachScore({
+              totalFollowers: a.socialReach?.total_followers || 0,
+              avgEngagementRate: a.socialReach?.avg_engagement_rate ?? null,
+              growthPct: null,
+            }).score;
+            const sb = computeReachScore({
+              totalFollowers: b.socialReach?.total_followers || 0,
+              avgEngagementRate: b.socialReach?.avg_engagement_rate ?? null,
+              growthPct: null,
+            }).score;
+            return sb - sa;
+          }
           case 'followers':
             return (b.socialReach?.total_followers || 0) - (a.socialReach?.total_followers || 0);
           case 'engagement':
@@ -228,7 +243,7 @@ const SearchArtists = () => {
     setFilterByFee(false);
     setMinRating(0);
     setFilterByRating(false);
-    setSortBy('name');
+    setSortBy('reach');
     setMinFollowers(0);
     setFilterByReach(false);
     setArtists([]);
@@ -518,6 +533,7 @@ const SearchArtists = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="reach">Reach Score</SelectItem>
                     <SelectItem value="name">Name (A-Z)</SelectItem>
                     <SelectItem value="rating">Highest Rating</SelectItem>
                     <SelectItem value="followers">Most Followers</SelectItem>
@@ -529,7 +545,7 @@ const SearchArtists = () => {
           )}
 
           {/* Active Filters */}
-          {(city || selectedDate || selectedGenres.length > 0 || filterByFee || filterByRating || filterByReach || sortBy !== 'name') && (
+          {(city || selectedDate || selectedGenres.length > 0 || filterByFee || filterByRating || filterByReach || sortBy !== 'reach') && (
             <div className="mt-4 flex items-center gap-2 flex-wrap">
               <span className="text-sm text-muted-foreground">Active filters:</span>
               {city && (
@@ -568,10 +584,10 @@ const SearchArtists = () => {
                   <X className="w-3 h-3 cursor-pointer" onClick={() => { setFilterByReach(false); setMinFollowers(0); }} />
                 </Badge>
               )}
-              {sortBy !== 'name' && (
+              {sortBy !== 'reach' && (
                 <Badge variant="secondary" className="gap-1 flex items-center">
-                  <ArrowUpDown className="w-3 h-3" /> {sortBy === 'followers' ? 'Most Followers' : sortBy === 'engagement' ? 'Engagement' : 'Rating'}
-                  <X className="w-3 h-3 cursor-pointer" onClick={() => setSortBy('name')} />
+                  <ArrowUpDown className="w-3 h-3" /> {sortBy === 'followers' ? 'Most Followers' : sortBy === 'engagement' ? 'Engagement' : sortBy === 'name' ? 'Name (A-Z)' : 'Rating'}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => setSortBy('reach')} />
                 </Badge>
               )}
               <Button variant="ghost" size="sm" onClick={clearFilters}>
@@ -603,7 +619,16 @@ const SearchArtists = () => {
                       <Music className="w-8 h-8 text-artist" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-lg truncate">{artist.artist_name}</h3>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <h3 className="font-semibold text-lg truncate">{artist.artist_name}</h3>
+                        <ReachBadge
+                          score={computeReachScore({
+                            totalFollowers: artist.socialReach?.total_followers || 0,
+                            avgEngagementRate: artist.socialReach?.avg_engagement_rate ?? null,
+                            growthPct: null,
+                          }).score}
+                        />
+                      </div>
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
                         <MapPin className="w-3 h-3" />
                         {artist.primary_city}
