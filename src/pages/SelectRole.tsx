@@ -48,10 +48,29 @@ const SelectRole = () => {
         if (profileError) throw profileError;
       }
 
-      // Assign role
+      // Check if user already has a role (e.g. assigned by signup trigger)
+      const { data: existingRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (existingRole?.role) {
+        // Already has a role — just route them to the right place
+        if (existingRole.role !== role) {
+          toast({
+            title: 'Role already set',
+            description: `Your account is registered as a ${existingRole.role}.`,
+          });
+        }
+        navigate(existingRole.role === 'artist' ? '/artist/dashboard' : '/venue/dashboard');
+        return;
+      }
+
+      // Assign role (idempotent — ignore duplicate if trigger raced us)
       const { error: roleError } = await supabase
         .from('user_roles')
-        .insert({ user_id: user.id, role });
+        .upsert({ user_id: user.id, role }, { onConflict: 'user_id,role', ignoreDuplicates: true });
 
       if (roleError) throw roleError;
 
