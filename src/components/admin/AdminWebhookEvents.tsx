@@ -211,8 +211,7 @@ const AdminWebhookEvents = () => {
 
   const retryEvent = async () => {
     const event = pendingRetryEvent;
-    if (!event) return;
-    setPendingRetryEvent(null);
+    if (!event || retryingId) return;
     setRetryingId(event.id);
     try {
       const { data, error } = await supabase.functions.invoke('retry-webhook-event', {
@@ -227,7 +226,6 @@ const AdminWebhookEvents = () => {
           title: 'Retry succeeded',
           description: `Replayed ${event.event_type} — HTTP ${result.status} in ${result.duration_ms}ms`,
         });
-        setTimeout(fetchEvents, 500);
       } else {
         toast({
           title: 'Retry failed',
@@ -241,6 +239,8 @@ const AdminWebhookEvents = () => {
       toast({ title: 'Retry error', description: msg, variant: 'destructive' });
     } finally {
       setRetryingId(null);
+      setPendingRetryEvent(null);
+      setTimeout(fetchEvents, 500);
     }
   };
 
@@ -470,7 +470,7 @@ const AdminWebhookEvents = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={retryingId === event.id}
+                            disabled={!!retryingId}
                             onClick={() => confirmRetry(event)}
                           >
                             <RotateCw
@@ -566,7 +566,12 @@ const AdminWebhookEvents = () => {
           </Table>
         )}
 
-        <Dialog open={!!pendingRetryEvent} onOpenChange={(open) => !open && cancelRetry()}>
+        <Dialog
+          open={!!pendingRetryEvent}
+          onOpenChange={(open) => {
+            if (!open && !retryingId) cancelRetry();
+          }}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Retry webhook event?</DialogTitle>
@@ -583,16 +588,16 @@ const AdminWebhookEvents = () => {
               )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={cancelRetry}>
+              <Button variant="outline" onClick={cancelRetry} disabled={!!retryingId}>
                 Cancel
               </Button>
               <Button
                 variant="default"
                 onClick={retryEvent}
-                disabled={retryingId === pendingRetryEvent?.id}
+                disabled={!!retryingId}
               >
-                <RotateCw className={`h-4 w-4 mr-2 ${retryingId === pendingRetryEvent?.id ? 'animate-spin' : ''}`} />
-                {retryingId === pendingRetryEvent?.id ? 'Retrying…' : 'Retry event'}
+                <RotateCw className={`h-4 w-4 mr-2 ${retryingId ? 'animate-spin' : ''}`} />
+                {retryingId ? 'Retrying…' : 'Retry event'}
               </Button>
             </DialogFooter>
           </DialogContent>
