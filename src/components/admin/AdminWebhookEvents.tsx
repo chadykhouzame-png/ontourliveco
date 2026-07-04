@@ -72,6 +72,20 @@ interface RetryResult {
   error?: string;
 }
 
+interface RetryAttempt {
+  id: string;
+  webhook_event_id: string;
+  admin_user_id: string | null;
+  admin_email: string | null;
+  success: boolean;
+  http_status: number | null;
+  duration_ms: number | null;
+  retry_event_id: string | null;
+  response_body: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
 const STATUS_OPTIONS = ['received', 'processing', 'processed', 'failed'];
 
 const statusVariant = (status: string) => {
@@ -92,6 +106,8 @@ const AdminWebhookEvents = () => {
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [retryResults, setRetryResults] = useState<Record<string, RetryResult>>({});
   const [pendingRetryEvent, setPendingRetryEvent] = useState<WebhookEvent | null>(null);
+  const [retryHistory, setRetryHistory] = useState<Record<string, RetryAttempt[]>>({});
+  const [historyLoading, setHistoryLoading] = useState<Record<string, boolean>>({});
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -103,6 +119,25 @@ const AdminWebhookEvents = () => {
 
   const { toast } = useToast();
   const { setLastResult } = useWebhookTest();
+
+  const fetchRetryHistory = useCallback(async (eventId: string) => {
+    setHistoryLoading((prev) => ({ ...prev, [eventId]: true }));
+    const { data, error } = await supabase
+      .from('webhook_retry_attempts')
+      .select('*')
+      .eq('webhook_event_id', eventId)
+      .order('created_at', { ascending: false });
+    if (!error && data) {
+      setRetryHistory((prev) => ({ ...prev, [eventId]: data as RetryAttempt[] }));
+    }
+    setHistoryLoading((prev) => ({ ...prev, [eventId]: false }));
+  }, []);
+
+  const toggleExpanded = (eventId: string) => {
+    const next = expandedId === eventId ? null : eventId;
+    setExpandedId(next);
+    if (next) fetchRetryHistory(next);
+  };
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -221,6 +256,7 @@ const AdminWebhookEvents = () => {
       const result = data as RetryResult;
       setRetryResults((prev) => ({ ...prev, [event.id]: result }));
       setExpandedId(event.id);
+      fetchRetryHistory(event.id);
       if (result.success) {
         toast({
           title: 'Retry succeeded',
@@ -452,7 +488,7 @@ const AdminWebhookEvents = () => {
             <TableBody>
               {filteredEvents.map((event) => (
                 <>
-                  <TableRow key={event.id} className="cursor-pointer" onClick={() => setExpandedId(expandedId === event.id ? null : event.id)}>
+                  <TableRow key={event.id} className="cursor-pointer" onClick={() => toggleExpanded(event.id)}>
                     <TableCell className="font-mono text-xs">{event.event_type}</TableCell>
                     <TableCell className="font-mono text-xs max-w-[180px] truncate">{event.event_id}</TableCell>
                     <TableCell>
@@ -528,6 +564,66 @@ const AdminWebhookEvents = () => {
                               </div>
                             </div>
                           )}
+                          <div>
+                            <div className="flex items-center justify-between mb-1 gap-2">
+                              <span className="text-xs font-semibold">Retry history:</span>
+                              <span className="text-xs text-muted-foreground">
+                                {historyLoading[event.id]
+                                  ? 'Loading…'
+                                  : `${retryHistory[event.id]?.length ?? 0} attempt${(retryHistory[event.id]?.length ?? 0) === 1 ? '' : 's'}`}
+                              </span>
+                            </div>
+                            {retryHistory[event.id] && retryHistory[event.id].length > 0 ? (
+                              <div className="rounded-lg border overflow-hidden">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="h-8 text-xs">When</TableHead>
+                                      <TableHead className="h-8 text-xs">Admin</TableHead>
+                                      <TableHead className="h-8 text-xs">Result</TableHead>
+                                      <TableHead className="h-8 text-xs">HTTP</TableHead>
+                                      <TableHead className="h-8 text-xs">Duration</TableHead>
+                                      <TableHead className="h-8 text-xs">Response</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {retryHistory[event.id].map((attempt) => (
+                                      <TableRow key={attempt.id}>
+                                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                                          {format(new Date(attempt.created_at), 'MMM d, HH:mm:ss')}
+                                        </TableCell>
+                                        <TableCell className="text-xs font-mono max-w-[180px] truncate">
+                                          {attempt.admin_email || attempt.admin_user_id || '—'}
+                                        </TableCell>
+                                        <TableCell>
+                                          {attempt.success ? (
+                                            <Badge variant="default" className="gap-1">
+                                              <CheckCircle2 className="h-3 w-3" /> Success
+                                            </Badge>
+                                          ) : (
+                                            <Badge variant="destructive" className="gap-1">
+                                              <XCircle className="h-3 w-3" /> Failed
+                                            </Badge>
+                                          )}
+                                        </TableCell>
+                                        <TableCell className="text-xs">{attempt.http_status ?? '—'}</TableCell>
+                                        <TableCell className="text-xs">
+                                          {attempt.duration_ms !== null ? `${attempt.duration_ms}ms` : '—'}
+                                        </TableCell>
+                                        <TableCell className="text-xs font-mono max-w-[280px] truncate">
+                                          {attempt.error_message || attempt.response_body || '—'}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            ) : (
+                              !historyLoading[event.id] && (
+                                <p className="text-xs text-muted-foreground">No retry attempts recorded.</p>
+                              )
+                            )}
+                          </div>
                           <div>
                             <div className="flex items-center justify-between mb-1 gap-2">
                               <span className="text-xs font-semibold">Payload:</span>

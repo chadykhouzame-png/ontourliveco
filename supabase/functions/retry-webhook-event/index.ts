@@ -98,6 +98,19 @@ serve(async (req) => {
     const durationMs = Date.now() - started;
     const responseText = await res.text();
 
+    // Record attempt for the event's history panel
+    await supabase.from("webhook_retry_attempts").insert({
+      webhook_event_id: row.id,
+      admin_user_id: userData.user.id,
+      admin_email: userData.user.email ?? null,
+      success: res.ok,
+      http_status: res.status,
+      duration_ms: durationMs,
+      retry_event_id: retryEventId,
+      response_body: responseText.slice(0, 2000),
+      error_message: res.ok ? null : responseText.slice(0, 500),
+    });
+
     return new Response(
       JSON.stringify({
         success: res.ok,
