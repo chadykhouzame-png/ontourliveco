@@ -192,6 +192,24 @@ const AdminWebhookEvents = () => {
     })();
   }, []);
 
+  // Track which visible events have retry attempts for prioritization
+  useEffect(() => {
+    if (!events.length) {
+      setRetriedIds(new Set());
+      return;
+    }
+    const ids = events.map((e) => e.id);
+    supabase
+      .from('webhook_retry_attempts')
+      .select('webhook_event_id')
+      .in('webhook_event_id', ids)
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setRetriedIds(new Set(data.map((r) => r.webhook_event_id)));
+        }
+      });
+  }, [events]);
+
   useEffect(() => {
     fetchEvents();
   }, [fetchEvents]);
