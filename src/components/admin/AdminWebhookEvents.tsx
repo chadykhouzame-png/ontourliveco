@@ -413,7 +413,7 @@ const AdminWebhookEvents = () => {
             </div>
           </div>
         )}
-        {events.length === 0 && !loading ? (
+        {filteredEvents.length === 0 && !loading ? (
           <p className="text-muted-foreground text-center py-8">
             {filtersActive ? 'No webhook events match these filters.' : 'No webhook events recorded yet.'}
           </p>
@@ -430,7 +430,7 @@ const AdminWebhookEvents = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((event) => (
+              {filteredEvents.map((event) => (
                 <>
                   <TableRow key={event.id} className="cursor-pointer" onClick={() => setExpandedId(expandedId === event.id ? null : event.id)}>
                     <TableCell className="font-mono text-xs">{event.event_type}</TableCell>
