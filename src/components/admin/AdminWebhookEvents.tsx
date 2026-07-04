@@ -588,16 +588,16 @@ const AdminWebhookEvents = () => {
               )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={cancelRetry}>
+              <Button variant="outline" onClick={cancelRetry} disabled={!!retryingId}>
                 Cancel
               </Button>
               <Button
                 variant="default"
                 onClick={retryEvent}
-                disabled={retryingId === pendingRetryEvent?.id}
+                disabled={!!retryingId}
               >
-                <RotateCw className={`h-4 w-4 mr-2 ${retryingId === pendingRetryEvent?.id ? 'animate-spin' : ''}`} />
-                {retryingId === pendingRetryEvent?.id ? 'Retrying…' : 'Retry event'}
+                <RotateCw className={`h-4 w-4 mr-2 ${retryingId ? 'animate-spin' : ''}`} />
+                {retryingId ? 'Retrying…' : 'Retry event'}
               </Button>
             </DialogFooter>
           </DialogContent>
