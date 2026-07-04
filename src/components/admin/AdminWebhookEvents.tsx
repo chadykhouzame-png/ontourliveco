@@ -22,6 +22,7 @@ import {
   XCircle,
   Calendar as CalendarIcon,
   X,
+  RotateCw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -48,6 +49,16 @@ interface WebhookEvent {
   created_at: string;
 }
 
+interface RetryResult {
+  success: boolean;
+  status?: number;
+  duration_ms?: number;
+  retry_event_id?: string;
+  original_event_id?: string;
+  response_body?: string;
+  error?: string;
+}
+
 const STATUS_OPTIONS = ['received', 'processing', 'processed', 'failed'];
 
 const statusVariant = (status: string) => {
@@ -65,6 +76,8 @@ const AdminWebhookEvents = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [retryResults, setRetryResults] = useState<Record<string, RetryResult>>({});
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -144,6 +157,38 @@ const AdminWebhookEvents = () => {
       toast({ title: 'Test error', description: msg, variant: 'destructive' });
     } finally {
       setTesting(false);
+    }
+  };
+
+  const retryEvent = async (event: WebhookEvent) => {
+    setRetryingId(event.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('retry-webhook-event', {
+        body: { webhook_event_id: event.id },
+      });
+      if (error) throw error;
+      const result = data as RetryResult;
+      setRetryResults((prev) => ({ ...prev, [event.id]: result }));
+      setExpandedId(event.id);
+      if (result.success) {
+        toast({
+          title: 'Retry succeeded',
+          description: `Replayed ${event.event_type} — HTTP ${result.status} in ${result.duration_ms}ms`,
+        });
+        setTimeout(fetchEvents, 500);
+      } else {
+        toast({
+          title: 'Retry failed',
+          description: result.error || `Status ${result.status}`,
+          variant: 'destructive',
+        });
+      }
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to retry event';
+      setRetryResults((prev) => ({ ...prev, [event.id]: { success: false, error: msg } }));
+      toast({ title: 'Retry error', description: msg, variant: 'destructive' });
+    } finally {
+      setRetryingId(null);
     }
   };
 
@@ -339,8 +384,23 @@ const AdminWebhookEvents = () => {
                     <TableCell className="text-xs text-muted-foreground">
                       {event.processed_at ? format(new Date(event.processed_at), 'MMM d, HH:mm:ss') : '—'}
                     </TableCell>
-                    <TableCell>
-                      {expandedId === event.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-2 justify-end">
+                        {event.status === 'failed' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={retryingId === event.id}
+                            onClick={() => retryEvent(event)}
+                          >
+                            <RotateCw
+                              className={`h-3.5 w-3.5 mr-1 ${retryingId === event.id ? 'animate-spin' : ''}`}
+                            />
+                            {retryingId === event.id ? 'Retrying…' : 'Retry'}
+                          </Button>
+                        )}
+                        {expandedId === event.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </div>
                     </TableCell>
                   </TableRow>
                   {expandedId === event.id && (
@@ -351,6 +411,41 @@ const AdminWebhookEvents = () => {
                             <div>
                               <span className="text-xs font-semibold text-destructive">Error: </span>
                               <span className="text-xs text-destructive">{event.error_message}</span>
+                            </div>
+                          )}
+                          {retryResults[event.id] && (
+                            <div
+                              className={`p-2 rounded-md border text-xs flex items-start gap-2 ${
+                                retryResults[event.id].success
+                                  ? 'bg-green-500/10 border-green-500/30'
+                                  : 'bg-destructive/10 border-destructive/30'
+                              }`}
+                            >
+                              {retryResults[event.id].success ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                              )}
+                              <div className="flex-1 min-w-0 space-y-0.5">
+                                <div className="font-medium">
+                                  {retryResults[event.id].success ? 'Retry delivered' : 'Retry failed'}
+                                </div>
+                                {retryResults[event.id].status !== undefined && (
+                                  <div className="text-muted-foreground">HTTP status: {retryResults[event.id].status}</div>
+                                )}
+                                {retryResults[event.id].duration_ms !== undefined && (
+                                  <div className="text-muted-foreground">Duration: {retryResults[event.id].duration_ms}ms</div>
+                                )}
+                                {retryResults[event.id].retry_event_id && (
+                                  <div className="font-mono truncate">Replay event: {retryResults[event.id].retry_event_id}</div>
+                                )}
+                                {retryResults[event.id].error && (
+                                  <div className="text-destructive">Error: {retryResults[event.id].error}</div>
+                                )}
+                                {retryResults[event.id].response_body && (
+                                  <div className="font-mono break-all">Response: {retryResults[event.id].response_body}</div>
+                                )}
+                              </div>
                             </div>
                           )}
                           <div>
