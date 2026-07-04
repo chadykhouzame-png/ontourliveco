@@ -302,6 +302,20 @@ const AdminWebhookEvents = () => {
           </div>
 
           <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">Search</label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Event ID or payload…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 w-[260px] pl-9 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
             <label className="text-xs text-muted-foreground">From</label>
             <Popover>
               <PopoverTrigger asChild>
