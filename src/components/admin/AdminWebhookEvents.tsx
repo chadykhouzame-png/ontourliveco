@@ -470,7 +470,7 @@ const AdminWebhookEvents = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            disabled={retryingId === event.id}
+                            disabled={!!retryingId}
                             onClick={() => confirmRetry(event)}
                           >
                             <RotateCw
