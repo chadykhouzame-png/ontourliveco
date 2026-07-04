@@ -1,12 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, ChevronDown, ChevronUp, Zap, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  RefreshCw,
+  ChevronDown,
+  ChevronUp,
+  Zap,
+  CheckCircle2,
+  XCircle,
+  Calendar as CalendarIcon,
+  X,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface TestResult {
   success: boolean;
@@ -29,6 +48,8 @@ interface WebhookEvent {
   created_at: string;
 }
 
+const STATUS_OPTIONS = ['received', 'processing', 'processed', 'failed'];
+
 const statusVariant = (status: string) => {
   switch (status) {
     case 'processed': return 'default';
@@ -44,21 +65,65 @@ const AdminWebhookEvents = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
+
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [knownTypes, setKnownTypes] = useState<string[]>([]);
+
   const { toast } = useToast();
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    let query = supabase
       .from('webhook_events')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(100);
 
+    if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+    if (typeFilter !== 'all') query = query.eq('event_type', typeFilter);
+    if (dateFrom) query = query.gte('created_at', dateFrom.toISOString());
+    if (dateTo) {
+      // Include the entire selected day
+      const end = new Date(dateTo);
+      end.setHours(23, 59, 59, 999);
+      query = query.lte('created_at', end.toISOString());
+    }
+
+    const { data, error } = await query;
+
     if (!error && data) {
       setEvents(data);
+      // Grow known-types list from any results we see
+      setKnownTypes((prev) => {
+        const merged = new Set(prev);
+        data.forEach((e) => merged.add(e.event_type));
+        return Array.from(merged).sort();
+      });
     }
     setLoading(false);
-  };
+  }, [statusFilter, typeFilter, dateFrom, dateTo]);
+
+  // Seed the event-type dropdown with distinct types from the DB on first load
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase
+        .from('webhook_events')
+        .select('event_type')
+        .order('event_type', { ascending: true })
+        .limit(500);
+      if (data) {
+        setKnownTypes(Array.from(new Set(data.map((r) => r.event_type))).sort());
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const runWebhookTest = async () => {
     setTesting(true);
@@ -69,7 +134,6 @@ const AdminWebhookEvents = () => {
       setTestResult(data as TestResult);
       if (data?.success) {
         toast({ title: 'Webhook test passed', description: `Endpoint responded ${data.status} in ${data.duration_ms}ms` });
-        // Refresh events list to show the new test event
         setTimeout(fetchEvents, 500);
       } else {
         toast({ title: 'Webhook test failed', description: data?.error || `Status ${data?.status}`, variant: 'destructive' });
@@ -83,9 +147,17 @@ const AdminWebhookEvents = () => {
     }
   };
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
+  const filtersActive = useMemo(
+    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo,
+    [statusFilter, typeFilter, dateFrom, dateTo],
+  );
+
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setTypeFilter('all');
+    setDateFrom(undefined);
+    setDateTo(undefined);
+  };
 
   return (
     <Card>
@@ -106,6 +178,106 @@ const AdminWebhookEvents = () => {
         </div>
       </CardHeader>
       <CardContent>
+        {/* Filters */}
+        <div className="mb-4 flex flex-wrap items-end gap-2">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">Status</label>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-9 w-[160px]">
+                <SelectValue placeholder="All statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All statuses</SelectItem>
+                {STATUS_OPTIONS.map((s) => (
+                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">Event type</label>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="h-9 w-[220px]">
+                <SelectValue placeholder="All event types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All event types</SelectItem>
+                {knownTypes.map((t) => (
+                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">From</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    'h-9 w-[170px] justify-start text-left font-normal',
+                    !dateFrom && 'text-muted-foreground',
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateFrom ? format(dateFrom, 'PP') : 'Any'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateFrom}
+                  onSelect={setDateFrom}
+                  disabled={(d) => (dateTo ? d > dateTo : false)}
+                  initialFocus
+                  className={cn('p-3 pointer-events-auto')}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">To</label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    'h-9 w-[170px] justify-start text-left font-normal',
+                    !dateTo && 'text-muted-foreground',
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateTo ? format(dateTo, 'PP') : 'Any'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={dateTo}
+                  onSelect={setDateTo}
+                  disabled={(d) => (dateFrom ? d < dateFrom : false)}
+                  initialFocus
+                  className={cn('p-3 pointer-events-auto')}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {filtersActive && (
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-9">
+              <X className="h-4 w-4 mr-1" />
+              Clear
+            </Button>
+          )}
+
+          <div className="ml-auto text-xs text-muted-foreground self-center">
+            {loading ? 'Loading…' : `${events.length} event${events.length === 1 ? '' : 's'}`}
+          </div>
+        </div>
+
         {testResult && (
           <div
             className={`mb-4 p-3 rounded-lg border flex items-start gap-3 ${
@@ -137,7 +309,9 @@ const AdminWebhookEvents = () => {
           </div>
         )}
         {events.length === 0 && !loading ? (
-          <p className="text-muted-foreground text-center py-8">No webhook events recorded yet.</p>
+          <p className="text-muted-foreground text-center py-8">
+            {filtersActive ? 'No webhook events match these filters.' : 'No webhook events recorded yet.'}
+          </p>
         ) : (
           <Table>
             <TableHeader>
