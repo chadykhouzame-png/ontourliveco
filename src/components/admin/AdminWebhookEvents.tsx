@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -25,6 +26,7 @@ import {
   RotateCw,
   Copy,
   Download,
+  Search,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -87,6 +89,7 @@ const AdminWebhookEvents = () => {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [knownTypes, setKnownTypes] = useState<string[]>([]);
 
   const { toast } = useToast();
@@ -221,9 +224,22 @@ const AdminWebhookEvents = () => {
     }
   };
 
+  const filteredEvents = useMemo(() => {
+    if (!searchQuery.trim()) return events;
+    const q = searchQuery.toLowerCase();
+    return events.filter((event) => {
+      const payloadText = JSON.stringify(event.payload || {}).toLowerCase();
+      return (
+        event.event_id.toLowerCase().includes(q) ||
+        event.event_type.toLowerCase().includes(q) ||
+        payloadText.includes(q)
+      );
+    });
+  }, [events, searchQuery]);
+
   const filtersActive = useMemo(
-    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo,
-    [statusFilter, typeFilter, dateFrom, dateTo],
+    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo || !!searchQuery.trim(),
+    [statusFilter, typeFilter, dateFrom, dateTo, searchQuery],
   );
 
   const clearFilters = () => {
@@ -231,6 +247,7 @@ const AdminWebhookEvents = () => {
     setTypeFilter('all');
     setDateFrom(undefined);
     setDateTo(undefined);
+    setSearchQuery('');
   };
 
   return (
@@ -282,6 +299,20 @@ const AdminWebhookEvents = () => {
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">Search</label>
+            <div className="relative">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Event ID or payload…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 w-[260px] pl-9 text-sm"
+              />
+            </div>
           </div>
 
           <div className="flex flex-col gap-1">
@@ -348,7 +379,7 @@ const AdminWebhookEvents = () => {
           )}
 
           <div className="ml-auto text-xs text-muted-foreground self-center">
-            {loading ? 'Loading…' : `${events.length} event${events.length === 1 ? '' : 's'}`}
+            {loading ? 'Loading…' : `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'}`}
           </div>
         </div>
 
@@ -382,7 +413,7 @@ const AdminWebhookEvents = () => {
             </div>
           </div>
         )}
-        {events.length === 0 && !loading ? (
+        {filteredEvents.length === 0 && !loading ? (
           <p className="text-muted-foreground text-center py-8">
             {filtersActive ? 'No webhook events match these filters.' : 'No webhook events recorded yet.'}
           </p>
@@ -399,7 +430,7 @@ const AdminWebhookEvents = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map((event) => (
+              {filteredEvents.map((event) => (
                 <>
                   <TableRow key={event.id} className="cursor-pointer" onClick={() => setExpandedId(expandedId === event.id ? null : event.id)}>
                     <TableCell className="font-mono text-xs">{event.event_type}</TableCell>
