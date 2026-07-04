@@ -22,6 +22,7 @@ import {
   XCircle,
   Calendar as CalendarIcon,
   X,
+  RotateCw,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -46,6 +47,16 @@ interface WebhookEvent {
   error_message: string | null;
   processed_at: string | null;
   created_at: string;
+}
+
+interface RetryResult {
+  success: boolean;
+  status?: number;
+  duration_ms?: number;
+  retry_event_id?: string;
+  original_event_id?: string;
+  response_body?: string;
+  error?: string;
 }
 
 const STATUS_OPTIONS = ['received', 'processing', 'processed', 'failed'];
