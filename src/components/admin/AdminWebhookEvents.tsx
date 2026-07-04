@@ -35,6 +35,7 @@ import {
   Copy,
   Download,
   Search,
+  AlertTriangle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -116,6 +117,8 @@ const AdminWebhookEvents = () => {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [knownTypes, setKnownTypes] = useState<string[]>([]);
+  const [showFailedOnly, setShowFailedOnly] = useState(false);
+  const [retriedIds, setRetriedIds] = useState<Set<string>>(new Set());
 
   const { toast } = useToast();
   const { setLastResult } = useWebhookTest();
@@ -147,7 +150,11 @@ const AdminWebhookEvents = () => {
       .order('created_at', { ascending: false })
       .limit(100);
 
-    if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+    if (showFailedOnly) {
+      query = query.eq('status', 'failed');
+    } else if (statusFilter !== 'all') {
+      query = query.eq('status', statusFilter);
+    }
     if (typeFilter !== 'all') query = query.eq('event_type', typeFilter);
     if (dateFrom) query = query.gte('created_at', dateFrom.toISOString());
     if (dateTo) {
@@ -169,7 +176,7 @@ const AdminWebhookEvents = () => {
       });
     }
     setLoading(false);
-  }, [statusFilter, typeFilter, dateFrom, dateTo]);
+  }, [statusFilter, typeFilter, dateFrom, dateTo, showFailedOnly]);
 
   // Seed the event-type dropdown with distinct types from the DB on first load
   useEffect(() => {
@@ -184,6 +191,24 @@ const AdminWebhookEvents = () => {
       }
     })();
   }, []);
+
+  // Track which visible events have retry attempts for prioritization
+  useEffect(() => {
+    if (!events.length) {
+      setRetriedIds(new Set());
+      return;
+    }
+    const ids = events.map((e) => e.id);
+    supabase
+      .from('webhook_retry_attempts')
+      .select('webhook_event_id')
+      .in('webhook_event_id', ids)
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setRetriedIds(new Set(data.map((r) => r.webhook_event_id)));
+        }
+      });
+  }, [events]);
 
   useEffect(() => {
     fetchEvents();
@@ -281,24 +306,38 @@ const AdminWebhookEvents = () => {
   };
 
   const filteredEvents = useMemo(() => {
-    if (!searchQuery.trim()) return events;
-    const q = searchQuery.toLowerCase();
-    return events.filter((event) => {
-      const payloadText = JSON.stringify(event.payload || {}).toLowerCase();
-      return (
-        event.event_id.toLowerCase().includes(q) ||
-        event.event_type.toLowerCase().includes(q) ||
-        payloadText.includes(q)
-      );
+    let list = events;
+    if (showFailedOnly) {
+      list = list.filter((event) => event.status === 'failed');
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter((event) => {
+        const payloadText = JSON.stringify(event.payload || {}).toLowerCase();
+        return (
+          event.event_id.toLowerCase().includes(q) ||
+          event.event_type.toLowerCase().includes(q) ||
+          payloadText.includes(q)
+        );
+      });
+    }
+    return [...list].sort((a, b) => {
+      if (showFailedOnly) {
+        const aRetried = retriedIds.has(a.id);
+        const bRetried = retriedIds.has(b.id);
+        if (aRetried !== bRetried) return aRetried ? 1 : -1;
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-  }, [events, searchQuery]);
+  }, [events, showFailedOnly, searchQuery, retriedIds]);
 
   const filtersActive = useMemo(
-    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo || !!searchQuery.trim(),
-    [statusFilter, typeFilter, dateFrom, dateTo, searchQuery],
+    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo || !!searchQuery.trim() || showFailedOnly,
+    [statusFilter, typeFilter, dateFrom, dateTo, searchQuery, showFailedOnly],
   );
 
   const clearFilters = () => {
+    setShowFailedOnly(false);
     setStatusFilter('all');
     setTypeFilter('all');
     setDateFrom(undefined);
@@ -329,7 +368,7 @@ const AdminWebhookEvents = () => {
         <div className="mb-4 flex flex-wrap items-end gap-2">
           <div className="flex flex-col gap-1">
             <label className="text-xs text-muted-foreground">Status</label>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={setStatusFilter} disabled={showFailedOnly}>
               <SelectTrigger className="h-9 w-[160px]">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
@@ -370,6 +409,24 @@ const AdminWebhookEvents = () => {
               />
             </div>
           </div>
+
+          <Button
+            variant={showFailedOnly ? 'default' : 'outline'}
+            size="sm"
+            className="h-9"
+            onClick={() => {
+              if (showFailedOnly) {
+                setShowFailedOnly(false);
+                setStatusFilter('all');
+              } else {
+                setShowFailedOnly(true);
+                setStatusFilter('failed');
+              }
+            }}
+          >
+            <AlertTriangle className="h-4 w-4 mr-1" />
+            Failed only
+          </Button>
 
           <div className="flex flex-col gap-1">
             <label className="text-xs text-muted-foreground">From</label>
