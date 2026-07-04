@@ -42,6 +42,9 @@ const AdminWebhookEvents = () => {
   const [events, setEvents] = useState<WebhookEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<TestResult | null>(null);
+  const { toast } = useToast();
 
   const fetchEvents = async () => {
     setLoading(true);
@@ -57,23 +60,82 @@ const AdminWebhookEvents = () => {
     setLoading(false);
   };
 
+  const runWebhookTest = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke('test-stripe-webhook');
+      if (error) throw error;
+      setTestResult(data as TestResult);
+      if (data?.success) {
+        toast({ title: 'Webhook test passed', description: `Endpoint responded ${data.status} in ${data.duration_ms}ms` });
+        // Refresh events list to show the new test event
+        setTimeout(fetchEvents, 500);
+      } else {
+        toast({ title: 'Webhook test failed', description: data?.error || `Status ${data?.status}`, variant: 'destructive' });
+      }
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to run test';
+      setTestResult({ success: false, error: msg });
+      toast({ title: 'Test error', description: msg, variant: 'destructive' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
   useEffect(() => {
     fetchEvents();
   }, []);
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
         <div>
           <CardTitle>Webhook Events</CardTitle>
           <CardDescription>Stripe webhook event audit log</CardDescription>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchEvents} disabled={loading}>
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="default" size="sm" onClick={runWebhookTest} disabled={testing}>
+            <Zap className={`h-4 w-4 mr-2 ${testing ? 'animate-pulse' : ''}`} />
+            {testing ? 'Testing…' : 'Send Test Event'}
+          </Button>
+          <Button variant="outline" size="sm" onClick={fetchEvents} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </CardHeader>
       <CardContent>
+        {testResult && (
+          <div
+            className={`mb-4 p-3 rounded-lg border flex items-start gap-3 ${
+              testResult.success
+                ? 'bg-green-500/10 border-green-500/30'
+                : 'bg-destructive/10 border-destructive/30'
+            }`}
+          >
+            {testResult.success ? (
+              <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+            ) : (
+              <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1 min-w-0 text-sm">
+              <div className="font-medium">
+                {testResult.success ? 'Test event delivered successfully' : 'Test event failed'}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                {testResult.status !== undefined && <div>HTTP status: {testResult.status}</div>}
+                {testResult.duration_ms !== undefined && <div>Duration: {testResult.duration_ms}ms</div>}
+                {testResult.event_id && <div className="font-mono truncate">Event: {testResult.event_id}</div>}
+                {testResult.event_type && <div>Type: {testResult.event_type}</div>}
+                {testResult.error && <div className="text-destructive">Error: {testResult.error}</div>}
+                {testResult.response_body && (
+                  <div className="font-mono break-all">Response: {testResult.response_body}</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
         {events.length === 0 && !loading ? (
           <p className="text-muted-foreground text-center py-8">No webhook events recorded yet.</p>
         ) : (
