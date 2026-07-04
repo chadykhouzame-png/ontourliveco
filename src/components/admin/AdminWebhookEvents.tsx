@@ -379,7 +379,7 @@ const AdminWebhookEvents = () => {
           )}
 
           <div className="ml-auto text-xs text-muted-foreground self-center">
-            {loading ? 'Loading…' : `${events.length} event${events.length === 1 ? '' : 's'}`}
+            {loading ? 'Loading…' : `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'}`}
           </div>
         </div>
 
