@@ -9,6 +9,7 @@ import AdminProfileApproval from '@/components/admin/AdminProfileApproval';
 import AdminDisputes from '@/components/admin/AdminDisputes';
 import AdminStats from '@/components/admin/AdminStats';
 import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
+import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import logo from '@/assets/logo.png';
 
 const AdminDashboard = () => {
@@ -85,8 +86,9 @@ const AdminDashboard = () => {
             <AdminDisputes />
           </TabsContent>
 
-          <TabsContent value="webhooks" className="mt-6">
+          <TabsContent value="webhooks" className="mt-6 space-y-6">
             <AdminWebhookEvents />
+            <WebhookTestingGuide />
           </TabsContent>
         </Tabs>
       </main>
