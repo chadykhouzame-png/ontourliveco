@@ -4,8 +4,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, ChevronDown, ChevronUp } from 'lucide-react';
+import { RefreshCw, ChevronDown, ChevronUp, Zap, CheckCircle2, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
+
+interface TestResult {
+  success: boolean;
+  status?: number;
+  duration_ms?: number;
+  event_id?: string;
+  event_type?: string;
+  response_body?: string;
+  error?: string;
+}
 
 interface WebhookEvent {
   id: string;
