@@ -410,6 +410,24 @@ const AdminWebhookEvents = () => {
             </div>
           </div>
 
+          <Button
+            variant={showFailedOnly ? 'default' : 'outline'}
+            size="sm"
+            className="h-9"
+            onClick={() => {
+              if (showFailedOnly) {
+                setShowFailedOnly(false);
+                setStatusFilter('all');
+              } else {
+                setShowFailedOnly(true);
+                setStatusFilter('failed');
+              }
+            }}
+          >
+            <AlertTriangle className="h-4 w-4 mr-1" />
+            Failed only
+          </Button>
+
           <div className="flex flex-col gap-1">
             <label className="text-xs text-muted-foreground">From</label>
             <Popover>
