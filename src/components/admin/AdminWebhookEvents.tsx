@@ -256,6 +256,7 @@ const AdminWebhookEvents = () => {
       const result = data as RetryResult;
       setRetryResults((prev) => ({ ...prev, [event.id]: result }));
       setExpandedId(event.id);
+      fetchRetryHistory(event.id);
       if (result.success) {
         toast({
           title: 'Retry succeeded',
