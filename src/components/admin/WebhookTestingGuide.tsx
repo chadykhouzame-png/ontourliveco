@@ -1,8 +1,137 @@
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { HelpCircle, ExternalLink } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { HelpCircle, ExternalLink, CheckCircle2, XCircle, Circle, AlertTriangle } from 'lucide-react';
+import { useWebhookTest, WebhookTestResult } from './WebhookTestContext';
+import { formatDistanceToNow } from 'date-fns';
+
+type CheckState = 'pending' | 'pass' | 'fail' | 'warn';
+
+interface CheckItem {
+  id: string;
+  label: string;
+  state: CheckState;
+  detail: string;
+}
+
+const buildChecklist = (r: WebhookTestResult | null): CheckItem[] => {
+  if (!r) {
+    return [
+      { id: 'invoke', label: 'Test event dispatched', state: 'pending', detail: 'Click "Send Test Event" above to run diagnostics.' },
+      { id: 'network', label: 'Edge function reachable', state: 'pending', detail: 'We\'ll POST a signed event to the stripe-webhook function.' },
+      { id: 'signature', label: 'Signature accepted', state: 'pending', detail: 'The event is signed with STRIPE_WEBHOOK_SECRET.' },
+      { id: 'handler', label: 'Handler processed the event', state: 'pending', detail: 'Handler returns 200 on success.' },
+      { id: 'logged', label: 'Event written to audit log', state: 'pending', detail: 'A new row will appear in the Webhook Events table.' },
+    ];
+  }
+
+  const err = (r.error || '').toLowerCase();
+  const body = (r.response_body || '').toLowerCase();
+  const status = r.status;
+
+  // Failure to even invoke the edge function (auth, network, secret missing)
+  const invokeFailed = status === undefined;
+  const missingSecret = err.includes('stripe_webhook_secret') || body.includes('stripe_webhook_secret');
+  const notAdmin = err.includes('admin') || err.includes('not authenticated');
+  const signatureFailed = status === 400 || body.includes('signature') || body.includes('invalid signature');
+  const handlerErrored = status !== undefined && status >= 500;
+
+  const dispatched: CheckItem = {
+    id: 'invoke',
+    label: 'Test event dispatched',
+    state: invokeFailed ? 'fail' : 'pass',
+    detail: invokeFailed
+      ? notAdmin
+        ? 'You\'re not signed in as admin. Sign in with an admin account and try again.'
+        : `Failed to invoke test function: ${r.error || 'unknown error'}`
+      : `Signed synthetic ${r.event_type ?? 'event'} and dispatched to endpoint.`,
+  };
+
+  const network: CheckItem = {
+    id: 'network',
+    label: 'Edge function reachable',
+    state: invokeFailed || missingSecret
+      ? 'fail'
+      : status !== undefined
+      ? 'pass'
+      : 'pending',
+    detail: missingSecret
+      ? 'STRIPE_WEBHOOK_SECRET is not configured in Cloud → Secrets. Add it and re-run.'
+      : invokeFailed
+      ? 'The test function did not return an HTTP status from the webhook. Check edge function logs.'
+      : `HTTP ${status} in ${r.duration_ms ?? '?'}ms.`,
+  };
+
+  const signature: CheckItem = {
+    id: 'signature',
+    label: 'Signature accepted',
+    state: invokeFailed || missingSecret
+      ? 'pending'
+      : signatureFailed
+      ? 'fail'
+      : status !== undefined && status < 400
+      ? 'pass'
+      : 'warn',
+    detail: signatureFailed
+      ? 'The webhook rejected the signature. STRIPE_WEBHOOK_SECRET in Cloud → Secrets probably does not match the whsec_… value in Stripe. Rotate or re-copy it.'
+      : status !== undefined && status < 400
+      ? 'Signature verified — the shared secret matches Stripe.'
+      : 'Signature check did not run to completion.',
+  };
+
+  const handler: CheckItem = {
+    id: 'handler',
+    label: 'Handler processed the event',
+    state: invokeFailed
+      ? 'pending'
+      : handlerErrored
+      ? 'fail'
+      : signatureFailed
+      ? 'pending'
+      : r.success
+      ? 'pass'
+      : 'warn',
+    detail: handlerErrored
+      ? `Handler threw an error (HTTP ${status}). Check the stripe-webhook function logs for the stack trace.`
+      : r.success
+      ? 'Handler returned 200 — event routed to its case successfully.'
+      : `Response: ${r.response_body?.slice(0, 200) || 'no body'}`,
+  };
+
+  const logged: CheckItem = {
+    id: 'logged',
+    label: 'Event written to audit log',
+    state: r.success
+      ? 'pass'
+      : invokeFailed || handlerErrored
+      ? 'warn'
+      : 'pending',
+    detail: r.success
+      ? `Look for event ${r.event_id ?? ''} in the table above (may take a second).`
+      : 'The event row may still be logged with status=failed if the handler threw after upserting.',
+  };
+
+  return [dispatched, network, signature, handler, logged];
+};
+
+const stateIcon = (s: CheckState) => {
+  switch (s) {
+    case 'pass': return <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />;
+    case 'fail': return <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />;
+    case 'warn': return <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />;
+    default: return <Circle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />;
+  }
+};
 
 const WebhookTestingGuide = () => {
+  const { lastResult } = useWebhookTest();
+  const checklist = buildChecklist(lastResult);
+  const overall: CheckState = !lastResult
+    ? 'pending'
+    : lastResult.success
+    ? 'pass'
+    : 'fail';
+
   return (
     <Card className="border-primary/20">
       <CardHeader>
@@ -14,7 +143,58 @@ const WebhookTestingGuide = () => {
           Three ways to trigger real webhook deliveries — all from the browser.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        {/* Interactive diagnostic checklist */}
+        <div className="rounded-lg border bg-muted/20 p-4">
+          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-semibold">Diagnostic checklist</h3>
+              <Badge
+                variant={
+                  overall === 'pass' ? 'default' : overall === 'fail' ? 'destructive' : 'secondary'
+                }
+                className="text-[10px]"
+              >
+                {overall === 'pass' ? 'All checks passed' : overall === 'fail' ? 'Issues detected' : 'Awaiting test run'}
+              </Badge>
+            </div>
+            {lastResult && (
+              <span className="text-xs text-muted-foreground">
+                Last run {formatDistanceToNow(new Date(lastResult.ranAt), { addSuffix: true })}
+              </span>
+            )}
+          </div>
+          {!lastResult && (
+            <p className="text-xs text-muted-foreground mb-3">
+              Click <strong>Send Test Event</strong> in the Webhook Events card above. The steps below will light up
+              green, yellow, or red based on what actually happened.
+            </p>
+          )}
+          <ul className="space-y-2">
+            {checklist.map((c) => (
+              <li key={c.id} className="flex items-start gap-2 text-sm">
+                {stateIcon(c.state)}
+                <div className="flex-1 min-w-0">
+                  <div
+                    className={
+                      c.state === 'fail'
+                        ? 'text-destructive font-medium'
+                        : c.state === 'pass'
+                        ? 'text-foreground'
+                        : c.state === 'warn'
+                        ? 'text-yellow-600 dark:text-yellow-400 font-medium'
+                        : 'text-muted-foreground'
+                    }
+                  >
+                    {c.label}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{c.detail}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+
         <Accordion type="single" collapsible className="w-full">
           <AccordionItem value="in-app">
             <AccordionTrigger>Option 1 — Use the "Send Test Event" button above (easiest)</AccordionTrigger>
@@ -27,7 +207,7 @@ const WebhookTestingGuide = () => {
               </p>
               <p>
                 On success, you'll see HTTP 200 in the result banner, and a new row will appear in the events table
-                below. If it fails, the error message tells you exactly which check failed (signature, secret, handler code).
+                below. If it fails, the checklist above tells you exactly which step failed.
               </p>
               <p className="text-xs italic">Best for verifying the endpoint + secret are wired up correctly.</p>
             </AccordionContent>
@@ -88,7 +268,7 @@ const WebhookTestingGuide = () => {
           </AccordionItem>
 
           <AccordionItem value="troubleshooting">
-            <AccordionTrigger>Nothing shows up — troubleshooting checklist</AccordionTrigger>
+            <AccordionTrigger>Nothing shows up — general troubleshooting</AccordionTrigger>
             <AccordionContent className="space-y-2 text-sm text-muted-foreground">
               <ul className="list-disc list-inside space-y-1">
                 <li>
@@ -106,8 +286,7 @@ const WebhookTestingGuide = () => {
                   You need endpoints (or a single endpoint) listening to <em>both</em> scopes.
                 </li>
                 <li>
-                  <strong>Sandbox vs Live:</strong> test events fire only to endpoints registered in the same mode. If you're
-                  in Stripe sandbox, the endpoint must be registered in sandbox.
+                  <strong>Sandbox vs Live:</strong> test events fire only to endpoints registered in the same mode.
                 </li>
                 <li>
                   <strong>Delivery status in Stripe:</strong> Stripe's <em>Event deliveries</em> tab always shows the true HTTP
