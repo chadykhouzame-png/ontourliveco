@@ -117,6 +117,8 @@ const AdminWebhookEvents = () => {
   const [dateTo, setDateTo] = useState<Date | undefined>();
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [knownTypes, setKnownTypes] = useState<string[]>([]);
+  const [showFailedOnly, setShowFailedOnly] = useState(false);
+  const [retriedIds, setRetriedIds] = useState<Set<string>>(new Set());
 
   const { toast } = useToast();
   const { setLastResult } = useWebhookTest();
