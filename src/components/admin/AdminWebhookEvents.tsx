@@ -106,6 +106,8 @@ const AdminWebhookEvents = () => {
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [retryResults, setRetryResults] = useState<Record<string, RetryResult>>({});
   const [pendingRetryEvent, setPendingRetryEvent] = useState<WebhookEvent | null>(null);
+  const [retryHistory, setRetryHistory] = useState<Record<string, RetryAttempt[]>>({});
+  const [historyLoading, setHistoryLoading] = useState<Record<string, boolean>>({});
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -117,6 +119,25 @@ const AdminWebhookEvents = () => {
 
   const { toast } = useToast();
   const { setLastResult } = useWebhookTest();
+
+  const fetchRetryHistory = useCallback(async (eventId: string) => {
+    setHistoryLoading((prev) => ({ ...prev, [eventId]: true }));
+    const { data, error } = await supabase
+      .from('webhook_retry_attempts')
+      .select('*')
+      .eq('webhook_event_id', eventId)
+      .order('created_at', { ascending: false });
+    if (!error && data) {
+      setRetryHistory((prev) => ({ ...prev, [eventId]: data as RetryAttempt[] }));
+    }
+    setHistoryLoading((prev) => ({ ...prev, [eventId]: false }));
+  }, []);
+
+  const toggleExpanded = (eventId: string) => {
+    const next = expandedId === eventId ? null : eventId;
+    setExpandedId(next);
+    if (next) fetchRetryHistory(next);
+  };
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
