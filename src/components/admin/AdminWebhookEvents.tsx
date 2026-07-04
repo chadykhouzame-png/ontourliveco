@@ -23,6 +23,8 @@ import {
   Calendar as CalendarIcon,
   X,
   RotateCw,
+  Copy,
+  Download,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
@@ -455,8 +457,30 @@ const AdminWebhookEvents = () => {
                             </div>
                           )}
                           <div>
-                            <span className="text-xs font-semibold">Payload:</span>
-                            <pre className="mt-1 text-xs bg-background rounded-lg p-3 overflow-auto max-h-48 border">
+                            <div className="flex items-center justify-between mb-1 gap-2">
+                              <span className="text-xs font-semibold">Payload:</span>
+                              <div className="flex gap-1">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() => copyPayload(event)}
+                                >
+                                  <Copy className="h-3 w-3 mr-1" />
+                                  Copy
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() => downloadPayload(event)}
+                                >
+                                  <Download className="h-3 w-3 mr-1" />
+                                  Download JSON
+                                </Button>
+                              </div>
+                            </div>
+                            <pre className="text-xs bg-background rounded-lg p-3 overflow-auto max-h-48 border">
                               {JSON.stringify(event.payload, null, 2)}
                             </pre>
                           </div>
