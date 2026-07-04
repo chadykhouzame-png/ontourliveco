@@ -488,7 +488,7 @@ const AdminWebhookEvents = () => {
             <TableBody>
               {filteredEvents.map((event) => (
                 <>
-                  <TableRow key={event.id} className="cursor-pointer" onClick={() => setExpandedId(expandedId === event.id ? null : event.id)}>
+                  <TableRow key={event.id} className="cursor-pointer" onClick={() => toggleExpanded(event.id)}>
                     <TableCell className="font-mono text-xs">{event.event_type}</TableCell>
                     <TableCell className="font-mono text-xs max-w-[180px] truncate">{event.event_id}</TableCell>
                     <TableCell>
