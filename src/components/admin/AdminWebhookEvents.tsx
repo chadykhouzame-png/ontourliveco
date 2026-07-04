@@ -76,6 +76,8 @@ const AdminWebhookEvents = () => {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<TestResult | null>(null);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [retryResults, setRetryResults] = useState<Record<string, RetryResult>>({});
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
