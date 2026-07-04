@@ -72,6 +72,20 @@ interface RetryResult {
   error?: string;
 }
 
+interface RetryAttempt {
+  id: string;
+  webhook_event_id: string;
+  admin_user_id: string | null;
+  admin_email: string | null;
+  success: boolean;
+  http_status: number | null;
+  duration_ms: number | null;
+  retry_event_id: string | null;
+  response_body: string | null;
+  error_message: string | null;
+  created_at: string;
+}
+
 const STATUS_OPTIONS = ['received', 'processing', 'processed', 'failed'];
 
 const statusVariant = (status: string) => {
