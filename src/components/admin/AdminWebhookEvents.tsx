@@ -160,6 +160,38 @@ const AdminWebhookEvents = () => {
     }
   };
 
+  const retryEvent = async (event: WebhookEvent) => {
+    setRetryingId(event.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('retry-webhook-event', {
+        body: { webhook_event_id: event.id },
+      });
+      if (error) throw error;
+      const result = data as RetryResult;
+      setRetryResults((prev) => ({ ...prev, [event.id]: result }));
+      setExpandedId(event.id);
+      if (result.success) {
+        toast({
+          title: 'Retry succeeded',
+          description: `Replayed ${event.event_type} — HTTP ${result.status} in ${result.duration_ms}ms`,
+        });
+        setTimeout(fetchEvents, 500);
+      } else {
+        toast({
+          title: 'Retry failed',
+          description: result.error || `Status ${result.status}`,
+          variant: 'destructive',
+        });
+      }
+    } catch (err: any) {
+      const msg = err?.message || 'Failed to retry event';
+      setRetryResults((prev) => ({ ...prev, [event.id]: { success: false, error: msg } }));
+      toast({ title: 'Retry error', description: msg, variant: 'destructive' });
+    } finally {
+      setRetryingId(null);
+    }
+  };
+
   const filtersActive = useMemo(
     () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo,
     [statusFilter, typeFilter, dateFrom, dateTo],
