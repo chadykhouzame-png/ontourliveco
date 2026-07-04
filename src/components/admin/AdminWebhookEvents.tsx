@@ -566,6 +566,66 @@ const AdminWebhookEvents = () => {
                           )}
                           <div>
                             <div className="flex items-center justify-between mb-1 gap-2">
+                              <span className="text-xs font-semibold">Retry history:</span>
+                              <span className="text-xs text-muted-foreground">
+                                {historyLoading[event.id]
+                                  ? 'Loading…'
+                                  : `${retryHistory[event.id]?.length ?? 0} attempt${(retryHistory[event.id]?.length ?? 0) === 1 ? '' : 's'}`}
+                              </span>
+                            </div>
+                            {retryHistory[event.id] && retryHistory[event.id].length > 0 ? (
+                              <div className="rounded-lg border overflow-hidden">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="h-8 text-xs">When</TableHead>
+                                      <TableHead className="h-8 text-xs">Admin</TableHead>
+                                      <TableHead className="h-8 text-xs">Result</TableHead>
+                                      <TableHead className="h-8 text-xs">HTTP</TableHead>
+                                      <TableHead className="h-8 text-xs">Duration</TableHead>
+                                      <TableHead className="h-8 text-xs">Response</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {retryHistory[event.id].map((attempt) => (
+                                      <TableRow key={attempt.id}>
+                                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
+                                          {format(new Date(attempt.created_at), 'MMM d, HH:mm:ss')}
+                                        </TableCell>
+                                        <TableCell className="text-xs font-mono max-w-[180px] truncate">
+                                          {attempt.admin_email || attempt.admin_user_id || '—'}
+                                        </TableCell>
+                                        <TableCell>
+                                          {attempt.success ? (
+                                            <Badge variant="default" className="gap-1">
+                                              <CheckCircle2 className="h-3 w-3" /> Success
+                                            </Badge>
+                                          ) : (
+                                            <Badge variant="destructive" className="gap-1">
+                                              <XCircle className="h-3 w-3" /> Failed
+                                            </Badge>
+                                          )}
+                                        </TableCell>
+                                        <TableCell className="text-xs">{attempt.http_status ?? '—'}</TableCell>
+                                        <TableCell className="text-xs">
+                                          {attempt.duration_ms !== null ? `${attempt.duration_ms}ms` : '—'}
+                                        </TableCell>
+                                        <TableCell className="text-xs font-mono max-w-[280px] truncate">
+                                          {attempt.error_message || attempt.response_body || '—'}
+                                        </TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+                            ) : (
+                              !historyLoading[event.id] && (
+                                <p className="text-xs text-muted-foreground">No retry attempts recorded.</p>
+                              )
+                            )}
+                          </div>
+                          <div>
+                            <div className="flex items-center justify-between mb-1 gap-2">
                               <span className="text-xs font-semibold">Payload:</span>
                               <div className="flex gap-1">
                                 <Button
