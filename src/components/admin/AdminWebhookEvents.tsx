@@ -27,6 +27,7 @@ import {
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { useWebhookTest } from './WebhookTestContext';
 
 interface TestResult {
   success: boolean;
@@ -87,6 +88,7 @@ const AdminWebhookEvents = () => {
   const [knownTypes, setKnownTypes] = useState<string[]>([]);
 
   const { toast } = useToast();
+  const { setLastResult } = useWebhookTest();
 
   const fetchEvents = useCallback(async () => {
     setLoading(true);
@@ -144,16 +146,20 @@ const AdminWebhookEvents = () => {
     try {
       const { data, error } = await supabase.functions.invoke('test-stripe-webhook');
       if (error) throw error;
-      setTestResult(data as TestResult);
-      if (data?.success) {
-        toast({ title: 'Webhook test passed', description: `Endpoint responded ${data.status} in ${data.duration_ms}ms` });
+      const result = data as TestResult;
+      setTestResult(result);
+      setLastResult({ ...result, ranAt: Date.now() });
+      if (result?.success) {
+        toast({ title: 'Webhook test passed', description: `Endpoint responded ${result.status} in ${result.duration_ms}ms` });
         setTimeout(fetchEvents, 500);
       } else {
-        toast({ title: 'Webhook test failed', description: data?.error || `Status ${data?.status}`, variant: 'destructive' });
+        toast({ title: 'Webhook test failed', description: result?.error || `Status ${result?.status}`, variant: 'destructive' });
       }
     } catch (err: any) {
       const msg = err?.message || 'Failed to run test';
-      setTestResult({ success: false, error: msg });
+      const failed = { success: false, error: msg };
+      setTestResult(failed);
+      setLastResult({ ...failed, ranAt: Date.now() });
       toast({ title: 'Test error', description: msg, variant: 'destructive' });
     } finally {
       setTesting(false);

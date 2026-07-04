@@ -10,6 +10,7 @@ import AdminDisputes from '@/components/admin/AdminDisputes';
 import AdminStats from '@/components/admin/AdminStats';
 import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
+import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
 import logo from '@/assets/logo.png';
 
 const AdminDashboard = () => {
@@ -87,8 +88,10 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="webhooks" className="mt-6 space-y-6">
-            <AdminWebhookEvents />
-            <WebhookTestingGuide />
+            <WebhookTestProvider>
+              <AdminWebhookEvents />
+              <WebhookTestingGuide />
+            </WebhookTestProvider>
           </TabsContent>
         </Tabs>
       </main>
