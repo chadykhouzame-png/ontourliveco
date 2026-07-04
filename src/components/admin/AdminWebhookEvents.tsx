@@ -306,24 +306,38 @@ const AdminWebhookEvents = () => {
   };
 
   const filteredEvents = useMemo(() => {
-    if (!searchQuery.trim()) return events;
-    const q = searchQuery.toLowerCase();
-    return events.filter((event) => {
-      const payloadText = JSON.stringify(event.payload || {}).toLowerCase();
-      return (
-        event.event_id.toLowerCase().includes(q) ||
-        event.event_type.toLowerCase().includes(q) ||
-        payloadText.includes(q)
-      );
+    let list = events;
+    if (showFailedOnly) {
+      list = list.filter((event) => event.status === 'failed');
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter((event) => {
+        const payloadText = JSON.stringify(event.payload || {}).toLowerCase();
+        return (
+          event.event_id.toLowerCase().includes(q) ||
+          event.event_type.toLowerCase().includes(q) ||
+          payloadText.includes(q)
+        );
+      });
+    }
+    return [...list].sort((a, b) => {
+      if (showFailedOnly) {
+        const aRetried = retriedIds.has(a.id);
+        const bRetried = retriedIds.has(b.id);
+        if (aRetried !== bRetried) return aRetried ? 1 : -1;
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-  }, [events, searchQuery]);
+  }, [events, showFailedOnly, searchQuery, retriedIds]);
 
   const filtersActive = useMemo(
-    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo || !!searchQuery.trim(),
-    [statusFilter, typeFilter, dateFrom, dateTo, searchQuery],
+    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo || !!searchQuery.trim() || showFailedOnly,
+    [statusFilter, typeFilter, dateFrom, dateTo, searchQuery, showFailedOnly],
   );
 
   const clearFilters = () => {
+    setShowFailedOnly(false);
     setStatusFilter('all');
     setTypeFilter('all');
     setDateFrom(undefined);
