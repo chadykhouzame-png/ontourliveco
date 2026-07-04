@@ -150,7 +150,11 @@ const AdminWebhookEvents = () => {
       .order('created_at', { ascending: false })
       .limit(100);
 
-    if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+    if (showFailedOnly) {
+      query = query.eq('status', 'failed');
+    } else if (statusFilter !== 'all') {
+      query = query.eq('status', statusFilter);
+    }
     if (typeFilter !== 'all') query = query.eq('event_type', typeFilter);
     if (dateFrom) query = query.gte('created_at', dateFrom.toISOString());
     if (dateTo) {
@@ -172,7 +176,7 @@ const AdminWebhookEvents = () => {
       });
     }
     setLoading(false);
-  }, [statusFilter, typeFilter, dateFrom, dateTo]);
+  }, [statusFilter, typeFilter, dateFrom, dateTo, showFailedOnly]);
 
   // Seed the event-type dropdown with distinct types from the DB on first load
   useEffect(() => {
