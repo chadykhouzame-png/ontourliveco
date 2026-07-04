@@ -211,8 +211,7 @@ const AdminWebhookEvents = () => {
 
   const retryEvent = async () => {
     const event = pendingRetryEvent;
-    if (!event) return;
-    setPendingRetryEvent(null);
+    if (!event || retryingId) return;
     setRetryingId(event.id);
     try {
       const { data, error } = await supabase.functions.invoke('retry-webhook-event', {
@@ -227,7 +226,6 @@ const AdminWebhookEvents = () => {
           title: 'Retry succeeded',
           description: `Replayed ${event.event_type} — HTTP ${result.status} in ${result.duration_ms}ms`,
         });
-        setTimeout(fetchEvents, 500);
       } else {
         toast({
           title: 'Retry failed',
@@ -241,6 +239,8 @@ const AdminWebhookEvents = () => {
       toast({ title: 'Retry error', description: msg, variant: 'destructive' });
     } finally {
       setRetryingId(null);
+      setPendingRetryEvent(null);
+      setTimeout(fetchEvents, 500);
     }
   };
 
