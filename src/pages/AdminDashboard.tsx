@@ -86,8 +86,9 @@ const AdminDashboard = () => {
             <AdminDisputes />
           </TabsContent>
 
-          <TabsContent value="webhooks" className="mt-6">
+          <TabsContent value="webhooks" className="mt-6 space-y-6">
             <AdminWebhookEvents />
+            <WebhookTestingGuide />
           </TabsContent>
         </Tabs>
       </main>
