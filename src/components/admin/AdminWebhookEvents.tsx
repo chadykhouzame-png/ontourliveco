@@ -565,6 +565,38 @@ const AdminWebhookEvents = () => {
             </TableBody>
           </Table>
         )}
+
+        <Dialog open={!!pendingRetryEvent} onOpenChange={(open) => !open && cancelRetry()}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Retry webhook event?</DialogTitle>
+              <DialogDescription>
+                This will replay the stored payload for{' '}
+                <span className="font-mono text-foreground">{pendingRetryEvent?.event_type}</span>{' '}
+                as a new signed Stripe event. Any side effects triggered by the handler will run again.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="rounded-lg border bg-muted/30 p-3 text-xs space-y-1">
+              <div className="font-mono break-all">{pendingRetryEvent?.event_id}</div>
+              {pendingRetryEvent?.error_message && (
+                <div className="text-destructive">Previous error: {pendingRetryEvent.error_message}</div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={cancelRetry}>
+                Cancel
+              </Button>
+              <Button
+                variant="default"
+                onClick={retryEvent}
+                disabled={retryingId === pendingRetryEvent?.id}
+              >
+                <RotateCw className={`h-4 w-4 mr-2 ${retryingId === pendingRetryEvent?.id ? 'animate-spin' : ''}`} />
+                {retryingId === pendingRetryEvent?.id ? 'Retrying…' : 'Retry event'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   );
