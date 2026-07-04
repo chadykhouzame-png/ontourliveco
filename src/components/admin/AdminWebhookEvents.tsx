@@ -224,9 +224,22 @@ const AdminWebhookEvents = () => {
     }
   };
 
+  const filteredEvents = useMemo(() => {
+    if (!searchQuery.trim()) return events;
+    const q = searchQuery.toLowerCase();
+    return events.filter((event) => {
+      const payloadText = JSON.stringify(event.payload || {}).toLowerCase();
+      return (
+        event.event_id.toLowerCase().includes(q) ||
+        event.event_type.toLowerCase().includes(q) ||
+        payloadText.includes(q)
+      );
+    });
+  }, [events, searchQuery]);
+
   const filtersActive = useMemo(
-    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo,
-    [statusFilter, typeFilter, dateFrom, dateTo],
+    () => statusFilter !== 'all' || typeFilter !== 'all' || !!dateFrom || !!dateTo || !!searchQuery.trim(),
+    [statusFilter, typeFilter, dateFrom, dateTo, searchQuery],
   );
 
   const clearFilters = () => {
@@ -234,6 +247,7 @@ const AdminWebhookEvents = () => {
     setTypeFilter('all');
     setDateFrom(undefined);
     setDateTo(undefined);
+    setSearchQuery('');
   };
 
   return (
