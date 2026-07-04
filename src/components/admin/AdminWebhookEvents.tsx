@@ -471,7 +471,7 @@ const AdminWebhookEvents = () => {
                             variant="outline"
                             size="sm"
                             disabled={retryingId === event.id}
-                            onClick={() => retryEvent(event)}
+                            onClick={() => confirmRetry(event)}
                           >
                             <RotateCw
                               className={`h-3.5 w-3.5 mr-1 ${retryingId === event.id ? 'animate-spin' : ''}`}
