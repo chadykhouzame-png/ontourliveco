@@ -23,6 +23,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { AlertTriangle } from 'lucide-react';
 import UserDisputes from '@/components/UserDisputes';
 import StripeConnectSetup from '@/components/StripeConnectSetup';
+import PayoutSetupChecklist from '@/components/PayoutSetupChecklist';
 import ArtistEPKUpload from '@/components/ArtistEPKUpload';
 import SocialMediaDashboard from '@/components/SocialMediaDashboard';
 import SocialMetricsForm from '@/components/SocialMetricsForm';
@@ -896,8 +897,9 @@ const ArtistDashboard = () => {
 
         {/* Payment Setup */}
         {artist && (
-          <div className="mt-6">
+          <div className="mt-6 space-y-6">
             <StripeConnectSetup artistId={artist.id} />
+            <PayoutSetupChecklist />
           </div>
         )}
 
