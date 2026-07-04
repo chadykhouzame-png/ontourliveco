@@ -1073,6 +1073,56 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_retry_attempts: {
+        Row: {
+          admin_email: string | null
+          admin_user_id: string | null
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          http_status: number | null
+          id: string
+          response_body: string | null
+          retry_event_id: string | null
+          success: boolean
+          webhook_event_id: string
+        }
+        Insert: {
+          admin_email?: string | null
+          admin_user_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          response_body?: string | null
+          retry_event_id?: string | null
+          success: boolean
+          webhook_event_id: string
+        }
+        Update: {
+          admin_email?: string | null
+          admin_user_id?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          response_body?: string | null
+          retry_event_id?: string | null
+          success?: boolean
+          webhook_event_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_retry_attempts_webhook_event_id_fkey"
+            columns: ["webhook_event_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       social_connections_public: {
