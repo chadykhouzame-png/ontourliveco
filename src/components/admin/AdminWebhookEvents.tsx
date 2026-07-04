@@ -384,8 +384,23 @@ const AdminWebhookEvents = () => {
                     <TableCell className="text-xs text-muted-foreground">
                       {event.processed_at ? format(new Date(event.processed_at), 'MMM d, HH:mm:ss') : '—'}
                     </TableCell>
-                    <TableCell>
-                      {expandedId === event.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-2 justify-end">
+                        {event.status === 'failed' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={retryingId === event.id}
+                            onClick={() => retryEvent(event)}
+                          >
+                            <RotateCw
+                              className={`h-3.5 w-3.5 mr-1 ${retryingId === event.id ? 'animate-spin' : ''}`}
+                            />
+                            {retryingId === event.id ? 'Retrying…' : 'Retry'}
+                          </Button>
+                        )}
+                        {expandedId === event.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </div>
                     </TableCell>
                   </TableRow>
                   {expandedId === event.id && (
@@ -396,6 +411,41 @@ const AdminWebhookEvents = () => {
                             <div>
                               <span className="text-xs font-semibold text-destructive">Error: </span>
                               <span className="text-xs text-destructive">{event.error_message}</span>
+                            </div>
+                          )}
+                          {retryResults[event.id] && (
+                            <div
+                              className={`p-2 rounded-md border text-xs flex items-start gap-2 ${
+                                retryResults[event.id].success
+                                  ? 'bg-green-500/10 border-green-500/30'
+                                  : 'bg-destructive/10 border-destructive/30'
+                              }`}
+                            >
+                              {retryResults[event.id].success ? (
+                                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
+                              )}
+                              <div className="flex-1 min-w-0 space-y-0.5">
+                                <div className="font-medium">
+                                  {retryResults[event.id].success ? 'Retry delivered' : 'Retry failed'}
+                                </div>
+                                {retryResults[event.id].status !== undefined && (
+                                  <div className="text-muted-foreground">HTTP status: {retryResults[event.id].status}</div>
+                                )}
+                                {retryResults[event.id].duration_ms !== undefined && (
+                                  <div className="text-muted-foreground">Duration: {retryResults[event.id].duration_ms}ms</div>
+                                )}
+                                {retryResults[event.id].retry_event_id && (
+                                  <div className="font-mono truncate">Replay event: {retryResults[event.id].retry_event_id}</div>
+                                )}
+                                {retryResults[event.id].error && (
+                                  <div className="text-destructive">Error: {retryResults[event.id].error}</div>
+                                )}
+                                {retryResults[event.id].response_body && (
+                                  <div className="font-mono break-all">Response: {retryResults[event.id].response_body}</div>
+                                )}
+                              </div>
                             </div>
                           )}
                           <div>
