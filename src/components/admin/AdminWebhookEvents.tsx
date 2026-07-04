@@ -201,7 +201,18 @@ const AdminWebhookEvents = () => {
     URL.revokeObjectURL(url);
   };
 
-  const retryEvent = async (event: WebhookEvent) => {
+  const confirmRetry = (event: WebhookEvent) => {
+    setPendingRetryEvent(event);
+  };
+
+  const cancelRetry = () => {
+    setPendingRetryEvent(null);
+  };
+
+  const retryEvent = async () => {
+    const event = pendingRetryEvent;
+    if (!event) return;
+    setPendingRetryEvent(null);
     setRetryingId(event.id);
     try {
       const { data, error } = await supabase.functions.invoke('retry-webhook-event', {
