@@ -89,6 +89,7 @@ const AdminWebhookEvents = () => {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [knownTypes, setKnownTypes] = useState<string[]>([]);
 
   const { toast } = useToast();
