@@ -8,7 +8,7 @@ import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
 // src/lib/mcp/tools/search-artists.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { createClient } from "npm:@supabase/supabase-js@^2.93.3";
-import { z } from "npm:zod@^4.4.3";
+import { z } from "npm:zod@^3.23.8";
 var search_artists_default = defineTool({
   name: "search_artists",
   title: "Search artists",
@@ -41,7 +41,7 @@ var search_artists_default = defineTool({
 // src/lib/mcp/tools/get-artist.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { createClient as createClient2 } from "npm:@supabase/supabase-js@^2.93.3";
-import { z as z2 } from "npm:zod@^4.4.3";
+import { z as z2 } from "npm:zod@^3.23.8";
 var get_artist_default = defineTool2({
   name: "get_artist",
   title: "Get artist",
@@ -70,7 +70,7 @@ var get_artist_default = defineTool2({
 // src/lib/mcp/tools/search-venues.ts
 import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { createClient as createClient3 } from "npm:@supabase/supabase-js@^2.93.3";
-import { z as z3 } from "npm:zod@^4.4.3";
+import { z as z3 } from "npm:zod@^3.23.8";
 var search_venues_default = defineTool3({
   name: "search_venues",
   title: "Search venues",

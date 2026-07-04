@@ -22,24 +22,25 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "city": {
-              "description": "Filter by artist primary city (case-insensitive partial match).",
-              "type": "string"
+              "type": "string",
+              "description": "Filter by artist primary city (case-insensitive partial match)."
             },
             "genre": {
-              "description": "Filter by a single genre slug (e.g. 'house', 'hip_hop').",
-              "type": "string"
+              "type": "string",
+              "description": "Filter by a single genre slug (e.g. 'house', 'hip_hop')."
             },
             "limit": {
-              "default": 10,
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 10
             }
-          }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -53,19 +54,19 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "id": {
               "type": "string",
               "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
               "description": "Artist id (uuid)."
             }
           },
           "required": [
             "id"
-          ]
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       },
@@ -79,20 +80,21 @@
           "openWorldHint": false
         },
         "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
           "type": "object",
           "properties": {
             "city": {
-              "description": "Filter by venue city (case-insensitive partial match).",
-              "type": "string"
+              "type": "string",
+              "description": "Filter by venue city (case-insensitive partial match)."
             },
             "limit": {
-              "default": 10,
               "type": "integer",
               "minimum": 1,
-              "maximum": 50
+              "maximum": 50,
+              "default": 10
             }
-          }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
       }
