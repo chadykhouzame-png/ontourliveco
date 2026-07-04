@@ -566,7 +566,12 @@ const AdminWebhookEvents = () => {
           </Table>
         )}
 
-        <Dialog open={!!pendingRetryEvent} onOpenChange={(open) => !open && cancelRetry()}>
+        <Dialog
+          open={!!pendingRetryEvent}
+          onOpenChange={(open) => {
+            if (!open && !retryingId) cancelRetry();
+          }}
+        >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Retry webhook event?</DialogTitle>
