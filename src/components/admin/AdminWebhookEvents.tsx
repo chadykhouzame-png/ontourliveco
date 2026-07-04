@@ -368,7 +368,7 @@ const AdminWebhookEvents = () => {
         <div className="mb-4 flex flex-wrap items-end gap-2">
           <div className="flex flex-col gap-1">
             <label className="text-xs text-muted-foreground">Status</label>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter} onValueChange={setStatusFilter} disabled={showFailedOnly}>
               <SelectTrigger className="h-9 w-[160px]">
                 <SelectValue placeholder="All statuses" />
               </SelectTrigger>
