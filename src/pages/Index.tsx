@@ -9,6 +9,7 @@ import { socialLinks } from "@/config/social";
 import logo from "@/assets/logo.png";
 import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
 import JoinListForm from "@/components/JoinListForm";
+import EventHighlights from "@/components/EventHighlights";
 
 
 const Index = () => {
@@ -405,6 +406,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Event Highlights */}
+      <EventHighlights />
 
       {/* Join the list / Request the stage */}
       <section id="join" className="relative bg-noir py-24 border-t border-border/40">
