@@ -7,6 +7,7 @@ import { Music, Building2, MapPin, Calendar, Star, MessageSquare, ArrowRight, Ch
 import { useAuth } from "@/contexts/AuthContext";
 import { socialLinks } from "@/config/social";
 import logo from "@/assets/logo.png";
+import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
 
 
 const Index = () => {
@@ -222,30 +223,97 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Hero Section - Split Screen */}
-      <section className="min-h-screen pt-20 relative overflow-hidden">
-        {/* Background gradients */}
-        <div className="absolute inset-0 bg-gradient-to-r from-artist/10 via-transparent to-venue/10" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-artist/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-venue/20 rounded-full blur-3xl" />
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-6 min-h-[calc(100vh-80px)] flex flex-col justify-center">
-          {/* Main headline */}
-          <div className="text-center mb-16 animate-fade-in">
-            <p className="text-primary font-medium tracking-widest uppercase text-sm mb-4">
-              The Booking Platform for Live Entertainment
-            </p>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6">
-              CONNECT.
-              <br />
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">BOOK.</span>
-              <br />
-              PERFORM.
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              On Tour connects venues with artists already on the move — 
-              turning travel dates into booked gigs.
-            </p>
+      {/* Hero — First Light */}
+      <section className="relative overflow-hidden bg-noir pt-32 pb-24 md:pt-40 md:pb-32">
+        {/* Single radial gold — the only illumination */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
+          style={{ background: 'radial-gradient(circle, hsl(var(--champagne) / 0.35) 0%, transparent 65%)' }}
+        />
+
+        {/* Hairline corner marks */}
+        <div aria-hidden className="absolute top-24 left-6 md:left-10 w-8 h-8 border-l border-t border-champagne/50" />
+        <div aria-hidden className="absolute top-24 right-6 md:right-10 w-8 h-8 border-r border-t border-champagne/50" />
+        <div aria-hidden className="absolute bottom-10 left-6 md:left-10 w-8 h-8 border-l border-b border-champagne/50" />
+        <div aria-hidden className="absolute bottom-10 right-6 md:right-10 w-8 h-8 border-r border-b border-champagne/50" />
+
+        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
+          <img
+            src={monogramIvory.url}
+            alt="On Tour Live monogram"
+            className="mx-auto h-24 md:h-32 w-auto mb-10 animate-fade-in"
+          />
+
+          <p className="eyebrow mb-8">The Booking Platform · Artists &amp; Venues</p>
+
+          <h1 className="font-display uppercase tracking-display text-ivory text-5xl md:text-7xl lg:text-8xl leading-[1.05] mb-8">
+            On&nbsp;Tour<span className="text-champagne"> · </span>Live
+          </h1>
+
+          <p className="editorial text-2xl md:text-3xl mb-6">The stage awaits.</p>
+
+          <p className="max-w-xl mx-auto text-ivory/70 text-base md:text-lg leading-relaxed mb-14">
+            Venues find the artists already in town. Artists turn travel dates into
+            booked nights. No DMs. No scrambling. Just the room, the sound, and the show.
+          </p>
+
+          {/* Key details — measured, indexed */}
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 mb-14 text-smoke">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-label">
+              <span className="w-1.5 h-1.5 rounded-full bg-champagne" />
+              <span>Direct booking</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-label">
+              <span className="w-1.5 h-1.5 rounded-full bg-champagne" />
+              <span>Secure payouts</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-label">
+              <span className="w-1.5 h-1.5 rounded-full bg-champagne" />
+              <span>Verified profiles</span>
+            </div>
+            <div className="flex items-center gap-2 text-xs uppercase tracking-label">
+              <span className="w-1.5 h-1.5 rounded-full bg-champagne" />
+              <span>5% platform fee</span>
+            </div>
+          </div>
+
+          {/* CTAs — champagne primary, ivory-outline secondary */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link to="/join/artist">
+              <Button
+                size="lg"
+                className="bg-champagne text-noir hover:bg-champagne-deep hover:text-ivory rounded-brand px-8 tracking-[0.08em] uppercase font-semibold shadow-none"
+              >
+                Take your place
+              </Button>
+            </Link>
+            <Link to="/join/venue">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border border-champagne text-ivory bg-transparent hover:bg-champagne/10 hover:text-ivory rounded-brand px-8 tracking-[0.08em] uppercase font-semibold shadow-none"
+              >
+                Book the night
+              </Button>
+            </Link>
+          </div>
+
+          <Link
+            to="/search"
+            className="mt-10 inline-block text-sm text-smoke hover:text-champagne underline-offset-4 hover:underline transition-colors"
+          >
+            Or browse the roster →
+          </Link>
+        </div>
+      </section>
+
+      {/* Legacy split hero — retained as role picker below the fold */}
+      <section className="relative overflow-hidden bg-noir-lift border-t border-border/40 py-24">
+        <div className="relative z-10 max-w-7xl mx-auto px-6">
+          <div className="text-center mb-16">
+            <p className="eyebrow mb-4">Choose your side of the stage</p>
+            <h2 className="text-3xl md:text-4xl text-ivory">Which room are you in?</h2>
           </div>
 
           {/* Split CTA */}
