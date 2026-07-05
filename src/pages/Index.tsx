@@ -10,6 +10,7 @@ import logo from "@/assets/logo.png";
 import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
 import JoinListForm from "@/components/JoinListForm";
 import EventHighlights from "@/components/EventHighlights";
+import PhotoGallery from "@/components/PhotoGallery";
 
 
 const Index = () => {
@@ -409,6 +410,9 @@ const Index = () => {
 
       {/* Event Highlights */}
       <EventHighlights />
+
+      {/* Photo Gallery — Field Notes */}
+      <PhotoGallery />
 
       {/* Join the list / Request the stage */}
       <section id="join" className="relative bg-noir py-24 border-t border-border/40">
