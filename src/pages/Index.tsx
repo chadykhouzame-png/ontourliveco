@@ -11,6 +11,8 @@ import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
 import JoinListForm from "@/components/JoinListForm";
 import EventHighlights from "@/components/EventHighlights";
 import PhotoGallery from "@/components/PhotoGallery";
+import FAQ from "@/components/FAQ";
+import SiteFooter from "@/components/SiteFooter";
 
 
 const Index = () => {
