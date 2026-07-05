@@ -1,107 +1,103 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* iOS-inspired Dark Design System
-   Clean, minimal, with frosted glass effects and smooth interactions
+/* On Tour Live — First Light
+   Dark luxury: noir field, ivory text, champagne gold used sparingly.
    All colors MUST be HSL.
 */
 
 @layer base {
   :root {
-    /* On Tour Live - Elegant Dark with Rose/Blush accents */
-    --background: 0 0% 2%;
-    --foreground: 15 20% 85%;
+    /* First Light palette (HSL) */
+    --noir: 36 17% 5%;
+    --noir-lift: 30 17% 7%;
+    --ivory: 41 47% 93%;
+    --champagne: 38 49% 58%;
+    --champagne-light: 39 66% 77%;
+    --champagne-deep: 37 43% 42%;
+    --velvet: 350 39% 23%;
+    --smoke: 45 8% 52%;
 
-    /* Frosted glass card effect */
-    --card: 0 0% 8%;
-    --card-foreground: 15 20% 85%;
+    /* Semantic tokens */
+    --background: var(--noir);
+    --foreground: var(--ivory);
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 15 20% 85%;
+    --card: var(--noir-lift);
+    --card-foreground: var(--ivory);
 
-    /* Rose/Blush pink accent from logo */
-    --primary: 15 30% 75%;
-    --primary-foreground: 0 0% 5%;
+    --popover: var(--noir-lift);
+    --popover-foreground: var(--ivory);
 
-    /* Elevated surfaces */
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 15 20% 85%;
+    /* Champagne gold — the accent */
+    --primary: var(--champagne);
+    --primary-foreground: var(--noir);
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 15 10% 50%;
+    --secondary: 30 12% 11%;
+    --secondary-foreground: var(--ivory);
 
-    --accent: 15 30% 75%;
-    --accent-foreground: 0 0% 5%;
+    --muted: 30 10% 12%;
+    --muted-foreground: var(--smoke);
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --accent: var(--champagne);
+    --accent-foreground: var(--noir);
 
-    /* Subtle borders */
-    --border: 15 10% 18%;
-    --input: 0 0% 12%;
-    --ring: 15 30% 75%;
+    --destructive: var(--velvet);
+    --destructive-foreground: var(--ivory);
 
-    /* Larger iOS-style radius */
-    --radius: 1rem;
+    /* Hairline borders */
+    --border: 45 8% 22%;
+    --input: 30 12% 14%;
+    --ring: var(--champagne);
 
-    /* Artist side - warm rose */
-    --artist: 350 45% 55%;
-    --artist-foreground: 0 0% 100%;
-    
-    /* Venue side - cool mauve */
-    --venue: 280 30% 50%;
-    --venue-foreground: 0 0% 100%;
+    /* Small, engraved corners */
+    --radius: 0.375rem;
 
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 15 10% 55%;
-    --sidebar-primary: 15 30% 75%;
-    --sidebar-primary-foreground: 0 0% 5%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 15 20% 85%;
-    --sidebar-border: 15 10% 15%;
-    --sidebar-ring: 15 30% 75%;
+    /* Role tints — retuned to the noir/champagne palette */
+    --artist: var(--champagne);
+    --artist-foreground: var(--noir);
+
+    --venue: var(--ivory);
+    --venue-foreground: var(--noir);
+
+    --sidebar-background: 30 17% 6%;
+    --sidebar-foreground: var(--smoke);
+    --sidebar-primary: var(--champagne);
+    --sidebar-primary-foreground: var(--noir);
+    --sidebar-accent: 30 12% 10%;
+    --sidebar-accent-foreground: var(--ivory);
+    --sidebar-border: 45 8% 18%;
+    --sidebar-ring: var(--champagne);
+
+    /* Typography */
+    --font-display: 'Italiana', serif;
+    --font-accent: 'Cormorant Garamond', serif;
+    --font-body: 'Outfit', 'Inter', -apple-system, system-ui, sans-serif;
+
+    --tracking-display: 0.1em;
+    --tracking-label: 0.3em;
   }
 
   .dark {
-    --background: 0 0% 2%;
-    --foreground: 15 20% 85%;
-
-    --card: 0 0% 8%;
-    --card-foreground: 15 20% 85%;
-
-    --popover: 0 0% 10%;
-    --popover-foreground: 15 20% 85%;
-
-    --primary: 15 30% 75%;
-    --primary-foreground: 0 0% 5%;
-
-    --secondary: 0 0% 12%;
-    --secondary-foreground: 15 20% 85%;
-
-    --muted: 0 0% 15%;
-    --muted-foreground: 15 10% 50%;
-
-    --accent: 15 30% 75%;
-    --accent-foreground: 0 0% 5%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 15 10% 18%;
-    --input: 0 0% 12%;
-    --ring: 15 30% 75%;
-
-    --sidebar-background: 0 0% 6%;
-    --sidebar-foreground: 15 10% 55%;
-    --sidebar-primary: 15 30% 75%;
-    --sidebar-primary-foreground: 0 0% 5%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 15 20% 85%;
-    --sidebar-border: 15 10% 15%;
-    --sidebar-ring: 15 30% 75%;
+    --background: var(--noir);
+    --foreground: var(--ivory);
+    --card: var(--noir-lift);
+    --card-foreground: var(--ivory);
+    --popover: var(--noir-lift);
+    --popover-foreground: var(--ivory);
+    --primary: var(--champagne);
+    --primary-foreground: var(--noir);
+    --secondary: 30 12% 11%;
+    --secondary-foreground: var(--ivory);
+    --muted: 30 10% 12%;
+    --muted-foreground: var(--smoke);
+    --accent: var(--champagne);
+    --accent-foreground: var(--noir);
+    --destructive: var(--velvet);
+    --destructive-foreground: var(--ivory);
+    --border: 45 8% 22%;
+    --input: 30 12% 14%;
+    --ring: var(--champagne);
   }
 }
 
@@ -111,13 +107,35 @@
   }
 
   html {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+    font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: var(--tracking-display);
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+    color: hsl(var(--champagne));
+    font-weight: 500;
+  }
+
+  .editorial {
+    font-family: var(--font-accent);
+    font-style: italic;
+    color: hsl(var(--champagne));
   }
 }
 
