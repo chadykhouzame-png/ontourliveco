@@ -75,6 +75,18 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        noir: {
+          DEFAULT: "hsl(var(--noir))",
+          lift: "hsl(var(--noir-lift))",
+        },
+        ivory: "hsl(var(--ivory))",
+        champagne: {
+          light: "hsl(var(--champagne-light))",
+          DEFAULT: "hsl(var(--champagne))",
+          deep: "hsl(var(--champagne-deep))",
+        },
+        velvet: "hsl(var(--velvet))",
+        smoke: "hsl(var(--smoke))",
       },
       borderRadius: {
         "3xl": "1.5rem",
