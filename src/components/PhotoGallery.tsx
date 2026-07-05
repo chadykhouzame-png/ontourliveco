@@ -122,7 +122,7 @@ const PhotoGallery = () => {
               {/* Light editorial caption */}
               <figcaption className="absolute left-0 right-0 bottom-0 p-5 md:p-6 flex items-end justify-between gap-4">
                 <div>
-                  <p className="font-editorial italic text-ivory text-base md:text-lg leading-snug">
+                  <p className="font-accent italic text-ivory text-lg md:text-xl leading-snug">
                     {f.caption}
                   </p>
                   <p className="mt-1 text-[11px] uppercase tracking-[0.22em] text-ivory/50">
