@@ -10,6 +10,7 @@ import logo from "@/assets/logo.png";
 import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
 import JoinListForm from "@/components/JoinListForm";
 import EventHighlights from "@/components/EventHighlights";
+import PhotoGallery from "@/components/PhotoGallery";
 
 
 const Index = () => {
