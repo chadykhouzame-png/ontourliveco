@@ -410,6 +410,9 @@ const Index = () => {
       {/* Event Highlights */}
       <EventHighlights />
 
+      {/* Photo Gallery — Field Notes */}
+      <PhotoGallery />
+
       {/* Join the list / Request the stage */}
       <section id="join" className="relative bg-noir py-24 border-t border-border/40">
         <div className="max-w-2xl mx-auto px-6">
