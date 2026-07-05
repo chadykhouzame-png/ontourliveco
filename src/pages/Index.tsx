@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { socialLinks } from "@/config/social";
 import logo from "@/assets/logo.png";
 import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
+import JoinListForm from "@/components/JoinListForm";
 
 
 const Index = () => {
@@ -402,6 +403,20 @@ const Index = () => {
               </Card>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Join the list / Request the stage */}
+      <section id="join" className="relative bg-noir py-24 border-t border-border/40">
+        <div className="max-w-2xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <p className="eyebrow mb-4">Before the doors open</p>
+            <h2 className="font-display uppercase tracking-display text-ivory text-3xl md:text-5xl mb-4">
+              Join the list
+            </h2>
+            <p className="editorial text-lg md:text-xl">Or request the stage — we're listening.</p>
+          </div>
+          <JoinListForm />
         </div>
       </section>
 
