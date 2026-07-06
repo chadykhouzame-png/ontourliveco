@@ -627,7 +627,8 @@ const VenueDashboard = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <StripeReturnBanner mode="venue" />
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">
