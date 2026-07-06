@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Users, CheckCircle, AlertTriangle, Webhook, Rocket, Settings } from 'lucide-react';
+import { Shield, Users, CheckCircle, AlertTriangle, Webhook, Rocket, Settings, Mail } from 'lucide-react';
 import AdminUserManagement from '@/components/admin/AdminUserManagement';
 import AdminProfileApproval from '@/components/admin/AdminProfileApproval';
 import AdminDisputes from '@/components/admin/AdminDisputes';
@@ -14,6 +14,7 @@ import RunStripeTestCheckout from '@/components/admin/RunStripeTestCheckout';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
 import PrePublishChecklist from '@/components/admin/PrePublishChecklist';
 import AdminSiteMode from '@/components/admin/AdminSiteMode';
+import AdminWaitlist from '@/components/admin/AdminWaitlist';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -59,7 +60,7 @@ const AdminDashboard = () => {
         <AdminStats />
 
         <Tabs defaultValue="approval" className="mt-8">
-          <TabsList className="grid w-full grid-cols-6 lg:w-[760px]">
+          <TabsList className="grid w-full grid-cols-7 lg:w-[880px]">
             <TabsTrigger value="approval" className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Approvals</span>
@@ -67,6 +68,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="users" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <span className="hidden sm:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="waitlist" className="flex items-center gap-2">
+              <Mail className="h-4 w-4" />
+              <span className="hidden sm:inline">Waitlist</span>
             </TabsTrigger>
             <TabsTrigger value="disputes" className="flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" />
@@ -92,6 +97,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="users" className="mt-6">
             <AdminUserManagement />
+          </TabsContent>
+
+          <TabsContent value="waitlist" className="mt-6">
+            <AdminWaitlist />
           </TabsContent>
 
           <TabsContent value="disputes" className="mt-6">
