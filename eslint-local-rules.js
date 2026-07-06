@@ -41,10 +41,15 @@ function reportMatch(context, node, text, message) {
 
 function scanText(context, node, text) {
   if (typeof text !== "string") return;
+  const seen = new Set();
   for (const { regex, message } of forbiddenPatterns) {
-    if (regex.test(text)) {
-      reportMatch(context, node, text, message);
-      return;
+    let match;
+    regex.lastIndex = 0;
+    while ((match = regex.exec(text)) !== null) {
+      const key = match[0];
+      if (seen.has(key)) continue;
+      seen.add(key);
+      reportMatch(context, node, key, message);
     }
   }
 }
