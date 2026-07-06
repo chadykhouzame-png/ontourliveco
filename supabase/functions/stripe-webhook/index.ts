@@ -35,6 +35,32 @@ function maybeCleanup() {
   }
 }
 
+async function fireAlert(payload: {
+  stage: string;
+  event_id?: string | null;
+  event_type?: string | null;
+  error_message: string;
+  ip?: string | null;
+}) {
+  try {
+    const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-webhook-failure-alert`;
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      },
+      body: JSON.stringify({
+        source: "stripe-webhook",
+        occurred_at: new Date().toISOString(),
+        ...payload,
+      }),
+    });
+  } catch (e) {
+    console.error("Failed to dispatch webhook failure alert:", e);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -63,6 +89,11 @@ serve(async (req) => {
 
   if (!signature || !webhookSecret) {
     console.error("Missing stripe-signature header or STRIPE_WEBHOOK_SECRET");
+    await fireAlert({
+      stage: "signature",
+      error_message: "Missing stripe-signature header or STRIPE_WEBHOOK_SECRET",
+      ip: clientIp,
+    });
     return new Response(JSON.stringify({ error: "Missing signature or secret" }), { status: 400 });
   }
 
@@ -70,6 +101,11 @@ serve(async (req) => {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
+    await fireAlert({
+      stage: "signature",
+      error_message: `Signature verification failed: ${(err as Error).message}`,
+      ip: clientIp,
+    });
     return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
   }
 
@@ -162,6 +198,15 @@ serve(async (req) => {
       .from("webhook_events")
       .update({ status: "failed", error_message: error.message, processed_at: new Date().toISOString() })
       .eq("event_id", event.id);
+
+    await fireAlert({
+      stage: "handler",
+      event_id: event.id,
+      event_type: event.type,
+      error_message: (error as Error).message,
+      ip: clientIp,
+    });
+
 
     console.error("Webhook error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
