@@ -275,7 +275,7 @@ const styles = `
   padding:13px 26px;cursor:pointer;transition:background .25s;
 }
 .fl-ghost:hover{background:rgba(199,164,94,.12)}
-.fl-footer{display:flex;justify-content:space-between;align-items:center;
+.fl-footer{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;
   padding:24px clamp(22px,5vw,54px);border-top:1px solid rgba(143,136,122,.18)}
 @media (prefers-reduced-motion: no-preference){
   .fl-mark .fl-frame{opacity:0;animation:fl-rise .9s .55s ease-out forwards}
