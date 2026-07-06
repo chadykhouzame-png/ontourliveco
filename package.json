@@ -15,6 +15,9 @@
     "test:visual:update": "playwright test --update-snapshots"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.2.11",
+    "@fontsource/italiana": "^5.2.8",
+    "@fontsource/outfit": "^5.2.8",
     "@hookform/resolvers": "^3.10.0",
     "@lovable.dev/cloud-auth-js": "^1.0.0",
     "@lovable.dev/mcp-js": "^0.20.0",
