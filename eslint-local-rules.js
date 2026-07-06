@@ -6,14 +6,14 @@ const forbiddenPatterns = [
   {
     name: "black/white",
     regex:
-      /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|decoration|shadow|divide|placeholder|accent|selection|caret)-(?:black|white)\b/,
+      /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|decoration|shadow|divide|placeholder|accent|selection|caret)-(?:black|white)\b/g,
     message:
       'Use semantic tokens instead of black/white (e.g. bg-background, text-foreground).',
   },
   {
     name: "raw color",
     regex:
-      /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|decoration|shadow|divide|placeholder|accent|selection|caret)-(?:green|yellow|red|blue)(?:-[0-9]+)?\b/,
+      /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|decoration|shadow|divide|placeholder|accent|selection|caret)-(?:green|yellow|red|blue)(?:-[0-9]+)?\b/g,
     message:
       'Use semantic tokens instead of raw green/yellow/red/blue colors (e.g. bg-success, text-warning, text-danger).',
   },
