@@ -38,7 +38,7 @@ const PLATFORM_ICON: Record<Platform, { icon: typeof Music; color: string }> = {
 };
 
 const BAND_STYLES: Record<string, string> = {
-  Major: 'text-emerald-500',
+  Major: 'text-success',
   Established: 'text-sky-500',
   Emerging: 'text-muted-foreground',
 };
@@ -160,7 +160,7 @@ export default function ArtistReachCard({ artistId, className }: ArtistReachCard
       ? 'New'
       : `${growthPct >= 0 ? '+' : ''}${growthPct.toFixed(growthPct > -10 && growthPct < 10 ? 1 : 0)}% · 30d`;
   const growthColor =
-    growthPct == null ? 'text-muted-foreground' : growthPct >= 2 ? 'text-emerald-500' : growthPct <= -2 ? 'text-red-500' : 'text-muted-foreground';
+    growthPct == null ? 'text-muted-foreground' : growthPct >= 2 ? 'text-success' : growthPct <= -2 ? 'text-danger' : 'text-muted-foreground';
 
   return (
     <Card className={cn('glass border-border/50 rounded-2xl overflow-hidden', className)}>

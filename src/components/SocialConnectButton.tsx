@@ -115,7 +115,7 @@ export const SocialConnectButton = ({
           <div>
             <div className="flex items-center gap-2">
               <span className="font-medium">{config.name}</span>
-              <Check className="w-4 h-4 text-green-500" />
+              <Check className="w-4 h-4 text-success" />
             </div>
             {connection.platform_username && (
               <p className="text-sm text-muted-foreground">

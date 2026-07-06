@@ -153,11 +153,11 @@ const AdminDisputes = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'open':
-        return <AlertTriangle className="h-4 w-4 text-yellow-500" />;
+        return <AlertTriangle className="h-4 w-4 text-warning" />;
       case 'in_review':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <Clock className="h-4 w-4 text-info" />;
       case 'resolved':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4 text-success" />;
       case 'dismissed':
         return <XCircle className="h-4 w-4 text-muted-foreground" />;
       default:
@@ -168,11 +168,11 @@ const AdminDisputes = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'open':
-        return <Badge className="bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20">Open</Badge>;
+        return <Badge className="bg-warning/10 text-warning hover:bg-warning/20">Open</Badge>;
       case 'in_review':
-        return <Badge className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20">In Review</Badge>;
+        return <Badge className="bg-info/10 text-info hover:bg-info/20">In Review</Badge>;
       case 'resolved':
-        return <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20">Resolved</Badge>;
+        return <Badge className="bg-success/10 text-success hover:bg-success/20">Resolved</Badge>;
       case 'dismissed':
         return <Badge variant="secondary">Dismissed</Badge>;
       default:
@@ -184,10 +184,10 @@ const AdminDisputes = () => {
     const colors: Record<string, string> = {
       general: 'bg-muted-foreground/10 text-muted-foreground',
       booking: 'bg-purple-500/10 text-purple-500',
-      payment: 'bg-green-500/10 text-green-500',
+      payment: 'bg-success/10 text-success',
       behavior: 'bg-orange-500/10 text-orange-500',
-      fraud: 'bg-red-500/10 text-red-500',
-      other: 'bg-blue-500/10 text-blue-500',
+      fraud: 'bg-danger/10 text-danger',
+      other: 'bg-info/10 text-info',
     };
     return (
       <Badge className={colors[type] || colors.other}>

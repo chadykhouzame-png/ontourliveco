@@ -136,9 +136,9 @@ export function NegotiationHistory({
                     variant="outline" 
                     className={`text-xs ${
                       event.action_type === 'accept' 
-                        ? 'border-green-500/50 text-green-500' 
+                        ? 'border-success/50 text-success' 
                         : event.action_type === 'decline'
-                          ? 'border-red-500/50 text-red-500'
+                          ? 'border-danger/50 text-danger'
                           : `border-${color}/50 text-${color}`
                     }`}
                   >
@@ -149,7 +149,7 @@ export function NegotiationHistory({
                 {event.amount && (
                   <p className={`text-lg font-bold ${
                     event.action_type === 'accept' 
-                      ? 'text-green-500' 
+                      ? 'text-success' 
                       : `text-${color}`
                   }`}>
                     ${event.amount.toLocaleString()}

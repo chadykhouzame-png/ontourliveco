@@ -78,7 +78,7 @@ const AdminUserManagement = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20">Approved</Badge>;
+        return <Badge className="bg-success/10 text-success hover:bg-success/20">Approved</Badge>;
       case 'rejected':
         return <Badge variant="destructive">Rejected</Badge>;
       case 'pending':

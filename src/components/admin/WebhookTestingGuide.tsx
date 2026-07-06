@@ -116,9 +116,9 @@ const buildChecklist = (r: WebhookTestResult | null): CheckItem[] => {
 
 const stateIcon = (s: CheckState) => {
   switch (s) {
-    case 'pass': return <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />;
+    case 'pass': return <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />;
     case 'fail': return <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />;
-    case 'warn': return <AlertTriangle className="h-4 w-4 text-yellow-500 shrink-0 mt-0.5" />;
+    case 'warn': return <AlertTriangle className="h-4 w-4 text-warning shrink-0 mt-0.5" />;
     default: return <Circle className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />;
   }
 };
@@ -182,7 +182,7 @@ const WebhookTestingGuide = () => {
                         : c.state === 'pass'
                         ? 'text-foreground'
                         : c.state === 'warn'
-                        ? 'text-yellow-600 dark:text-yellow-400 font-medium'
+                        ? 'text-warning dark:text-warning font-medium'
                         : 'text-muted-foreground'
                     }
                   >
