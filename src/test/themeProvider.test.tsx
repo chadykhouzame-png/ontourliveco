@@ -38,7 +38,7 @@ describe("ThemeProvider", () => {
   beforeEach(() => {
     localStorage.clear();
     document.documentElement.classList.remove("dark", "light");
-    delete (document.documentElement.style as any).colorScheme;
+    document.documentElement.style.removeProperty("colorScheme");
   });
 
   afterEach(() => {
