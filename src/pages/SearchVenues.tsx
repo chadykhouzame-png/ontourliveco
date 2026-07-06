@@ -16,7 +16,8 @@ import { RatingDisplay } from '@/components/StarRating';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import logo from '@/assets/logo.png';
+import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
+const logo = logoAsset.url;
 
 type SortOption = 'name_asc' | 'name_desc' | 'rating_desc' | 'rating_asc' | 'capacity_desc' | 'capacity_asc';
 

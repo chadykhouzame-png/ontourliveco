@@ -34,7 +34,8 @@ import BookingDetailModal from '@/components/BookingDetailModal';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import StripeReturnBanner from '@/components/StripeReturnBanner';
-import logo from '@/assets/logo.png';
+import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
+const logo = logoAsset.url;
 
 const ArtistDashboard = () => {
   const navigate = useNavigate();
