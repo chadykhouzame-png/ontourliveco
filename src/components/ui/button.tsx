@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 // - Body font (Outfit) with wide UI tracking on labels
 // - Champagne accent used sparingly
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium uppercase tracking-[0.2em] ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:normal-case transition-all duration-100 ease-out origin-center active:scale-[0.97] active:duration-[50ms] [&:not(:active)]:duration-300 [&:not(:active)]:ease-[cubic-bezier(0.34,1.56,0.64,1)]",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium uppercase tracking-[0.2em] ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:normal-case transition-all duration-100 ease-out origin-center active:scale-[0.97] active:duration-[50ms] [&:not(:active)]:duration-300 [&:not(:active)]:ease-[cubic-bezier(0.34,1.56,0.64,1)]",
   {
     variants: {
       variant: {
