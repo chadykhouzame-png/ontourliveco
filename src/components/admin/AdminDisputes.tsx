@@ -182,7 +182,7 @@ const AdminDisputes = () => {
 
   const getTypeBadge = (type: string) => {
     const colors: Record<string, string> = {
-      general: 'bg-gray-500/10 text-gray-500',
+      general: 'bg-muted-foreground/10 text-muted-foreground',
       booking: 'bg-purple-500/10 text-purple-500',
       payment: 'bg-green-500/10 text-green-500',
       behavior: 'bg-orange-500/10 text-orange-500',

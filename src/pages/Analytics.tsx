@@ -16,7 +16,7 @@ const statusColors: Record<string, string> = {
   accepted: 'bg-green-500',
   declined: 'bg-red-500',
   completed: 'bg-blue-500',
-  cancelled: 'bg-gray-500',
+  cancelled: 'bg-muted-foreground',
 };
 
 const pieColors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
