@@ -1343,23 +1343,18 @@ export type Database = {
       user_in_conversation: { Args: { conv_id: string }; Returns: boolean }
       user_owns_artist: { Args: { artist_uuid: string }; Returns: boolean }
       user_owns_venue: { Args: { venue_uuid: string }; Returns: boolean }
-      waitlist_signup:
-        | {
-            Args: { p_email: string; p_ip?: string; p_role: string }
-            Returns: number
-          }
-        | {
-            Args: {
-              p_artist_name?: string
-              p_email: string
-              p_first_name?: string
-              p_ip?: string
-              p_last_name?: string
-              p_role: string
-              p_venue_name?: string
-            }
-            Returns: number
-          }
+      waitlist_signup: {
+        Args: {
+          p_artist_name?: string
+          p_email: string
+          p_first_name?: string
+          p_ip?: string
+          p_last_name?: string
+          p_role: string
+          p_venue_name?: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "artist" | "venue" | "admin"
