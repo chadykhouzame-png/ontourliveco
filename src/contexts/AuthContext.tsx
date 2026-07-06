@@ -27,15 +27,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', userId)
-      .maybeSingle();
-    
+      .eq('user_id', userId);
+
     if (error) {
       console.error('Error fetching user role:', error);
       return null;
     }
-    
-    return data?.role as UserRole;
+
+    if (!data || data.length === 0) return null;
+
+    // A user may hold multiple roles (e.g. admin + venue). Pick the highest
+    // privilege for routing/UI purposes.
+    const priority: UserRole[] = ['admin', 'venue', 'artist'];
+    for (const role of priority) {
+      if (data.some((r) => r.role === role)) return role;
+    }
+    return (data[0].role as UserRole) ?? null;
   };
 
   useEffect(() => {
