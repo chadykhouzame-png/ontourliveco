@@ -51,10 +51,10 @@ export const StarRating = ({
             <Star
               className={cn(
                 sizeClasses[size],
-                isFilled && "fill-yellow-400 text-yellow-400",
-                isHalfFilled && "fill-yellow-400/50 text-yellow-400",
+                isFilled && "fill-warning text-warning",
+                isHalfFilled && "fill-warning/50 text-warning",
                 !isFilled && !isHalfFilled && "text-muted-foreground/30",
-                interactive && "hover:text-yellow-400"
+                interactive && "hover:text-warning"
               )}
             />
           </button>

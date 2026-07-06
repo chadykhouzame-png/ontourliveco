@@ -24,7 +24,7 @@ const StarRatingDisplay = ({ rating }: { rating: number }) => {
           key={star}
           className={`w-4 h-4 ${
             star <= rating
-              ? 'fill-yellow-400 text-yellow-400'
+              ? 'fill-warning text-warning'
               : 'text-muted-foreground/30'
           }`}
         />
@@ -39,7 +39,7 @@ export const ReviewsList = ({ reviews, emptyMessage = "No reviews yet" }: Review
       <Card className="bg-card border-border">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Star className="w-5 h-5 text-yellow-400" />
+            <Star className="w-5 h-5 text-warning" />
             Reviews
           </CardTitle>
         </CardHeader>
@@ -54,8 +54,8 @@ export const ReviewsList = ({ reviews, emptyMessage = "No reviews yet" }: Review
     <Card className="bg-card border-border">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Star className="w-5 h-5 text-yellow-400" />
-          Reviews
+            <Star className="w-5 h-5 text-warning" />
+            Reviews
         </CardTitle>
         <CardDescription>
           {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
