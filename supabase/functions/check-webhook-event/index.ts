@@ -44,15 +44,15 @@ serve(async (req) => {
     if (!isAdmin) return json(403, { error: "Admin access required" });
 
     const url = new URL(req.url);
-    const stripeEventId = url.searchParams.get("stripe_event_id");
-    if (!stripeEventId || !/^evt_[A-Za-z0-9]{6,}$/.test(stripeEventId)) {
-      return json(400, { error: "Invalid or missing stripe_event_id" });
+    const eventId = url.searchParams.get("event_id");
+    if (!eventId || !/^evt_[A-Za-z0-9]{6,}$/.test(eventId)) {
+      return json(400, { error: "Invalid or missing event_id" });
     }
 
     const { data: row, error: qErr } = await supabase
       .from("webhook_events")
-      .select("id, stripe_event_id, event_type, status, error_message, created_at")
-      .eq("stripe_event_id", stripeEventId)
+      .select("id, event_id, event_type, status, error_message, processed_at, created_at")
+      .eq("event_id", eventId)
       .maybeSingle();
 
     if (qErr) return json(500, { error: qErr.message });
