@@ -94,15 +94,8 @@ const VenueDashboard = () => {
       navigate('/join/venue');
     }
 
-    // Handle payment return
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'success') {
-      toast({ title: 'Payment successful!', description: 'The artist has been notified.' });
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (params.get('payment') === 'cancelled') {
-      toast({ title: 'Payment cancelled', description: 'You can pay anytime from your dashboard.', variant: 'destructive' });
-      window.history.replaceState({}, '', window.location.pathname);
-    }
+    // Payment-return outcomes are now surfaced via <StripeReturnBanner /> below,
+    // which reads the same query params and renders a dismissible banner.
   }, [user, authLoading, navigate]);
 
   // Check if user has admin role
