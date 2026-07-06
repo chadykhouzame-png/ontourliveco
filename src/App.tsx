@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import AnimatedRoutes from "@/components/AnimatedRoutes";
 import FloatingActionButton from "@/components/FloatingActionButton";
@@ -11,6 +11,19 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/components/ThemeProvider";
 
 const queryClient = new QueryClient();
+
+// Hide app-chrome (FAB + cookie banner) on the holding page so the
+// First Light landing stays visually pristine.
+const AppChrome = () => {
+  const { pathname } = useLocation();
+  if (pathname === "/") return null;
+  return (
+    <>
+      <FloatingActionButton />
+      <CookieConsent />
+    </>
+  );
+};
 
 const App = () => (
   <ErrorBoundary>
@@ -22,8 +35,7 @@ const App = () => (
           <BrowserRouter>
             <AuthProvider>
               <AnimatedRoutes />
-              <FloatingActionButton />
-              <CookieConsent />
+              <AppChrome />
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>
