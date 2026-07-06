@@ -30,28 +30,35 @@ function getClassNameAttrName(node) {
   return null;
 }
 
-function reportMatch(context, node, text, message) {
-  if (reported.has(node)) return;
-  reported.add(node);
+function reportMatches(context, node, matches) {
+  if (matches.length === 0) return;
+  const unique = [...new Set(matches)];
+  const isBlackWhite = unique.some((m) => /-(?:black|white)\b/.test(m));
+  const isRawColor = unique.some((m) => /-(?:green|yellow|red|blue)(?:-[0-9]+)?\b/.test(m));
+  const messageParts = [];
+  if (isBlackWhite) {
+    messageParts.push("black/white (e.g. bg-background, text-foreground)");
+  }
+  if (isRawColor) {
+    messageParts.push("raw green/yellow/red/blue (e.g. bg-success, text-warning, text-danger)");
+  }
   context.report({
     node,
-    message,
+    message: `Use semantic tokens instead of ${messageParts.join(" and ")}: ${unique.join(", ")}`,
   });
 }
 
 function scanText(context, node, text) {
   if (typeof text !== "string") return;
-  const seen = new Set();
-  for (const { regex, message } of forbiddenPatterns) {
-    let match;
+  const matches = [];
+  for (const { regex } of forbiddenPatterns) {
     regex.lastIndex = 0;
+    let match;
     while ((match = regex.exec(text)) !== null) {
-      const key = match[0];
-      if (seen.has(key)) continue;
-      seen.add(key);
-      reportMatch(context, node, key, message);
+      matches.push(match[0]);
     }
   }
+  reportMatches(context, node, matches);
 }
 
 function checkNode(context, node) {
