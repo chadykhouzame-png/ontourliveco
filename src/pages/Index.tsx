@@ -228,13 +228,13 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Hero — First Light */}
-      <section className="relative overflow-hidden bg-noir pt-32 pb-24 md:pt-40 md:pb-32">
-        {/* Single radial gold — the only illumination */}
+      {/* Hero — Cinematic Diptych */}
+      <section className="relative overflow-hidden bg-noir pt-32 pb-24 md:pt-40 md:pb-32 border-b border-smoke/20">
+        {/* Off-center champagne glow */}
         <div
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-1/3 -translate-x-1/2 -translate-y-1/2 h-[520px] w-[520px] rounded-full opacity-40 blur-3xl"
-          style={{ background: 'radial-gradient(circle, hsl(var(--champagne) / 0.35) 0%, transparent 65%)' }}
+          className="pointer-events-none absolute top-1/2 right-0 -translate-y-1/2 h-[600px] w-[600px] rounded-full opacity-40 blur-[120px]"
+          style={{ background: 'hsl(var(--champagne) / 0.15)' }}
         />
 
         {/* Hairline corner marks */}
@@ -243,73 +243,144 @@ const Index = () => {
         <div aria-hidden className="absolute bottom-10 left-6 md:left-10 w-8 h-8 border-l border-b border-champagne/50" />
         <div aria-hidden className="absolute bottom-10 right-6 md:right-10 w-8 h-8 border-r border-b border-champagne/50" />
 
-        <div className="relative z-10 max-w-4xl mx-auto px-6 text-center">
-          <img
-            src={monogramIvory.url}
-            alt="On Tour Live monogram"
-            className="mx-auto h-24 md:h-32 w-auto mb-10 animate-fade-in"
-          />
+        <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 lg:px-24">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-9 animate-fade-in">
+              {/* Monogram + eyebrow row */}
+              <div className="flex items-center gap-4 mb-8">
+                <div className="w-11 h-11 border border-champagne rounded-brand flex items-center justify-center bg-noir-lift">
+                  <img
+                    src={monogramIvory.url}
+                    alt=""
+                    aria-hidden
+                    className="h-6 w-auto"
+                  />
+                </div>
+                <span className="uppercase tracking-label text-[10px] text-smoke">
+                  The Booking Platform · Artists &amp; Venues
+                </span>
+              </div>
 
-          <p className="eyebrow mb-8">The Booking Platform · Artists &amp; Venues</p>
+              {/* Headline */}
+              <h1 className="font-display uppercase tracking-display text-ivory text-6xl md:text-8xl leading-[1.02] mb-4">
+                On&nbsp;Tour<span className="text-champagne"> · </span>Live
+              </h1>
 
-          <h1 className="font-display uppercase tracking-display text-ivory text-5xl md:text-7xl lg:text-8xl leading-[1.05] mb-8">
-            On&nbsp;Tour<span className="text-champagne"> · </span>Live
-          </h1>
+              <p className="editorial text-2xl md:text-3xl text-smoke mb-8">The stage awaits.</p>
 
-          <p className="editorial text-2xl md:text-3xl mb-6">The stage awaits.</p>
+              <p className="max-w-xl text-ivory/80 text-base md:text-lg leading-relaxed mb-12">
+                Venues find the artists already in town. Artists turn travel dates into
+                booked nights. No DMs. No scrambling. Just the room, the sound, and the show.
+              </p>
 
-          <p className="max-w-xl mx-auto text-ivory/70 text-base md:text-lg leading-relaxed mb-14">
-            Venues find the artists already in town. Artists turn travel dates into
-            booked nights. No DMs. No scrambling. Just the room, the sound, and the show.
-          </p>
+              {/* Trust chips — hairline borders, dot prefix removed for cleaner rhythm */}
+              <div className="flex flex-wrap gap-3 mb-12">
+                {['Direct booking', 'Secure payouts', 'Verified profiles', '5% platform fee'].map((label) => (
+                  <div
+                    key={label}
+                    className="px-4 py-1.5 border border-smoke/35 rounded-brand text-[10px] uppercase tracking-label text-smoke"
+                  >
+                    {label}
+                  </div>
+                ))}
+              </div>
 
-          {/* Key details — measured, indexed */}
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 mb-14 text-smoke">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-label">
-              <span className="w-1.5 h-1.5 rounded-full bg-champagne" />
-              <span>Direct booking</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-label">
-              <span className="w-1.5 h-1.5 rounded-full bg-champagne" />
-              <span>Secure payouts</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-label">
-              <span className="w-1.5 h-1.5 rounded-full bg-champagne" />
-              <span>Verified profiles</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs uppercase tracking-label">
-              <span className="w-1.5 h-1.5 rounded-full bg-champagne" />
-              <span>5% platform fee</span>
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row items-start gap-4">
+                <Link to="/join/artist">
+                  <Button
+                    size="lg"
+                    className="bg-champagne text-noir hover:bg-champagne-deep hover:text-ivory rounded-brand px-10 py-4 tracking-[0.3em] uppercase text-[11px] font-semibold shadow-none"
+                  >
+                    Take your place
+                  </Button>
+                </Link>
+                <Link to="/join/venue">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border border-ivory text-ivory bg-transparent hover:bg-ivory hover:text-noir rounded-brand px-10 py-4 tracking-[0.3em] uppercase text-[11px] font-semibold shadow-none"
+                  >
+                    Book the night
+                  </Button>
+                </Link>
+              </div>
+
+              <Link
+                to="/search"
+                className="mt-10 inline-block text-sm text-smoke hover:text-champagne underline-offset-4 hover:underline transition-colors"
+              >
+                Or browse the roster →
+              </Link>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* CTAs — champagne primary, ivory-outline secondary */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link to="/join/artist">
-              <Button
-                size="lg"
-                className="bg-champagne text-noir hover:bg-champagne-deep hover:text-ivory rounded-brand px-8 tracking-[0.08em] uppercase font-semibold shadow-none"
-              >
-                Take your place
-              </Button>
-            </Link>
-            <Link to="/join/venue">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border border-champagne text-ivory bg-transparent hover:bg-champagne/10 hover:text-ivory rounded-brand px-8 tracking-[0.08em] uppercase font-semibold shadow-none"
-              >
-                Book the night
-              </Button>
-            </Link>
+      {/* Role split — Diptych with champagne hairline */}
+      <section className="relative bg-noir py-32">
+        <div className="max-w-6xl mx-auto px-6 md:px-8">
+          <div className="text-center mb-24">
+            <p className="eyebrow mb-4">Choose your side of the stage</p>
+            <h2 className="font-display uppercase tracking-[0.2em] text-ivory text-3xl md:text-4xl">
+              Which room are you in?
+            </h2>
           </div>
 
-          <Link
-            to="/search"
-            className="mt-10 inline-block text-sm text-smoke hover:text-champagne underline-offset-4 hover:underline transition-colors"
-          >
-            Or browse the roster →
-          </Link>
+          <div className="grid grid-cols-1 md:grid-cols-2 relative">
+            {/* Vertical champagne rule */}
+            <div aria-hidden className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px bg-champagne/20" />
+
+            {/* Artist side */}
+            <div className="p-8 md:p-12 flex flex-col items-center text-center">
+              <div className="mb-8 text-velvet font-display text-lg uppercase tracking-[0.4em]">
+                01 / Profile
+              </div>
+              <h3 className="font-display text-3xl md:text-4xl uppercase tracking-display text-ivory mb-8">
+                I'm an Artist
+              </h3>
+              <p className="text-smoke text-sm leading-relaxed max-w-sm mb-8">
+                Going on tour? Get booked while you travel. Set your dates once — venues find you.
+              </p>
+              <ul className="space-y-4 mb-12 text-smoke text-sm tracking-wide">
+                <li>Share your travel dates</li>
+                <li>Showcase your EPK &amp; socials</li>
+                <li>Get discovered by venues</li>
+              </ul>
+              <Link
+                to="/join/artist"
+                className="group flex items-center gap-4 text-[11px] uppercase tracking-[0.3em] text-champagne"
+              >
+                <span>Claim the stage</span>
+                <span aria-hidden className="block w-8 h-px bg-champagne transition-all duration-300 group-hover:w-12" />
+              </Link>
+            </div>
+
+            {/* Venue side */}
+            <div className="p-8 md:p-12 flex flex-col items-center text-center border-t md:border-t-0 border-smoke/20">
+              <div className="mb-8 text-velvet font-display text-lg uppercase tracking-[0.4em]">
+                02 / Curation
+              </div>
+              <h3 className="font-display text-3xl md:text-4xl uppercase tracking-display text-ivory mb-8">
+                I'm a Venue
+              </h3>
+              <p className="text-smoke text-sm leading-relaxed max-w-sm mb-8">
+                See who's in town. Fill your dates. No more chasing DMs or last-minute scrambles.
+              </p>
+              <ul className="space-y-4 mb-12 text-smoke text-sm tracking-wide">
+                <li>Browse artists by city + date</li>
+                <li>View profiles &amp; reviews</li>
+                <li>Book with confidence</li>
+              </ul>
+              <Link
+                to="/join/venue"
+                className="group flex items-center gap-4 text-[11px] uppercase tracking-[0.3em] text-champagne"
+              >
+                <span>Open the doors</span>
+                <span aria-hidden className="block w-8 h-px bg-champagne transition-all duration-300 group-hover:w-12" />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
