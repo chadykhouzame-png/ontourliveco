@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import { socialLinks } from "@/config/social";
-import lockupHorizontalIvory from "@/assets/lockup-horizontal-ivory.png.asset.json";
-import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
+import { BrandLockup } from "@/components/BrandLockup";
 
 const nav = {
   Platform: [
