@@ -12,7 +12,7 @@ export default function FirstLight() {
   const [role, setRole] = useState<"artist" | "venue">("artist");
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [hint, setHint] = useState("Doors open September 2026 · Sydney first");
+  const [hint, setHint] = useState("App launches September 2026 · Sydney first");
   const [hintTone, setHintTone] = useState<"muted" | "gold">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
@@ -51,7 +51,7 @@ export default function FirstLight() {
   async function onShare() {
     const data = {
       title: "On Tour Live",
-      text: "The booking app for artists & venues. Doors open September 2026 — take your place.",
+      text: "The booking app for artists & venues. Launching September 2026 — take your place.",
       url: typeof window !== "undefined" ? window.location.href : "",
     };
     try {
@@ -152,9 +152,9 @@ export default function FirstLight() {
             <h2>Your place is held</h2>
             <div className="fl-num">№ {position}</div>
             <p className="fl-sub">
-              in line for opening night.
+              in line for launch.
               <br />
-              Doors open September 2026. Watch{" "}
+              Launching September 2026. Watch{" "}
               <a
                 href="https://instagram.com/ontourlive"
                 style={{ color: "var(--fl-champagne)", textDecoration: "none" }}
