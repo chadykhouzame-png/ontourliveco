@@ -47,7 +47,9 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/" element={<FirstLight />} />
+        <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        
         
         {/* Auth Routes */}
         <Route path="/join/artist" element={<ProtectedRoute><JoinArtist /></ProtectedRoute>} />
