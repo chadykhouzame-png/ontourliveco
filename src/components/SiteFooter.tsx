@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import { socialLinks } from "@/config/social";
-import logo from "@/assets/logo.png";
+import lockupHorizontalIvory from "@/assets/lockup-horizontal-ivory.png.asset.json";
 import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
 
 const nav = {
@@ -91,19 +91,11 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-10">
           {/* Brand column */}
           <div className="md:col-span-5">
-            <Link to="/" className="inline-flex items-center gap-4 mb-6">
+            <Link to="/" className="inline-flex items-center mb-6">
               <img
-                src={monogramIvory.url}
-                alt="On Tour Live monogram"
-                className="h-12 w-auto"
-                width={96}
-                height={96}
-                loading="lazy"
-              />
-              <img
-                src={logo}
+                src={lockupHorizontalIvory.url}
                 alt="On Tour Live"
-                className="h-10 w-auto"
+                className="h-12 w-auto"
                 loading="lazy"
               />
             </Link>
