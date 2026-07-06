@@ -90,14 +90,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-10">
           {/* Brand column */}
           <div className="md:col-span-5">
-            <Link to="/" className="inline-flex items-center mb-6">
-              <img
-                src={lockupHorizontalIvory.url}
-                alt="On Tour Live"
-                className="h-12 w-auto"
-                loading="lazy"
-              />
-            </Link>
+            <BrandLockup size="md" className="mb-6" />
+
 
             <p className="font-accent italic text-ivory/80 text-xl leading-snug max-w-sm mb-6">
               The stage awaits.
