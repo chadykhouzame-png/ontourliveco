@@ -115,7 +115,13 @@ function scanText(context, node, text) {
     regex.lastIndex = 0;
     let match;
     while ((match = regex.exec(text)) !== null) {
-      matches.push(match[0]);
+      const hit = match[0];
+      // Allow official brand hex values (Spotify/Instagram/SoundCloud)
+      // while keeping every other arbitrary hex forbidden.
+      if (/-\[#[0-9a-fA-F]{3,8}\]$/.test(hit) && isAllowedBrandHex(hit)) {
+        continue;
+      }
+      matches.push(hit);
     }
   }
   reportMatches(context, node, matches);
