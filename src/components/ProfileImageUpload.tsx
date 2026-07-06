@@ -134,9 +134,9 @@ const ProfileImageUpload = ({
         
         <div className={`absolute inset-0 ${accentColor}/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity`}>
           {isUploading ? (
-            <Loader2 className="w-6 h-6 text-white animate-spin" />
+            <Loader2 className="w-6 h-6 text-ivory animate-spin" />
           ) : (
-            <Camera className="w-6 h-6 text-white" />
+            <Camera className="w-6 h-6 text-ivory" />
           )}
         </div>
       </div>
