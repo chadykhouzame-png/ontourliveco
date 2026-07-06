@@ -650,26 +650,43 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-black tracking-tight mb-6">
-            Ready to Get Started?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-10">
-            Join On Tour today and change how you book entertainment forever.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/join/artist">
-              <Button size="lg" className="text-lg px-8 bg-artist hover:bg-artist/90">
-                Join as Artist
-              </Button>
-            </Link>
-            <Link to="/join/venue">
-              <Button size="lg" className="text-lg px-8 bg-venue hover:bg-venue/90">
-                Join as Venue
-              </Button>
-            </Link>
+      {/* Closing CTA — framed proscenium with velvet undertone */}
+      <section className="px-6 md:px-8 py-24 bg-noir">
+        <div className="max-w-6xl mx-auto relative overflow-hidden rounded-brand border border-smoke/35 bg-noir-lift p-12 md:p-24">
+          {/* Velvet accent bloom */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute top-0 right-0 h-40 w-40 rounded-full blur-[60px]"
+            style={{ background: 'hsl(var(--velvet) / 0.35)' }}
+          />
+
+          <div className="relative z-10 text-center">
+            <p className="eyebrow mb-6">Take your place</p>
+            <h2 className="font-display uppercase tracking-[0.2em] text-ivory text-4xl md:text-5xl mb-6">
+              Your legacy begins tonight.
+            </h2>
+            <p className="editorial text-xl text-smoke mb-12">
+              The industry has changed. Your standards haven't.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/join/artist">
+                <Button
+                  size="lg"
+                  className="bg-champagne text-noir hover:bg-champagne-deep hover:text-ivory rounded-brand px-12 py-5 tracking-[0.3em] uppercase text-[11px] font-semibold shadow-none"
+                >
+                  Join as Artist
+                </Button>
+              </Link>
+              <Link to="/join/venue">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border border-ivory text-ivory bg-transparent hover:bg-ivory hover:text-noir rounded-brand px-12 py-5 tracking-[0.3em] uppercase text-[11px] font-semibold shadow-none"
+                >
+                  Join as Venue
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
