@@ -199,6 +199,15 @@ serve(async (req) => {
       .update({ status: "failed", error_message: error.message, processed_at: new Date().toISOString() })
       .eq("event_id", event.id);
 
+    await fireAlert({
+      stage: "handler",
+      event_id: event.id,
+      event_type: event.type,
+      error_message: (error as Error).message,
+      ip: clientIp,
+    });
+
+
     console.error("Webhook error:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { "Content-Type": "application/json" },
