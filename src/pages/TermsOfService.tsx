@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
-const logo = logoAsset.url;
+import { BrandLockup } from '@/components/BrandLockup';
 
 const TermsOfService = () => {
   return (
@@ -10,9 +9,7 @@ const TermsOfService = () => {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="On Tour Live" className="h-16 w-auto" />
-          </Link>
+          <BrandLockup size="lg" lazy={false} />
           <Link to="/">
             <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
