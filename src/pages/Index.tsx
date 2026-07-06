@@ -75,9 +75,8 @@ const Index = () => {
       {/* Navigation - iOS frosted glass style */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img src={lockupHorizontalIvory.url} alt="On Tour Live" className="h-10 md:h-12 w-auto" />
-          </Link>
+          <BrandLockup size="md" lazy={false} />
+
           <div className="hidden md:flex items-center gap-8">
             <a href="#how-it-works" className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium">How It Works</a>
             <a href="#for-artists" className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium">For Artists</a>
