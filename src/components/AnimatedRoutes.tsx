@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { ReactNode } from 'react';
 import PageTransition from './PageTransition';
@@ -32,6 +32,13 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => (
     <PageTransition>{children}</PageTransition>
   </RouteErrorBoundary>
 );
+
+// Preserves query string + hash so Stripe redirects like
+// /artist-dashboard?stripe=complete keep their params after redirecting.
+const LegacyRedirect = ({ to }: { to: string }) => {
+  const { search, hash } = useLocation();
+  return <Navigate to={`${to}${search}${hash}`} replace />;
+};
 
 const AnimatedRoutes = () => {
   const location = useLocation();
@@ -76,6 +83,10 @@ const AnimatedRoutes = () => {
         <Route path="/terms" element={<ProtectedRoute><TermsOfService /></ProtectedRoute>} />
         <Route path="/privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
         
+        {/* Legacy hyphenated redirects — prevent 404s from old Stripe URLs, bookmarks, emails */}
+        <Route path="/artist-dashboard" element={<LegacyRedirect to="/artist/dashboard" />} />
+        <Route path="/venue-dashboard" element={<LegacyRedirect to="/venue/dashboard" />} />
+
         {/* Catch-all */}
         <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
       </Routes>
