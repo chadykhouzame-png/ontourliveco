@@ -30,6 +30,7 @@ import CompleteBookingDialog from '@/components/CompleteBookingDialog';
 import BookingDetailModal from '@/components/BookingDetailModal';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import StripeReturnBanner from '@/components/StripeReturnBanner';
 import logo from '@/assets/logo.png';
 const VenueDashboard = () => {
   const navigate = useNavigate();
