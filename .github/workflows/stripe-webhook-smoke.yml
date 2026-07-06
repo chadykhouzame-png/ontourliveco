@@ -1,0 +1,95 @@
+name: Stripe webhook smoke test
+
+# Fires a real checkout.session.completed via the Stripe CLI (test mode) and
+# asserts the app's webhook handler marks the row status='processed'.
+#
+# Required repo secrets (Settings → Secrets and variables → Actions → New secret):
+#   STRIPE_API_KEY              Restricted test-mode key (rak_test_...) with
+#                                 "Events: Read" + "Webhook Endpoints: Write"
+#                                 permissions. Do NOT use a live key.
+#   SUPABASE_URL                https://<project-ref>.supabase.co
+#   SUPABASE_ANON_KEY           anon / publishable key (safe to expose, but
+#                                 kept in secrets for consistency)
+#   STRIPE_ENDPOINT             https://<project-ref>.supabase.co/functions/v1/stripe-webhook
+#   ADMIN_EMAIL                 Email of a user with the 'admin' role
+#   ADMIN_PASSWORD              Password for that admin user
+#
+# Manual: Actions tab → this workflow → Run workflow.
+# Scheduled: runs every 6 hours by default (adjust or remove the cron).
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+  pull_request:
+    paths:
+      - "supabase/functions/stripe-webhook/**"
+      - "supabase/functions/check-webhook-event/**"
+      - "scripts/trigger-webhook-test.sh"
+      - ".github/workflows/stripe-webhook-smoke.yml"
+
+concurrency:
+  group: stripe-webhook-smoke
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    name: Trigger and verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    env:
+      STRIPE_API_KEY: ${{ secrets.STRIPE_API_KEY }}
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      STRIPE_ENDPOINT: ${{ secrets.STRIPE_ENDPOINT }}
+      ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Guard against missing secrets
+        run: |
+          missing=()
+          for v in STRIPE_API_KEY SUPABASE_URL SUPABASE_ANON_KEY STRIPE_ENDPOINT ADMIN_EMAIL ADMIN_PASSWORD; do
+            if [ -z "${!v}" ]; then missing+=("$v"); fi
+          done
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing required secret(s): ${missing[*]}"
+            exit 1
+          fi
+
+      - name: Install Stripe CLI
+        run: |
+          curl -fsSL https://packages.stripe.dev/api/security/keypair/stripe-cli-gpg/public \
+            | sudo gpg --dearmor -o /usr/share/keyrings/stripe.gpg
+          echo "deb [signed-by=/usr/share/keyrings/stripe.gpg] https://packages.stripe.dev/stripe-cli-debian-local stable main" \
+            | sudo tee /etc/apt/sources.list.d/stripe.list >/dev/null
+          sudo apt-get update -y
+          sudo apt-get install -y stripe jq
+          stripe --version
+
+      - name: Write .env for the script
+        # secrets are already masked in logs by Actions; the file is only readable
+        # by the runner and is discarded when the job ends.
+        run: |
+          umask 077
+          cat > .env <<EOF
+          SUPABASE_URL=${SUPABASE_URL}
+          SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+          STRIPE_ENDPOINT=${STRIPE_ENDPOINT}
+          ADMIN_EMAIL=${ADMIN_EMAIL}
+          ADMIN_PASSWORD=${ADMIN_PASSWORD}
+          EOF
+
+      - name: Run Stripe webhook smoke test
+        # STRIPE_API_KEY is read by the Stripe CLI automatically.
+        run: |
+          chmod +x scripts/trigger-webhook-test.sh
+          ./scripts/trigger-webhook-test.sh --timeout 60
+
+      - name: Remove .env
+        if: always()
+        run: rm -f .env
