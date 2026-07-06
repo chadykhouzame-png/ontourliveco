@@ -45,8 +45,8 @@ serve(async (req) => {
     if (artist.stripe_account_id) {
       const accountLink = await stripe.accountLinks.create({
         account: artist.stripe_account_id,
-        refresh_url: `${req.headers.get("origin")}/artist-dashboard?stripe=refresh`,
-        return_url: `${req.headers.get("origin")}/artist-dashboard?stripe=complete`,
+        refresh_url: `${req.headers.get("origin")}/artist/dashboard?stripe=refresh`,
+        return_url: `${req.headers.get("origin")}/artist/dashboard?stripe=complete`,
         type: "account_onboarding",
       });
 
