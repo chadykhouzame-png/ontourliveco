@@ -10,6 +10,7 @@ import AdminDisputes from '@/components/admin/AdminDisputes';
 import AdminStats from '@/components/admin/AdminStats';
 import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
+import RunStripeTestCheckout from '@/components/admin/RunStripeTestCheckout';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
