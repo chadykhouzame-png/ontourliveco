@@ -76,6 +76,10 @@ const AnimatedRoutes = () => {
         <Route path="/terms" element={<ProtectedRoute><TermsOfService /></ProtectedRoute>} />
         <Route path="/privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
         
+        {/* Legacy hyphenated redirects — prevent 404s from old Stripe URLs, bookmarks, emails */}
+        <Route path="/artist-dashboard" element={<Navigate to="/artist/dashboard" replace />} />
+        <Route path="/venue-dashboard" element={<Navigate to="/venue/dashboard" replace />} />
+
         {/* Catch-all */}
         <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
       </Routes>
