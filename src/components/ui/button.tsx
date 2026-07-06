@@ -4,23 +4,39 @@ import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 
+// First Light brand kit:
+// - Hairline 1px borders (border-border), small engraved radii (rounded-md ≈ 6px)
+// - No drop shadows, no gradients
+// - Body font (Outfit) with wide UI tracking on labels
+// - Champagne accent used sparingly
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-semibold ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 transition-all duration-100 ease-out origin-center active:scale-[0.96] active:duration-[50ms] [&:not(:active)]:duration-300 [&:not(:active)]:ease-[cubic-bezier(0.34,1.56,0.64,1)] -webkit-tap-highlight-color-transparent",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap text-xs font-medium uppercase tracking-[0.2em] ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:normal-case transition-all duration-100 ease-out origin-center active:scale-[0.97] active:duration-[50ms] [&:not(:active)]:duration-300 [&:not(:active)]:ease-[cubic-bezier(0.34,1.56,0.64,1)]",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-ios hover:bg-primary/90 hover:shadow-ios-glow active:bg-primary/85 active:shadow-ios",
-        destructive: "bg-destructive text-destructive-foreground shadow-ios hover:bg-destructive/90 active:bg-destructive/85",
-        outline: "border border-border bg-transparent hover:bg-secondary/50 active:bg-secondary/70",
-        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80 active:bg-secondary/90",
-        ghost: "hover:bg-secondary/50 active:bg-secondary/70",
-        link: "text-primary underline-offset-4 hover:underline active:opacity-70",
+        // Primary = champagne on noir. No shadow, hairline edge on hover.
+        default:
+          "bg-primary text-primary-foreground hover:bg-primary/90 active:bg-primary/85",
+        // Champagne outline — the editorial call to action
+        champagne:
+          "border border-primary/70 bg-transparent text-primary hover:bg-primary/10 hover:border-primary active:bg-primary/15",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:bg-destructive/90 active:bg-destructive/85",
+        // Hairline ivory outline — the quiet default
+        outline:
+          "border border-border bg-transparent text-foreground hover:border-foreground/60 hover:bg-foreground/[0.03] active:bg-foreground/[0.06]",
+        secondary:
+          "bg-secondary text-secondary-foreground border border-border/60 hover:bg-secondary/80 active:bg-secondary/90",
+        ghost:
+          "text-foreground hover:bg-foreground/[0.04] active:bg-foreground/[0.07]",
+        link:
+          "text-primary underline-offset-4 hover:underline active:opacity-70 tracking-normal normal-case font-normal",
       },
       size: {
-        default: "h-11 px-5 py-2.5 rounded-xl",
-        sm: "h-9 rounded-xl px-4",
-        lg: "h-12 rounded-2xl px-8 text-base",
-        icon: "h-11 w-11 rounded-xl",
+        default: "h-11 px-5 py-2.5 rounded-md",
+        sm: "h-9 rounded-md px-4 text-[10px] tracking-[0.25em]",
+        lg: "h-12 rounded-md px-8 text-sm tracking-[0.25em]",
+        icon: "h-11 w-11 rounded-md",
       },
     },
     defaultVariants: {
