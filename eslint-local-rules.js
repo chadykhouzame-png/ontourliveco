@@ -21,7 +21,6 @@ const forbiddenPatterns = [
 
 const classNameHelpers = new Set(["cn", "clsx", "cva", "twMerge"]);
 
-const reported = new WeakSet();
 
 function getClassNameAttrName(node) {
   if (!node || node.type !== "JSXAttribute") return null;
