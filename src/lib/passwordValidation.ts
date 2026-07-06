@@ -59,8 +59,8 @@ export function checkPasswordStrength(password: string): {
 // Get strength label
 export function getStrengthLabel(score: number): { label: string; color: string } {
   if (score <= 1) return { label: 'Very Weak', color: 'bg-destructive' };
-  if (score === 2) return { label: 'Weak', color: 'bg-orange-500' };
+  if (score === 2) return { label: 'Weak', color: 'bg-destructive/70' };
   if (score === 3) return { label: 'Fair', color: 'bg-warning' };
-  if (score === 4) return { label: 'Good', color: 'bg-lime-500' };
+  if (score === 4) return { label: 'Good', color: 'bg-success/70' };
   return { label: 'Strong', color: 'bg-success' };
 }
