@@ -16,7 +16,7 @@ interface ReachBadgeProps {
 
 const BAND_STYLES: Record<string, string> = {
   Major: 'text-success',
-  Established: 'text-sky-500',
+  Established: 'text-info',
   Emerging: 'text-muted-foreground',
 };
 
