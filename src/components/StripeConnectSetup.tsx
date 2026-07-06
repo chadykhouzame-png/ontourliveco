@@ -39,19 +39,16 @@ export const StripeConnectSetup = ({ artistId }: StripeConnectStatusProps) => {
     checkStatus();
   }, [checkStatus]);
 
-  // Check for returning from Stripe onboarding
+  // Re-check status when returning from Stripe onboarding. The visible
+  // confirmation is rendered by <StripeReturnBanner /> in ArtistDashboard;
+  // this hook only refreshes the account status data. URL cleanup is handled
+  // by the banner when the user dismisses it.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('stripe') === 'complete') {
       checkStatus();
-      toast({ title: 'Stripe setup updated', description: 'Checking your account status...' });
-      // Clean URL
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (params.get('stripe') === 'refresh') {
-      toast({ title: 'Stripe setup incomplete', description: 'Please complete your Stripe onboarding.', variant: 'destructive' });
-      window.history.replaceState({}, '', window.location.pathname);
     }
-  }, [checkStatus, toast]);
+  }, [checkStatus]);
 
   const handleSetupStripe = async () => {
     setIsOnboarding(true);

@@ -30,6 +30,7 @@ import CompleteBookingDialog from '@/components/CompleteBookingDialog';
 import BookingDetailModal from '@/components/BookingDetailModal';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
+import StripeReturnBanner from '@/components/StripeReturnBanner';
 import logo from '@/assets/logo.png';
 const VenueDashboard = () => {
   const navigate = useNavigate();
@@ -93,15 +94,8 @@ const VenueDashboard = () => {
       navigate('/join/venue');
     }
 
-    // Handle payment return
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('payment') === 'success') {
-      toast({ title: 'Payment successful!', description: 'The artist has been notified.' });
-      window.history.replaceState({}, '', window.location.pathname);
-    } else if (params.get('payment') === 'cancelled') {
-      toast({ title: 'Payment cancelled', description: 'You can pay anytime from your dashboard.', variant: 'destructive' });
-      window.history.replaceState({}, '', window.location.pathname);
-    }
+    // Payment-return outcomes are now surfaced via <StripeReturnBanner /> below,
+    // which reads the same query params and renders a dismissible banner.
   }, [user, authLoading, navigate]);
 
   // Check if user has admin role
@@ -633,7 +627,8 @@ const VenueDashboard = () => {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        <StripeReturnBanner mode="venue" />
         <div className="flex items-center justify-between mb-8">
           <div>
             <div className="flex items-center gap-3">
