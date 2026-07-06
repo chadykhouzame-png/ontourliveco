@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Users, CheckCircle, AlertTriangle, Webhook } from 'lucide-react';
+import { Shield, Users, CheckCircle, AlertTriangle, Webhook, Rocket } from 'lucide-react';
 import AdminUserManagement from '@/components/admin/AdminUserManagement';
 import AdminProfileApproval from '@/components/admin/AdminProfileApproval';
 import AdminDisputes from '@/components/admin/AdminDisputes';
@@ -12,6 +12,7 @@ import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import RunStripeTestCheckout from '@/components/admin/RunStripeTestCheckout';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
+import PrePublishChecklist from '@/components/admin/PrePublishChecklist';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -57,7 +58,7 @@ const AdminDashboard = () => {
         <AdminStats />
 
         <Tabs defaultValue="approval" className="mt-8">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[520px]">
+          <TabsList className="grid w-full grid-cols-5 lg:w-[640px]">
             <TabsTrigger value="approval" className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Approvals</span>
@@ -73,6 +74,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="webhooks" className="flex items-center gap-2">
               <Webhook className="h-4 w-4" />
               <span className="hidden sm:inline">Webhooks</span>
+            </TabsTrigger>
+            <TabsTrigger value="prepublish" className="flex items-center gap-2">
+              <Rocket className="h-4 w-4" />
+              <span className="hidden sm:inline">Pre-publish</span>
             </TabsTrigger>
           </TabsList>
 
@@ -94,6 +99,10 @@ const AdminDashboard = () => {
               <AdminWebhookEvents />
               <WebhookTestingGuide />
             </WebhookTestProvider>
+          </TabsContent>
+
+          <TabsContent value="prepublish" className="mt-6">
+            <PrePublishChecklist />
           </TabsContent>
         </Tabs>
       </main>
