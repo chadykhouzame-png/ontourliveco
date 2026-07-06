@@ -714,7 +714,7 @@ const VenueDashboard = () => {
                       </div>
                       <div className="flex items-center gap-2">
                         {booking.payment_status === 'paid' ? (
-                          <Badge className="bg-green-600 text-white">Paid</Badge>
+                          <Badge className="bg-champagne text-noir hover:bg-champagne-deep">Paid</Badge>
                         ) : (
                           <PayBookingButton
                             bookingId={booking.id}
