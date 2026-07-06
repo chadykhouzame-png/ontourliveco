@@ -2,20 +2,25 @@
  * Local ESLint plugin enforcing OnTour's semantic design tokens.
  */
 
+const COLOR_UTILITY_PREFIX =
+  "(?:bg|text|border|ring|from|to|via|fill|stroke|outline|decoration|shadow|divide|placeholder|accent|selection|caret)";
+
 const forbiddenPatterns = [
   {
     name: "black/white",
-    regex:
-      /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|decoration|shadow|divide|placeholder|accent|selection|caret)-(?:black|white)\b/g,
-    message:
-      'Use semantic tokens instead of black/white (e.g. bg-background, text-foreground).',
+    regex: new RegExp(`\\b${COLOR_UTILITY_PREFIX}-(?:black|white)\\b`, "g"),
   },
   {
     name: "raw color",
-    regex:
-      /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|decoration|shadow|divide|placeholder|accent|selection|caret)-(?:green|yellow|red|blue)(?:-[0-9]+)?\b/g,
-    message:
-      'Use semantic tokens instead of raw green/yellow/red/blue colors (e.g. bg-success, text-warning, text-danger).',
+    regex: new RegExp(
+      `\\b${COLOR_UTILITY_PREFIX}-(?:green|yellow|red|blue|emerald|lime|amber|orange|rose|sky|indigo)(?:-[0-9]+)?\\b`,
+      "g"
+    ),
+  },
+  {
+    // Arbitrary hex values on color utilities: bg-[#22c55e], text-[#ef4444], etc.
+    name: "arbitrary hex",
+    regex: new RegExp(`\\b${COLOR_UTILITY_PREFIX}-\\[#[0-9a-fA-F]{3,8}\\]`, "g"),
   },
 ];
 
@@ -36,13 +41,23 @@ function reportMatches(context, node, matches) {
   reported.add(node);
   const unique = [...new Set(matches)];
   const isBlackWhite = unique.some((m) => /-(?:black|white)\b/.test(m));
-  const isRawColor = unique.some((m) => /-(?:green|yellow|red|blue)(?:-[0-9]+)?\b/.test(m));
+  const isRawColor = unique.some((m) =>
+    /-(?:green|yellow|red|blue|emerald|lime|amber|orange|rose|sky|indigo)(?:-[0-9]+)?\b/.test(m)
+  );
+  const isArbitraryHex = unique.some((m) => /-\[#[0-9a-fA-F]{3,8}\]$/.test(m));
   const messageParts = [];
   if (isBlackWhite) {
-    messageParts.push("black/white (e.g. bg-background, text-foreground)");
+    messageParts.push("black/white (use bg-background, text-foreground)");
   }
   if (isRawColor) {
-    messageParts.push("raw green/yellow/red/blue (e.g. bg-success, text-warning, text-danger)");
+    messageParts.push(
+      "raw status colors (use bg-success, text-warning, text-danger, text-info)"
+    );
+  }
+  if (isArbitraryHex) {
+    messageParts.push(
+      "arbitrary hex colors (use semantic tokens defined in src/index.css)"
+    );
   }
   context.report({
     node,
