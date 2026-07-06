@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { socialLinks } from "@/config/social";
 import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
 import { BrandLockup } from "@/components/BrandLockup";
+import { ThemeToggle } from '@/components/ThemeToggle';
 import JoinListForm from "@/components/JoinListForm";
 import EventHighlights from "@/components/EventHighlights";
 import PhotoGallery from "@/components/PhotoGallery";
@@ -84,6 +85,7 @@ const Index = () => {
             <Link to="/search" className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium">Search</Link>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {/* Social Icons */}
             <div className="hidden sm:flex items-center gap-2">
               <a 

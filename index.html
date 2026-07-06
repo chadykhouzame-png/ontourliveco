@@ -1,7 +1,19 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!-- Resolve theme before first paint to avoid a light/dark flash. Mirrors ThemeProvider. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('otl.theme');
+          var pref = (stored === 'light' || stored === 'dark' || stored === 'system') ? stored : 'dark';
+          var isDark = pref === 'dark' || (pref === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          if (isDark) document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
+        } catch (e) { document.documentElement.classList.add('dark'); }
+      })();
+    </script>
     <!-- Favicon: noir-tiled monogram is the safe default (reads on any browser chrome). -->
     <link rel="icon" href="/favicon.png" type="image/png" sizes="180x180" />
     <!-- Dark-scheme browsers that honor the media hint can use the borderless ivory mark. -->

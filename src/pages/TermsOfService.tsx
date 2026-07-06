@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from '@/components/BrandLockup';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const TermsOfService = () => {
   return (
@@ -10,12 +11,15 @@ const TermsOfService = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <BrandLockup size="lg" lazy={false} />
-          <Link to="/">
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link to="/">
             <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="w-4 h-4" />
               Back to Home
             </Button>
           </Link>
+          </div>
         </div>
       </nav>
 

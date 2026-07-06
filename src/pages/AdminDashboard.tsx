@@ -12,6 +12,7 @@ import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
 import { BrandLockup } from '@/components/BrandLockup';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 const AdminDashboard = () => {
   const { user, userRole, isLoading } = useAuth();
@@ -41,6 +42,7 @@ const AdminDashboard = () => {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <BrandLockup size="md" lazy={false} />
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Shield className="h-6 w-6 text-primary" />
             <div>
               <h1 className="text-xl font-bold">Admin Dashboard</h1>

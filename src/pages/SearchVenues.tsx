@@ -17,6 +17,7 @@ import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BrandLockup } from '@/components/BrandLockup';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 type SortOption = 'name_asc' | 'name_desc' | 'rating_desc' | 'rating_asc' | 'capacity_desc' | 'capacity_asc';
 
@@ -248,6 +249,7 @@ const SearchVenues = () => {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <BrandLockup size="md" lazy={false} />
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {user && userRole === 'artist' && (
               <Button variant="outline" onClick={() => navigate('/artist/dashboard')}>
                 Dashboard

@@ -21,6 +21,7 @@ import ReachBadge from '@/components/ReachBadge';
 import { computeReachScore } from '@/lib/reachScore';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { BrandLockup } from '@/components/BrandLockup';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface SocialReach {
   total_followers: number;
@@ -268,6 +269,7 @@ const SearchArtists = () => {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <BrandLockup size="md" lazy={false} />
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {user && userRole === 'venue' && (
               <Button variant="outline" onClick={() => navigate('/venue/dashboard')}>
                 Dashboard
