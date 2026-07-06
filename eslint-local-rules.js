@@ -24,6 +24,49 @@ const forbiddenPatterns = [
   },
 ];
 
+/**
+ * Official brand hex values allowed in arbitrary color utilities
+ * (e.g. `bg-[#1DB954]` for the Spotify connect button). These are the
+ * only exception to the "no arbitrary hex" rule — anything else must
+ * be a semantic token defined in src/index.css.
+ *
+ * Keep entries as lowercase 6-digit hex. `normalizeHex` handles 3-digit
+ * shorthand and 8-digit (with alpha) forms at match time.
+ */
+const BRAND_HEX_ALLOWLIST = new Set([
+  // Spotify
+  "1db954",
+  "1ed760",
+  // Instagram (solid + gradient stops)
+  "e4405f",
+  "f58529",
+  "dd2a7b",
+  "8134af",
+  "515bd4",
+  // SoundCloud
+  "ff5500",
+  "ff7700",
+]);
+
+function normalizeHex(hex) {
+  let h = hex.toLowerCase();
+  if (h.length === 3) {
+    h = h.split("").map((c) => c + c).join("");
+  } else if (h.length === 4) {
+    h = h.split("").map((c) => c + c).join("").slice(0, 6);
+  } else if (h.length === 8) {
+    // Drop alpha channel when comparing brand identity.
+    h = h.slice(0, 6);
+  }
+  return h;
+}
+
+function isAllowedBrandHex(match) {
+  const hex = match.match(/#([0-9a-fA-F]{3,8})\]$/)?.[1];
+  if (!hex) return false;
+  return BRAND_HEX_ALLOWLIST.has(normalizeHex(hex));
+}
+
 const classNameHelpers = new Set(["cn", "clsx", "cva", "twMerge"]);
 
 const reported = new WeakSet();
