@@ -10,8 +10,8 @@ interface ThemeContextValue {
   preference: ThemePreference;
   /** Set the preference and persist to localStorage. */
   setPreference: (pref: ThemePreference) => void;
-  /** Cycle to the next preference: light → dark → system → light. */
-  cycle: () => void;
+  /** Remove the saved preference and fall back to the OS setting. */
+  clearPreference: () => void;
 }
 
 const STORAGE_KEY = "otl.theme";
@@ -70,20 +70,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setPreferenceState(pref);
   }, []);
 
-  const cycle = useCallback(() => {
-    if (preference === "system") {
-      // From system, jump to the opposite of the currently resolved theme so the
-      // button always produces a visible change.
-      setPreference(theme === "dark" ? "light" : "dark");
-    } else if (preference === "light") {
-      setPreference("dark");
-    } else {
-      setPreference("system");
-    }
-  }, [preference, theme, setPreference]);
+  const clearPreference = useCallback(() => {
+    window.localStorage.removeItem(STORAGE_KEY);
+    setPreferenceState("system");
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, preference, setPreference, cycle }}>
+    <ThemeContext.Provider value={{ theme, preference, setPreference, clearPreference }}>
       {children}
     </ThemeContext.Provider>
   );
