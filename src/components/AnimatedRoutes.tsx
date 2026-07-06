@@ -5,6 +5,7 @@ import PageTransition from './PageTransition';
 import RouteErrorBoundary from './RouteErrorBoundary';
 
 import Index from '@/pages/Index';
+import FirstLight from '@/pages/FirstLight';
 import NotFound from '@/pages/NotFound';
 import JoinArtist from '@/pages/JoinArtist';
 import JoinVenue from '@/pages/JoinVenue';
@@ -46,7 +47,9 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        <Route path="/" element={<FirstLight />} />
+        <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+        
         
         {/* Auth Routes */}
         <Route path="/join/artist" element={<ProtectedRoute><JoinArtist /></ProtectedRoute>} />
