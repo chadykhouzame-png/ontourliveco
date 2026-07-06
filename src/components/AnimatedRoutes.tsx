@@ -5,6 +5,7 @@ import PageTransition from './PageTransition';
 import RouteErrorBoundary from './RouteErrorBoundary';
 
 import Index from '@/pages/Index';
+import FirstLight from '@/pages/FirstLight';
 import NotFound from '@/pages/NotFound';
 import JoinArtist from '@/pages/JoinArtist';
 import JoinVenue from '@/pages/JoinVenue';
