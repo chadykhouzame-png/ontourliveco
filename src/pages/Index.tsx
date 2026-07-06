@@ -85,6 +85,7 @@ const Index = () => {
             <Link to="/search" className="text-muted-foreground hover:text-foreground transition-colors duration-200 text-sm font-medium">Search</Link>
           </div>
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             {/* Social Icons */}
             <div className="hidden sm:flex items-center gap-2">
               <a 
