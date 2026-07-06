@@ -9,17 +9,85 @@
 
 @layer base {
   :root {
-    /* First Light palette (HSL) */
+    /* First Light palette (HSL) — palette constants, referenced by both themes */
     --noir: 36 17% 5%;
     --noir-lift: 30 17% 7%;
     --ivory: 41 47% 93%;
+    --ivory-lift: 41 30% 97%;
     --champagne: 38 49% 58%;
     --champagne-light: 39 66% 77%;
     --champagne-deep: 37 43% 42%;
     --velvet: 350 39% 23%;
     --smoke: 45 8% 52%;
+    --ink: 36 17% 12%;
 
-    /* Semantic tokens */
+    /* Typography (theme-independent) */
+    --font-display: 'Italiana', serif;
+    --font-accent: 'Cormorant Garamond', serif;
+    --font-body: 'Outfit', 'Inter', -apple-system, system-ui, sans-serif;
+    --tracking-display: 0.1em;
+    --tracking-label: 0.3em;
+
+    /* Small, engraved corners (both themes) */
+    --radius: 0.375rem;
+
+    /* Status tokens — read on both light and dark surfaces */
+    --success: 150 35% 40%;
+    --success-foreground: 41 47% 96%;
+    --warning: 38 65% 48%;
+    --warning-foreground: 36 17% 8%;
+    --info: 200 45% 45%;
+    --info-foreground: 41 47% 96%;
+    --danger: 350 60% 45%;
+    --danger-foreground: 41 47% 96%;
+
+    /* ---------- Light theme (First Light · Dawn) ---------- */
+    --background: var(--ivory);
+    --foreground: var(--ink);
+
+    --card: var(--ivory-lift);
+    --card-foreground: var(--ink);
+
+    --popover: var(--ivory-lift);
+    --popover-foreground: var(--ink);
+
+    --primary: var(--champagne-deep);
+    --primary-foreground: var(--ivory);
+
+    --secondary: 41 25% 88%;
+    --secondary-foreground: var(--ink);
+
+    --muted: 41 20% 90%;
+    --muted-foreground: 30 8% 38%;
+
+    --accent: var(--champagne-deep);
+    --accent-foreground: var(--ivory);
+
+    --destructive: var(--velvet);
+    --destructive-foreground: var(--ivory);
+
+    --border: 45 15% 78%;
+    --input: 41 25% 92%;
+    --ring: var(--champagne-deep);
+
+    /* Role tints */
+    --artist: var(--champagne-deep);
+    --artist-foreground: var(--ivory);
+    --venue: var(--ink);
+    --venue-foreground: var(--ivory);
+
+    --sidebar-background: 41 30% 95%;
+    --sidebar-foreground: 30 8% 38%;
+    --sidebar-primary: var(--champagne-deep);
+    --sidebar-primary-foreground: var(--ivory);
+    --sidebar-accent: 41 25% 90%;
+    --sidebar-accent-foreground: var(--ink);
+    --sidebar-border: 45 15% 82%;
+    --sidebar-ring: var(--champagne-deep);
+  }
+
+  .dark {
+    /* ---------- Dark theme (First Light · Noir) ---------- */
     --background: var(--noir);
     --foreground: var(--ivory);
 
@@ -29,7 +97,6 @@
     --popover: var(--noir-lift);
     --popover-foreground: var(--ivory);
 
-    /* Champagne gold — the accent */
     --primary: var(--champagne);
     --primary-foreground: var(--noir);
 
@@ -45,29 +112,12 @@
     --destructive: var(--velvet);
     --destructive-foreground: var(--ivory);
 
-    /* Status tokens — muted to sit inside the First Light palette.
-       Use these instead of raw tailwind green-500 / yellow-500 / red-500. */
-    --success: 150 35% 45%;
-    --success-foreground: 41 47% 93%;
-    --warning: 38 55% 55%;
-    --warning-foreground: 36 17% 5%;
-    --info: 200 40% 55%;
-    --info-foreground: 36 17% 5%;
-    --danger: 350 55% 50%;
-    --danger-foreground: 41 47% 93%;
-
-    /* Hairline borders */
     --border: 45 8% 22%;
     --input: 30 12% 14%;
     --ring: var(--champagne);
 
-    /* Small, engraved corners */
-    --radius: 0.375rem;
-
-    /* Role tints — retuned to the noir/champagne palette */
     --artist: var(--champagne);
     --artist-foreground: var(--noir);
-
     --venue: var(--ivory);
     --venue-foreground: var(--noir);
 
@@ -79,36 +129,6 @@
     --sidebar-accent-foreground: var(--ivory);
     --sidebar-border: 45 8% 18%;
     --sidebar-ring: var(--champagne);
-
-    /* Typography */
-    --font-display: 'Italiana', serif;
-    --font-accent: 'Cormorant Garamond', serif;
-    --font-body: 'Outfit', 'Inter', -apple-system, system-ui, sans-serif;
-
-    --tracking-display: 0.1em;
-    --tracking-label: 0.3em;
-  }
-
-  .dark {
-    --background: var(--noir);
-    --foreground: var(--ivory);
-    --card: var(--noir-lift);
-    --card-foreground: var(--ivory);
-    --popover: var(--noir-lift);
-    --popover-foreground: var(--ivory);
-    --primary: var(--champagne);
-    --primary-foreground: var(--noir);
-    --secondary: 30 12% 11%;
-    --secondary-foreground: var(--ivory);
-    --muted: 30 10% 12%;
-    --muted-foreground: var(--smoke);
-    --accent: var(--champagne);
-    --accent-foreground: var(--noir);
-    --destructive: var(--velvet);
-    --destructive-foreground: var(--ivory);
-    --border: 45 8% 22%;
-    --input: 30 12% 14%;
-    --ring: var(--champagne);
   }
 }
 
