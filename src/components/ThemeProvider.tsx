@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useState, useCallback, type ReactNode } from "react";
 
 type Theme = "light" | "dark";
 type ThemePreference = Theme | "system";
@@ -10,8 +10,8 @@ interface ThemeContextValue {
   preference: ThemePreference;
   /** Set the preference and persist to localStorage. */
   setPreference: (pref: ThemePreference) => void;
-  /** Convenience: flip between light and dark, dropping "system". */
-  toggle: () => void;
+  /** Cycle to the next preference: light → dark → system → light. */
+  cycle: () => void;
 }
 
 const STORAGE_KEY = "otl.theme";
@@ -44,8 +44,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState<ThemePreference>(readStoredPreference);
   const [theme, setTheme] = useState<Theme>(() => resolve(readStoredPreference()));
 
-  // Apply on mount and whenever preference changes.
-  useEffect(() => {
+  // Apply immediately on mount (layout effect avoids a paint flash) and whenever
+  // the stored preference changes.
+  useLayoutEffect(() => {
     const next = resolve(preference);
     setTheme(next);
     apply(next);
@@ -64,15 +65,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => mq.removeEventListener("change", onChange);
   }, [preference]);
 
-  const setPreference = (pref: ThemePreference) => {
+  const setPreference = useCallback((pref: ThemePreference) => {
     window.localStorage.setItem(STORAGE_KEY, pref);
     setPreferenceState(pref);
-  };
+  }, []);
 
-  const toggle = () => setPreference(theme === "dark" ? "light" : "dark");
+  const cycle = useCallback(() => {
+    if (preference === "system") {
+      // From system, jump to the opposite of the currently resolved theme so the
+      // button always produces a visible change.
+      setPreference(theme === "dark" ? "light" : "dark");
+    } else if (preference === "light") {
+      setPreference("dark");
+    } else {
+      setPreference("system");
+    }
+  }, [preference, theme, setPreference]);
 
   return (
-    <ThemeContext.Provider value={{ theme, preference, setPreference, toggle }}>
+    <ThemeContext.Provider value={{ theme, preference, setPreference, cycle }}>
       {children}
     </ThemeContext.Provider>
   );
