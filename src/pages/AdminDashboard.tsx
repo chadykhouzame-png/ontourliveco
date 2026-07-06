@@ -11,7 +11,8 @@ import AdminStats from '@/components/admin/AdminStats';
 import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
-import logo from '@/assets/logo.png';
+import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
+const logo = logoAsset.url;
 
 const AdminDashboard = () => {
   const { user, userRole, isLoading } = useAuth();

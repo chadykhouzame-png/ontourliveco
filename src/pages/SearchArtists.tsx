@@ -20,7 +20,8 @@ import { RatingDisplay } from '@/components/StarRating';
 import ReachBadge from '@/components/ReachBadge';
 import { computeReachScore } from '@/lib/reachScore';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
-import logo from '@/assets/logo.png';
+import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
+const logo = logoAsset.url;
 
 interface SocialReach {
   total_followers: number;

@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import logo from "@/assets/logo.png";
+import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
+const logo = logoAsset.url;
 
 const PrivacyPolicy = () => {
   return (
