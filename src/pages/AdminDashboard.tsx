@@ -58,7 +58,7 @@ const AdminDashboard = () => {
         <AdminStats />
 
         <Tabs defaultValue="approval" className="mt-8">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[520px]">
+          <TabsList className="grid w-full grid-cols-5 lg:w-[640px]">
             <TabsTrigger value="approval" className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Approvals</span>
@@ -74,6 +74,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="webhooks" className="flex items-center gap-2">
               <Webhook className="h-4 w-4" />
               <span className="hidden sm:inline">Webhooks</span>
+            </TabsTrigger>
+            <TabsTrigger value="prepublish" className="flex items-center gap-2">
+              <Rocket className="h-4 w-4" />
+              <span className="hidden sm:inline">Pre-publish</span>
             </TabsTrigger>
           </TabsList>
 
@@ -95,6 +99,10 @@ const AdminDashboard = () => {
               <AdminWebhookEvents />
               <WebhookTestingGuide />
             </WebhookTestProvider>
+          </TabsContent>
+
+          <TabsContent value="prepublish" className="mt-6">
+            <PrePublishChecklist />
           </TabsContent>
         </Tabs>
       </main>
