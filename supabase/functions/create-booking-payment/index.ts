@@ -104,8 +104,8 @@ serve(async (req) => {
           destination: artist.stripe_account_id,
         },
       },
-      success_url: `${origin}/venue-dashboard?payment=success&booking=${bookingId}`,
-      cancel_url: `${origin}/venue-dashboard?payment=cancelled&booking=${bookingId}`,
+      success_url: `${origin}/venue/dashboard?payment=success&booking=${bookingId}`,
+      cancel_url: `${origin}/venue/dashboard?payment=cancelled&booking=${bookingId}`,
       metadata: {
         booking_id: bookingId,
         artist_id: artist.id,
