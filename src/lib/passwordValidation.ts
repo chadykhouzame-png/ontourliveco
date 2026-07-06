@@ -60,7 +60,7 @@ export function checkPasswordStrength(password: string): {
 export function getStrengthLabel(score: number): { label: string; color: string } {
   if (score <= 1) return { label: 'Very Weak', color: 'bg-destructive' };
   if (score === 2) return { label: 'Weak', color: 'bg-orange-500' };
-  if (score === 3) return { label: 'Fair', color: 'bg-yellow-500' };
+  if (score === 3) return { label: 'Fair', color: 'bg-warning' };
   if (score === 4) return { label: 'Good', color: 'bg-lime-500' };
-  return { label: 'Strong', color: 'bg-green-500' };
+  return { label: 'Strong', color: 'bg-success' };
 }

@@ -82,24 +82,24 @@ const buildConfig = (mode: Mode, params: URLSearchParams): BannerConfig | null =
 
 const variantStyles: Record<Variant, { wrap: string; icon: JSX.Element; title: string }> = {
   success: {
-    wrap: 'bg-green-500/10 border-green-500/30 text-green-700 dark:text-green-300',
-    icon: <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" aria-hidden />,
-    title: 'text-green-700 dark:text-green-300',
+    wrap: 'bg-success/10 border-success/30 text-success dark:text-success',
+    icon: <CheckCircle2 className="w-5 h-5 text-success shrink-0" aria-hidden />,
+    title: 'text-success dark:text-success',
   },
   warning: {
-    wrap: 'bg-yellow-500/10 border-yellow-500/30 text-yellow-700 dark:text-yellow-300',
-    icon: <AlertTriangle className="w-5 h-5 text-yellow-500 shrink-0" aria-hidden />,
-    title: 'text-yellow-700 dark:text-yellow-300',
+    wrap: 'bg-warning/10 border-warning/30 text-warning dark:text-warning',
+    icon: <AlertTriangle className="w-5 h-5 text-warning shrink-0" aria-hidden />,
+    title: 'text-warning dark:text-warning',
   },
   error: {
-    wrap: 'bg-red-500/10 border-red-500/30 text-red-700 dark:text-red-300',
-    icon: <XCircle className="w-5 h-5 text-red-500 shrink-0" aria-hidden />,
-    title: 'text-red-700 dark:text-red-300',
+    wrap: 'bg-danger/10 border-danger/30 text-danger dark:text-danger',
+    icon: <XCircle className="w-5 h-5 text-danger shrink-0" aria-hidden />,
+    title: 'text-danger dark:text-danger',
   },
   info: {
-    wrap: 'bg-blue-500/10 border-blue-500/30 text-blue-700 dark:text-blue-300',
-    icon: <Loader2 className="w-5 h-5 text-blue-500 shrink-0 animate-spin" aria-hidden />,
-    title: 'text-blue-700 dark:text-blue-300',
+    wrap: 'bg-info/10 border-info/30 text-info dark:text-info',
+    icon: <Loader2 className="w-5 h-5 text-info shrink-0 animate-spin" aria-hidden />,
+    title: 'text-info dark:text-info',
   },
 };
 

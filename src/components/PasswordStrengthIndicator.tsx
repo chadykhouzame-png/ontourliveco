@@ -25,7 +25,7 @@ export function PasswordStrengthIndicator({ password }: PasswordStrengthIndicato
       <div className="space-y-1">
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground">Password strength</span>
-          <span className={strength.score === 5 ? 'text-green-500' : 'text-muted-foreground'}>
+          <span className={strength.score === 5 ? 'text-success' : 'text-muted-foreground'}>
             {label}
           </span>
         </div>
@@ -43,7 +43,7 @@ export function PasswordStrengthIndicator({ password }: PasswordStrengthIndicato
           <li
             key={req.key}
             className={`flex items-center gap-2 text-xs transition-colors ${
-              req.met ? 'text-green-500' : 'text-muted-foreground'
+              req.met ? 'text-success' : 'text-muted-foreground'
             }`}
           >
             {req.met ? (

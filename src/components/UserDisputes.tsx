@@ -101,7 +101,7 @@ const UserDisputes = () => {
       <Card className="glass border-border/50 rounded-2xl overflow-hidden">
         <CardHeader className="border-b border-border/30 bg-secondary/20">
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-amber-500" />
+            <AlertTriangle className="w-5 h-5 text-warning" />
             My Disputes
           </CardTitle>
         </CardHeader>
@@ -119,7 +119,7 @@ const UserDisputes = () => {
       <Card className="glass border-border/50 rounded-2xl overflow-hidden">
         <CardHeader className="border-b border-border/30 bg-secondary/20">
           <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-amber-500" />
+            <AlertTriangle className="w-5 h-5 text-warning" />
             My Disputes
           </CardTitle>
           <CardDescription>
@@ -262,7 +262,7 @@ const UserDisputes = () => {
               {selectedDispute.resolution && (
                 <div>
                   <h4 className="text-sm font-medium text-muted-foreground mb-1">Resolution</h4>
-                  <p className="text-sm bg-green-500/10 border border-green-500/20 p-3 rounded-lg">
+                  <p className="text-sm bg-success/10 border border-success/20 p-3 rounded-lg">
                     {selectedDispute.resolution}
                   </p>
                   {selectedDispute.resolved_at && (

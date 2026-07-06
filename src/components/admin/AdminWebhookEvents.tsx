@@ -500,12 +500,12 @@ const AdminWebhookEvents = () => {
           <div
             className={`mb-4 p-3 rounded-lg border flex items-start gap-3 ${
               testResult.success
-                ? 'bg-green-500/10 border-green-500/30'
+                ? 'bg-success/10 border-success/30'
                 : 'bg-destructive/10 border-destructive/30'
             }`}
           >
             {testResult.success ? (
-              <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0 mt-0.5" />
+              <CheckCircle2 className="h-5 w-5 text-success shrink-0 mt-0.5" />
             ) : (
               <XCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
             )}
@@ -590,12 +590,12 @@ const AdminWebhookEvents = () => {
                             <div
                               className={`p-2 rounded-md border text-xs flex items-start gap-2 ${
                                 retryResults[event.id].success
-                                  ? 'bg-green-500/10 border-green-500/30'
+                                  ? 'bg-success/10 border-success/30'
                                   : 'bg-destructive/10 border-destructive/30'
                               }`}
                             >
                               {retryResults[event.id].success ? (
-                                <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0 mt-0.5" />
+                                <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
                               ) : (
                                 <XCircle className="h-4 w-4 text-destructive shrink-0 mt-0.5" />
                               )}

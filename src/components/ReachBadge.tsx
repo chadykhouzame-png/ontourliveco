@@ -15,7 +15,7 @@ interface ReachBadgeProps {
 }
 
 const BAND_STYLES: Record<string, string> = {
-  Major: 'text-emerald-500',
+  Major: 'text-success',
   Established: 'text-sky-500',
   Emerging: 'text-muted-foreground',
 };
@@ -24,7 +24,7 @@ export default function ReachBadge({ score, growthPct = null, className }: Reach
   const band = reachBand(score);
   const showGrowth = growthPct != null && Math.abs(growthPct) >= 2;
   const GrowthIcon = (growthPct ?? 0) >= 0 ? TrendingUp : TrendingDown;
-  const growthColor = (growthPct ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500';
+  const growthColor = (growthPct ?? 0) >= 0 ? 'text-success' : 'text-danger';
 
   return (
     <span

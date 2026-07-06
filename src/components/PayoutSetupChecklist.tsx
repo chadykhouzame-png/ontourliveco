@@ -110,7 +110,7 @@ export const PayoutSetupChecklist = ({ onComplete }: Props) => {
 
   const stepIcon = (done: boolean) =>
     done ? (
-      <CheckCircle2 className="w-5 h-5 text-green-500 shrink-0" />
+      <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
     ) : (
       <Circle className="w-5 h-5 text-muted-foreground shrink-0" />
     );
@@ -172,18 +172,18 @@ export const PayoutSetupChecklist = ({ onComplete }: Props) => {
         </ul>
 
         {allDone ? (
-          <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/20">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
+          <div className="flex items-center gap-2 p-3 rounded-xl bg-success/10 border border-success/20">
+            <CheckCircle2 className="w-5 h-5 text-success" />
             <div>
-              <p className="font-medium text-green-700 dark:text-green-400">Payouts are ready</p>
+              <p className="font-medium text-success dark:text-success">Payouts are ready</p>
               <p className="text-sm text-muted-foreground">
                 You'll receive payouts automatically after each booking.
               </p>
             </div>
           </div>
         ) : state?.account_created ? (
-          <div className="flex items-start gap-2 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
-            <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-warning/10 border border-warning/20">
+            <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
             <p className="text-sm text-muted-foreground">
               Finish onboarding in Stripe, then click <span className="font-medium">Verify</span>. We'll re-check
               Stripe and confirm the webhook landed in your database.

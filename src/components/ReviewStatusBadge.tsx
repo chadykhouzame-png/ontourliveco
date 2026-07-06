@@ -12,20 +12,20 @@ const ReviewStatusBadge = ({ status }: ReviewStatusBadgeProps) => {
         return {
           label: 'Approved',
           icon: CheckCircle,
-          className: 'bg-green-500/20 text-green-400 border-green-500/30',
+          className: 'bg-success/20 text-success border-success/30',
         };
       case 'rejected':
         return {
           label: 'Needs Changes',
           icon: XCircle,
-          className: 'bg-red-500/20 text-red-400 border-red-500/30',
+          className: 'bg-danger/20 text-danger border-danger/30',
         };
       case 'pending':
       default:
         return {
           label: 'Pending Review',
           icon: Clock,
-          className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
+          className: 'bg-warning/20 text-warning border-warning/30',
         };
     }
   };
