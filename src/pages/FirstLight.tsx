@@ -1,5 +1,6 @@
 import { useState, FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import stageBg from "@/assets/fl-stage-bg.jpg";
 
 /**
  * First Light — On Tour Live waitlist landing page.
@@ -68,6 +69,17 @@ export default function FirstLight() {
   return (
     <div className="fl-root">
       <style>{styles}</style>
+
+      <div
+        className="fl-bg"
+        aria-hidden="true"
+        style={{ backgroundImage: `url(${stageBg})` }}
+      />
+      <div className="fl-bg-wash" aria-hidden="true" />
+      <div className="fl-aura" aria-hidden="true" />
+      <div className="fl-grain" aria-hidden="true" />
+
+
 
       <header className="fl-bar">
         <svg className="fl-mini" viewBox="0 0 512 512" aria-hidden="true">
@@ -176,16 +188,35 @@ const styles = `
   --fl-smoke:#8F887A;
   --fl-display:'Italiana',serif; --fl-accent:'Cormorant Garamond',serif; --fl-body:'Outfit',sans-serif;
   background:var(--fl-noir); color:var(--fl-ivory); font-family:var(--fl-body); font-weight:300;
-  display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden;
-  background-image:radial-gradient(ellipse 90% 55% at 50% 108%, rgba(199,164,94,.10), transparent 62%);
+  display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden; position:relative; isolation:isolate;
 }
 .fl-root ::selection{background:var(--fl-champagne);color:var(--fl-noir)}
-.fl-bar{display:flex;justify-content:space-between;align-items:center;padding:26px clamp(22px,5vw,54px)}
+.fl-bg{
+  position:absolute;inset:0;z-index:-4;background-size:cover;background-position:center;
+  filter:grayscale(.55) contrast(1.12) brightness(.85);opacity:.32;pointer-events:none;
+}
+.fl-bg-wash{
+  position:absolute;inset:0;z-index:-3;pointer-events:none;
+  background:
+    linear-gradient(to bottom, var(--fl-noir) 0%, transparent 28%, transparent 72%, var(--fl-noir) 100%),
+    radial-gradient(ellipse 70% 55% at 50% 50%, transparent 0%, rgba(15,13,10,.55) 60%, var(--fl-noir) 100%);
+}
+.fl-aura{
+  position:absolute;left:50%;top:50%;width:min(680px,92vw);height:min(680px,92vw);
+  transform:translate(-50%,-50%);z-index:-2;pointer-events:none;
+  background:radial-gradient(circle, rgba(199,164,94,.14) 0%, rgba(199,164,94,.06) 40%, transparent 70%);
+  filter:blur(60px);
+}
+.fl-grain{
+  position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/></svg>");
+}
+.fl-bar{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:26px clamp(22px,5vw,54px)}
 .fl-mini{width:30px;height:30px;flex:none}
 .fl-eyebrow{font-size:10.5px;letter-spacing:.32em;color:var(--fl-smoke);text-transform:uppercase}
 .fl-eyebrow a{color:var(--fl-smoke);text-decoration:none}
 .fl-eyebrow a:hover{color:var(--fl-champagne)}
-.fl-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+.fl-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:24px clamp(22px,6vw,60px) 48px}
 .fl-mark{width:clamp(108px,16vw,150px);margin-bottom:clamp(28px,4.5vh,44px)}
 .fl-wordmark{
@@ -244,7 +275,7 @@ const styles = `
   padding:13px 26px;cursor:pointer;transition:background .25s;
 }
 .fl-ghost:hover{background:rgba(199,164,94,.12)}
-.fl-footer{display:flex;justify-content:space-between;align-items:center;
+.fl-footer{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;
   padding:24px clamp(22px,5vw,54px);border-top:1px solid rgba(143,136,122,.18)}
 @media (prefers-reduced-motion: no-preference){
   .fl-mark .fl-frame{opacity:0;animation:fl-rise .9s .55s ease-out forwards}
