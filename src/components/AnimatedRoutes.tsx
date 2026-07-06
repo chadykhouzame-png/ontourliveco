@@ -77,8 +77,8 @@ const AnimatedRoutes = () => {
         <Route path="/privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
         
         {/* Legacy hyphenated redirects — prevent 404s from old Stripe URLs, bookmarks, emails */}
-        <Route path="/artist-dashboard" element={<Navigate to="/artist/dashboard" replace />} />
-        <Route path="/venue-dashboard" element={<Navigate to="/venue/dashboard" replace />} />
+        <Route path="/artist-dashboard" element={<LegacyRedirect to="/artist/dashboard" />} />
+        <Route path="/venue-dashboard" element={<LegacyRedirect to="/venue/dashboard" />} />
 
         {/* Catch-all */}
         <Route path="*" element={<ProtectedRoute><NotFound /></ProtectedRoute>} />
