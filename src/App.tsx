@@ -12,11 +12,16 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 
 const queryClient = new QueryClient();
 
+import { useHoldingPage } from "@/hooks/useHoldingPage";
+
 // Hide app-chrome (FAB + cookie banner) on the holding page so the
-// First Light landing stays visually pristine.
+// First Light landing stays visually pristine. Applies to /waitlist and
+// to / whenever the admin has the holding page enabled.
 const AppChrome = () => {
   const { pathname } = useLocation();
-  if (pathname === "/") return null;
+  const { enabled: holdingEnabled } = useHoldingPage();
+  if (pathname === "/waitlist") return null;
+  if (pathname === "/" && holdingEnabled) return null;
   return (
     <>
       <FloatingActionButton />

@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Users, CheckCircle, AlertTriangle, Webhook, Rocket } from 'lucide-react';
+import { Shield, Users, CheckCircle, AlertTriangle, Webhook, Rocket, Settings } from 'lucide-react';
 import AdminUserManagement from '@/components/admin/AdminUserManagement';
 import AdminProfileApproval from '@/components/admin/AdminProfileApproval';
 import AdminDisputes from '@/components/admin/AdminDisputes';
@@ -13,6 +13,7 @@ import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import RunStripeTestCheckout from '@/components/admin/RunStripeTestCheckout';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
 import PrePublishChecklist from '@/components/admin/PrePublishChecklist';
+import AdminSiteMode from '@/components/admin/AdminSiteMode';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -58,7 +59,7 @@ const AdminDashboard = () => {
         <AdminStats />
 
         <Tabs defaultValue="approval" className="mt-8">
-          <TabsList className="grid w-full grid-cols-5 lg:w-[640px]">
+          <TabsList className="grid w-full grid-cols-6 lg:w-[760px]">
             <TabsTrigger value="approval" className="flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
               <span className="hidden sm:inline">Approvals</span>
@@ -78,6 +79,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="prepublish" className="flex items-center gap-2">
               <Rocket className="h-4 w-4" />
               <span className="hidden sm:inline">Pre-publish</span>
+            </TabsTrigger>
+            <TabsTrigger value="site" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline">Site</span>
             </TabsTrigger>
           </TabsList>
 
@@ -103,6 +108,10 @@ const AdminDashboard = () => {
 
           <TabsContent value="prepublish" className="mt-6">
             <PrePublishChecklist />
+          </TabsContent>
+
+          <TabsContent value="site" className="mt-6">
+            <AdminSiteMode />
           </TabsContent>
         </Tabs>
       </main>
