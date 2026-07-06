@@ -6,6 +6,7 @@ import RouteErrorBoundary from './RouteErrorBoundary';
 
 import Index from '@/pages/Index';
 import FirstLight from '@/pages/FirstLight';
+import RootGate from '@/components/RootGate';
 import NotFound from '@/pages/NotFound';
 import JoinArtist from '@/pages/JoinArtist';
 import JoinVenue from '@/pages/JoinVenue';
@@ -47,7 +48,8 @@ const AnimatedRoutes = () => {
   return (
     <AnimatePresence mode="wait">
       <Routes location={location} key={location.pathname}>
-        <Route path="/" element={<FirstLight />} />
+        <Route path="/" element={<RootGate />} />
+        <Route path="/waitlist" element={<FirstLight />} />
         <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
         
         
