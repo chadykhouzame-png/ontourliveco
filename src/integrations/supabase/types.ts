@@ -1271,7 +1271,6 @@ export type Database = {
       cleanup_old_error_logs: { Args: never; Returns: undefined }
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
       get_my_artist_mobile: { Args: never; Returns: string }
-      get_my_stripe_account_id: { Args: never; Returns: string }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
