@@ -33,6 +33,13 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => (
   </RouteErrorBoundary>
 );
 
+// Preserves query string + hash so Stripe redirects like
+// /artist-dashboard?stripe=complete keep their params after redirecting.
+const LegacyRedirect = ({ to }: { to: string }) => {
+  const { search, hash } = useLocation();
+  return <Navigate to={`${to}${search}${hash}`} replace />;
+};
+
 const AnimatedRoutes = () => {
   const location = useLocation();
 
