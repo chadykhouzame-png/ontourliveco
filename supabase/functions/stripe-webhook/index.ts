@@ -89,6 +89,11 @@ serve(async (req) => {
 
   if (!signature || !webhookSecret) {
     console.error("Missing stripe-signature header or STRIPE_WEBHOOK_SECRET");
+    await fireAlert({
+      stage: "signature",
+      error_message: "Missing stripe-signature header or STRIPE_WEBHOOK_SECRET",
+      ip: clientIp,
+    });
     return new Response(JSON.stringify({ error: "Missing signature or secret" }), { status: 400 });
   }
 
@@ -96,6 +101,11 @@ serve(async (req) => {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err) {
     console.error("Webhook signature verification failed:", err);
+    await fireAlert({
+      stage: "signature",
+      error_message: `Signature verification failed: ${(err as Error).message}`,
+      ip: clientIp,
+    });
     return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
   }
 
