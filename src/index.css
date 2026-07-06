@@ -127,7 +127,7 @@
     --sidebar-primary-foreground: var(--noir);
     --sidebar-accent: 30 12% 10%;
     --sidebar-accent-foreground: var(--ivory);
-    --sidebar-border: 45 8% 18%;
+    --sidebar-border: 45 10% 28%;
     --sidebar-ring: var(--champagne);
   }
 }
