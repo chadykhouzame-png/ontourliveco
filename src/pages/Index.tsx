@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { socialLinks } from "@/config/social";
 import monogramIvory from "@/assets/monogram-ivory.png.asset.json";
 import { BrandLockup } from "@/components/BrandLockup";
+import { ThemeToggle } from '@/components/ThemeToggle';
 import JoinListForm from "@/components/JoinListForm";
 import EventHighlights from "@/components/EventHighlights";
 import PhotoGallery from "@/components/PhotoGallery";

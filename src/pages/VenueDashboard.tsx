@@ -32,6 +32,7 @@ import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import StripeReturnBanner from '@/components/StripeReturnBanner';
 import { BrandLockup } from '@/components/BrandLockup';
+import { ThemeToggle } from '@/components/ThemeToggle';
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
@@ -603,6 +604,7 @@ const VenueDashboard = () => {
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <BrandLockup size="md" lazy={false} />
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <span className="text-sm text-muted-foreground hidden sm:block">
               {venue?.venue_name}
             </span>
