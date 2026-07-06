@@ -12,10 +12,10 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { format } from 'date-fns';
 
 const statusColors: Record<string, string> = {
-  pending: 'bg-yellow-500',
-  accepted: 'bg-green-500',
-  declined: 'bg-red-500',
-  completed: 'bg-blue-500',
+  pending: 'bg-warning',
+  accepted: 'bg-success',
+  declined: 'bg-danger',
+  completed: 'bg-info',
   cancelled: 'bg-muted-foreground',
 };
 
@@ -313,7 +313,7 @@ const Analytics = () => {
                         {booking.offer_amount ? `$${booking.offer_amount}` : '-'}
                       </TableCell>
                       <TableCell>
-                        <Badge className={`${statusColors[booking.status]} text-white`}>
+                        <Badge className={`${statusColors[booking.status]} text-primary-foreground`}>
                           {booking.status}
                         </Badge>
                       </TableCell>

@@ -17,7 +17,7 @@ export const PayBookingButton = ({ bookingId, amount, paymentStatus, disabled }:
 
   if (paymentStatus === 'paid') {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-green-600 dark:text-green-400 font-medium px-2 py-1 rounded-md bg-green-500/10 border border-green-500/20">
+      <span className="inline-flex items-center gap-1 text-xs text-success font-medium px-2 py-1 rounded-md bg-success/10 border border-success/25">
         <CreditCard className="w-3 h-3" />
         Paid
       </span>
@@ -54,7 +54,7 @@ export const PayBookingButton = ({ bookingId, amount, paymentStatus, disabled }:
       variant="default"
       onClick={handlePay}
       disabled={isLoading || disabled}
-      className="bg-green-600 hover:bg-green-700 text-white"
+      className="bg-success hover:bg-success/90 text-success-foreground"
     >
       {isLoading ? (
         <Loader2 className="w-4 h-4 mr-1 animate-spin" />

@@ -45,6 +45,17 @@
     --destructive: var(--velvet);
     --destructive-foreground: var(--ivory);
 
+    /* Status tokens — muted to sit inside the First Light palette.
+       Use these instead of raw tailwind green-500 / yellow-500 / red-500. */
+    --success: 150 35% 45%;
+    --success-foreground: 41 47% 93%;
+    --warning: 38 55% 55%;
+    --warning-foreground: 36 17% 5%;
+    --info: 200 40% 55%;
+    --info-foreground: 36 17% 5%;
+    --danger: 350 55% 50%;
+    --danger-foreground: 41 47% 93%;
+
     /* Hairline borders */
     --border: 45 8% 22%;
     --input: 30 12% 14%;

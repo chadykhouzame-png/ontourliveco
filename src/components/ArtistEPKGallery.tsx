@@ -103,7 +103,7 @@ export const ArtistEPKGallery = ({ artistId, artistName }: ArtistEPKGalleryProps
                     alt={item.file_name}
                     className="aspect-square object-cover w-full transition-transform duration-200 group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-end justify-between p-2 opacity-0 group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-noir/0 group-hover:bg-noir/40 transition-colors flex items-end justify-between p-2 opacity-0 group-hover:opacity-100">
                     <Badge variant="secondary" className="text-xs backdrop-blur-sm bg-background/70">
                       {FILE_TYPE_LABELS[item.file_type]}
                     </Badge>
@@ -158,7 +158,7 @@ export const ArtistEPKGallery = ({ artistId, artistName }: ArtistEPKGalleryProps
 
       {/* Lightbox */}
       <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
-        <DialogContent className="max-w-3xl p-0 bg-black/90 border-none">
+        <DialogContent className="max-w-3xl p-0 bg-noir/95 border-none">
           {lightboxUrl && (
             <img
               src={lightboxUrl}
