@@ -133,33 +133,30 @@ describe("ThemeProvider", () => {
   });
 
   it("stops following OS changes when an explicit preference is chosen", () => {
-    let changeCallback: ((e: MediaQueryListEvent) => void) | null = null;
-    let matches = false;
+    const addListener = vi.fn();
+    const removeListener = vi.fn();
 
     vi.stubGlobal(
       "matchMedia",
       vi.fn((query: string) => ({
-        get matches() {
-          return matches;
-        },
+        matches: query === "(prefers-color-scheme: dark)",
         media: query,
-        addEventListener: vi.fn((_event: string, cb: (e: MediaQueryListEvent) => void) => {
-          changeCallback = cb;
-        }),
-        removeEventListener: vi.fn(),
+        addEventListener: addListener,
+        removeEventListener: removeListener,
         dispatchEvent: vi.fn(),
       }))
     );
 
     renderProvider();
+    expect(addListener).toHaveBeenCalled(); // system registers the listener
+
     act(() => {
       screen.getByTestId("set-light").click();
     });
 
-    act(() => {
-      matches = true;
-      changeCallback?.({ matches: true } as MediaQueryListEvent);
-    });
+    expect(removeListener).toHaveBeenCalled();
+    expect(addListener).toHaveBeenCalledTimes(1); // no re-registration after going explicit
     expect(screen.getByTestId("theme").textContent).toBe("light");
   });
+
 });
