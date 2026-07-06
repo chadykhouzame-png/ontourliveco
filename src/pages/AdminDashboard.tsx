@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Users, CheckCircle, AlertTriangle, Webhook } from 'lucide-react';
+import { Shield, Users, CheckCircle, AlertTriangle, Webhook, Rocket } from 'lucide-react';
 import AdminUserManagement from '@/components/admin/AdminUserManagement';
 import AdminProfileApproval from '@/components/admin/AdminProfileApproval';
 import AdminDisputes from '@/components/admin/AdminDisputes';
@@ -12,6 +12,7 @@ import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import RunStripeTestCheckout from '@/components/admin/RunStripeTestCheckout';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
+import PrePublishChecklist from '@/components/admin/PrePublishChecklist';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
