@@ -251,3 +251,50 @@ describe("System fallback behavior", () => {
     expect(screen.getByTestId("theme").textContent).toBe("dark");
   });
 });
+
+describe("theme-color meta tag", () => {
+  beforeEach(() => {
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((el) => el.parentNode?.removeChild(el));
+  });
+
+  it("writes a dynamic theme-color meta reflecting the resolved theme", () => {
+    stubMatchMedia({ prefersDark: false });
+    renderProvider();
+
+    let metas = document.querySelectorAll('meta[name="theme-color"]');
+    expect(metas.length).toBe(1);
+    expect(metas[0].getAttribute("content")).toBe("#F5F0E4");
+    expect(metas[0].hasAttribute("data-dynamic-theme-color")).toBe(true);
+
+    act(() => {
+      screen.getByTestId("to-dark").click();
+    });
+
+    metas = document.querySelectorAll('meta[name="theme-color"]');
+    expect(metas.length).toBe(1);
+    expect(metas[0].getAttribute("content")).toBe("#0F0D0A");
+  });
+
+  it("replaces the static media-scoped theme-color tags from index.html", () => {
+    const darkStatic = document.createElement("meta");
+    darkStatic.setAttribute("name", "theme-color");
+    darkStatic.setAttribute("media", "(prefers-color-scheme: dark)");
+    darkStatic.setAttribute("content", "#000000");
+    document.head.appendChild(darkStatic);
+    const lightStatic = document.createElement("meta");
+    lightStatic.setAttribute("name", "theme-color");
+    lightStatic.setAttribute("media", "(prefers-color-scheme: light)");
+    lightStatic.setAttribute("content", "#ffffff");
+    document.head.appendChild(lightStatic);
+
+    stubMatchMedia({ prefersDark: true });
+    renderProvider();
+
+    const metas = document.querySelectorAll('meta[name="theme-color"]');
+    expect(metas.length).toBe(1);
+    expect(metas[0].getAttribute("media")).toBeNull();
+    expect(metas[0].getAttribute("content")).toBe("#0F0D0A");
+  });
+});
