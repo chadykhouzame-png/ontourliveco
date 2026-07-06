@@ -1,26 +1,27 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { ThemeProvider, useTheme } from "@/components/ThemeProvider";
 
 const STORAGE_KEY = "otl.theme";
 
 function TestConsumer() {
-  const { theme, preference, setPreference, cycle } = useTheme();
+  const { theme, preference, setPreference, clearPreference } = useTheme();
   return (
     <div>
       <div data-testid="theme">{theme}</div>
       <div data-testid="preference">{preference}</div>
-      <button data-testid="cycle" onClick={cycle}>
-        Cycle
-      </button>
-      <button data-testid="set-system" onClick={() => setPreference("system")}>
-        System
-      </button>
       <button data-testid="set-light" onClick={() => setPreference("light")}>
         Light
       </button>
       <button data-testid="set-dark" onClick={() => setPreference("dark")}>
         Dark
+      </button>
+      <button data-testid="set-system" onClick={() => setPreference("system")}>
+        Set System
+      </button>
+      <button data-testid="clear" onClick={clearPreference}>
+        Clear
       </button>
     </div>
   );
@@ -85,20 +86,17 @@ describe("ThemeProvider", () => {
     expect(localStorage.getItem(STORAGE_KEY)).toBe("light");
   });
 
-  it("cycles light → dark → system → light", () => {
+  it("clearPreference removes the saved value and reverts to system", () => {
+    localStorage.setItem(STORAGE_KEY, "dark");
     renderProvider();
-    // Initial: system
-    expect(screen.getByTestId("preference").textContent).toBe("system");
-
-    act(() => screen.getByTestId("cycle").click());
-    expect(screen.getByTestId("preference").textContent).toBe("light");
-
-    act(() => screen.getByTestId("cycle").click());
     expect(screen.getByTestId("preference").textContent).toBe("dark");
-    expect(screen.getByTestId("theme").textContent).toBe("dark");
 
-    act(() => screen.getByTestId("cycle").click());
+    act(() => {
+      screen.getByTestId("clear").click();
+    });
+
     expect(screen.getByTestId("preference").textContent).toBe("system");
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
   it("follows OS color-scheme changes while system is selected", () => {
@@ -158,5 +156,61 @@ describe("ThemeProvider", () => {
     expect(addListener).toHaveBeenCalledTimes(1); // no re-registration after going explicit
     expect(screen.getByTestId("theme").textContent).toBe("light");
   });
+});
 
+describe("ThemeToggle", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    document.documentElement.classList.remove("dark", "light");
+    document.documentElement.style.removeProperty("colorScheme");
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("opens a menu with Light, Dark, and System options", async () => {
+    const user = userEvent.setup();
+
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        matches: query === "(prefers-color-scheme: dark)",
+        media: query,
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }))
+    );
+
+    const { ThemeToggle } = await import("@/components/ThemeToggle");
+    render(
+      <ThemeProvider>
+        <ThemeToggle />
+      </ThemeProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /theme/i }));
+    expect(screen.getByRole("menuitemradio", { name: /light/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: /dark/i })).toBeInTheDocument();
+    expect(screen.getByRole("menuitemradio", { name: /system/i })).toBeInTheDocument();
+  });
+
+  it("selecting System clears the saved preference", async () => {
+    const user = userEvent.setup();
+    localStorage.setItem(STORAGE_KEY, "dark");
+
+    const { ThemeToggle } = await import("@/components/ThemeToggle");
+    render(
+      <ThemeProvider>
+        <ThemeToggle />
+      </ThemeProvider>
+    );
+
+    await user.click(screen.getByRole("button", { name: /theme/i }));
+    await user.click(screen.getByRole("menuitemradio", { name: /system/i }));
+
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull();
+    expect(screen.getByRole("button", { name: /theme/i })).toHaveAttribute("aria-label", expect.stringContaining("system"));
+  });
 });
