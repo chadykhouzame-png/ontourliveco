@@ -2,10 +2,13 @@
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.png" type="image/png" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <link rel="mask-icon" href="/favicon.png" color="#C7A45E" />
-    <meta name="theme-color" content="#0F0D0A" />
+    <!-- Favicon: noir-tiled monogram is the safe default (reads on any browser chrome). -->
+    <link rel="icon" href="/favicon.png" type="image/png" sizes="180x180" />
+    <!-- Dark-scheme browsers that honor the media hint can use the borderless ivory mark. -->
+    <link rel="icon" href="/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="512x512" />
+    <meta name="theme-color" content="#0F0D0A" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#F5F0E4" media="(prefers-color-scheme: light)" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>On Tour | Connect Venues with Touring Artists</title>
     <meta name="description" content="On Tour connects venues with artists already on the move. Find DJs, singers, and performers available in your city. Book with confidence." />
