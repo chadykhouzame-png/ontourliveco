@@ -1,6 +1,7 @@
 import { useState, FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import stageBg from "@/assets/fl-stage-bg.jpg";
+import LaunchCountdown from "@/components/LaunchCountdown";
 
 /**
  * First Light — On Tour Live waitlist landing page.
@@ -132,6 +133,9 @@ export default function FirstLight() {
         </h1>
         <p className="fl-tag">The stage awaits.</p>
         <p className="fl-descriptor">The booking app for artists &amp; venues</p>
+
+        <LaunchCountdown />
+
 
         {position === null ? (
           <form className="fl-form" onSubmit={onSubmit} noValidate>
@@ -379,4 +383,20 @@ const styles = `
   @keyframes fl-glow{0%{opacity:0}60%{opacity:1}100%{opacity:1}}
 }
 @media (max-width:430px){ .fl-wordmark{letter-spacing:.11em} }
+
+.fl-countdown{margin-top:clamp(26px,4vh,36px);display:flex;flex-direction:column;align-items:center;gap:10px}
+.fl-cd-grid{display:flex;align-items:flex-start;justify-content:center;gap:clamp(10px,1.8vw,18px)}
+.fl-cd-unit{display:flex;flex-direction:column;align-items:center;min-width:clamp(48px,7vw,64px)}
+.fl-cd-num{font-family:var(--fl-display);font-weight:400;font-size:clamp(30px,4.6vw,42px);
+  color:var(--fl-ivory);line-height:1;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.fl-cd-label{margin-top:6px;font-size:9.5px;letter-spacing:.32em;color:var(--fl-smoke);text-transform:uppercase}
+.fl-cd-sep{font-family:var(--fl-display);font-size:clamp(24px,3.6vw,34px);color:var(--fl-champagne);
+  opacity:.7;line-height:1;transform:translateY(2px)}
+.fl-cd-cap{font-family:var(--fl-accent);font-style:italic;font-size:14px;color:var(--fl-champagne);
+  letter-spacing:.04em;margin-top:2px}
+.fl-live{font-family:var(--fl-display);font-size:clamp(22px,3.4vw,30px);letter-spacing:.12em;
+  color:var(--fl-champagne);text-transform:uppercase;margin:0}
+@media (prefers-reduced-motion: no-preference){
+  .fl-countdown{opacity:0;transform:translateY(10px);animation:fl-rise .8s 1.5s ease-out forwards}
+}
 `;
