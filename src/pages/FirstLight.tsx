@@ -70,6 +70,17 @@ export default function FirstLight() {
     <div className="fl-root">
       <style>{styles}</style>
 
+      <div
+        className="fl-bg"
+        aria-hidden="true"
+        style={{ backgroundImage: `url(${stageBg})` }}
+      />
+      <div className="fl-bg-wash" aria-hidden="true" />
+      <div className="fl-aura" aria-hidden="true" />
+      <div className="fl-grain" aria-hidden="true" />
+
+
+
       <header className="fl-bar">
         <svg className="fl-mini" viewBox="0 0 512 512" aria-hidden="true">
           <rect x="128" y="133" width="256" height="14" fill="#F5F0E4" />
