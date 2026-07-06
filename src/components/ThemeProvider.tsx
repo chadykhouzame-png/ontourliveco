@@ -18,10 +18,10 @@ const STORAGE_KEY = "otl.theme";
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function readStoredPreference(): ThemePreference {
-  if (typeof window === "undefined") return "dark";
+  if (typeof window === "undefined") return "system";
   const stored = window.localStorage.getItem(STORAGE_KEY);
   if (stored === "light" || stored === "dark" || stored === "system") return stored;
-  return "dark"; // On Tour Live default = dark luxury
+  return "system"; // No saved choice → follow OS
 }
 
 function systemPrefersDark(): boolean {
