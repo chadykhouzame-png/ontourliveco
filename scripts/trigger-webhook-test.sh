@@ -5,23 +5,30 @@
 # Prerequisites:
 #   1. Install the Stripe CLI:  https://stripe.com/docs/stripe-cli
 #   2. Log in (test mode):      stripe login
-#   3. Export your Lovable Cloud service-role key so we can query webhook_events:
-#         export SUPABASE_URL="https://<your-project-ref>.supabase.co"
-#         export SUPABASE_SERVICE_ROLE_KEY="eyJhbGci..."   # from Cloud → Secrets
+#   3. Create a .env file next to this script (or in the repo root) with:
+#         SUPABASE_URL=https://<your-project-ref>.supabase.co
+#         SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...       # from Cloud → Secrets
+#         STRIPE_ENDPOINT=https://<ref>.supabase.co/functions/v1/stripe-webhook
 #
 # Usage:
 #   ./trigger-webhook-test.sh
-#   ./trigger-webhook-test.sh --endpoint https://<ref>.supabase.co/functions/v1/stripe-webhook
+#   ./trigger-webhook-test.sh --env-file path/to/.env
+#   ./trigger-webhook-test.sh --endpoint https://.../stripe-webhook   # overrides STRIPE_ENDPOINT
 
 set -euo pipefail
 
-ENDPOINT_URL=""
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+ENV_FILE=""
+ENDPOINT_OVERRIDE=""
 POLL_TIMEOUT_SEC=30
 POLL_INTERVAL_SEC=2
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --endpoint) ENDPOINT_URL="$2"; shift 2 ;;
+    --env-file) ENV_FILE="$2"; shift 2 ;;
+    --endpoint) ENDPOINT_OVERRIDE="$2"; shift 2 ;;
     --timeout)  POLL_TIMEOUT_SEC="$2"; shift 2 ;;
     -h|--help)
       grep '^#' "$0" | sed 's/^# \{0,1\}//'
@@ -30,12 +37,52 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-command -v stripe >/dev/null || { echo "Stripe CLI not found. Install: https://stripe.com/docs/stripe-cli" >&2; exit 1; }
-command -v curl   >/dev/null || { echo "curl is required" >&2; exit 1; }
-command -v jq     >/dev/null || { echo "jq is required (brew install jq)" >&2; exit 1; }
+# Resolve .env: explicit flag > scripts/.env > repo-root .env
+if [[ -z "$ENV_FILE" ]]; then
+  if   [[ -f "$SCRIPT_DIR/.env" ]]; then ENV_FILE="$SCRIPT_DIR/.env"
+  elif [[ -f "$REPO_ROOT/.env"  ]]; then ENV_FILE="$REPO_ROOT/.env"
+  fi
+fi
 
-: "${SUPABASE_URL:?Set SUPABASE_URL to your project URL}"
-: "${SUPABASE_SERVICE_ROLE_KEY:?Set SUPABASE_SERVICE_ROLE_KEY (from Cloud → Secrets)}"
+if [[ -z "$ENV_FILE" || ! -f "$ENV_FILE" ]]; then
+  echo "FAIL: no .env file found. Looked for scripts/.env and repo-root .env." >&2
+  echo "      Create one with SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, STRIPE_ENDPOINT." >&2
+  exit 2
+fi
+
+echo "==> Loading env from $ENV_FILE"
+# Load KEY=VALUE lines without executing arbitrary shell in the .env file.
+while IFS='=' read -r key value; do
+  [[ -z "$key" || "$key" =~ ^[[:space:]]*# ]] && continue
+  key="${key%"${key##*[![:space:]]}"}"; key="${key#"${key%%[![:space:]]*}"}"
+  [[ -z "$key" ]] && continue
+  # Strip surrounding quotes and trailing CR (Windows line endings)
+  value="${value%$'\r'}"
+  value="${value%\"}"; value="${value#\"}"
+  value="${value%\'}"; value="${value#\'}"
+  # Only export the three keys we care about; ignore everything else.
+  case "$key" in
+    SUPABASE_URL|SUPABASE_SERVICE_ROLE_KEY|STRIPE_ENDPOINT)
+      export "$key=$value" ;;
+  esac
+done < "$ENV_FILE"
+
+[[ -n "$ENDPOINT_OVERRIDE" ]] && STRIPE_ENDPOINT="$ENDPOINT_OVERRIDE"
+
+command -v stripe >/dev/null || { echo "FAIL: Stripe CLI not found. Install: https://stripe.com/docs/stripe-cli" >&2; exit 1; }
+command -v curl   >/dev/null || { echo "FAIL: curl is required" >&2; exit 1; }
+command -v jq     >/dev/null || { echo "FAIL: jq is required (brew install jq)" >&2; exit 1; }
+
+missing=()
+[[ -z "${SUPABASE_URL:-}"              ]] && missing+=("SUPABASE_URL")
+[[ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]] && missing+=("SUPABASE_SERVICE_ROLE_KEY")
+[[ -z "${STRIPE_ENDPOINT:-}"           ]] && missing+=("STRIPE_ENDPOINT")
+if (( ${#missing[@]} > 0 )); then
+  echo "FAIL: missing required env vars in $ENV_FILE: ${missing[*]}" >&2
+  exit 2
+fi
+
+ENDPOINT_URL="$STRIPE_ENDPOINT"
 
 echo "==> Triggering checkout.session.completed via Stripe CLI (test mode)..."
 TRIGGER_OUT=$(stripe trigger checkout.session.completed 2>&1)
