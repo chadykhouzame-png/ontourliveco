@@ -34,10 +34,33 @@ function resolve(pref: ThemePreference): Theme {
   return pref;
 }
 
+// Keep these in sync with the media-scoped <meta name="theme-color"> tags
+// in index.html so the browser chrome matches the resolved theme.
+const THEME_COLORS: Record<Theme, string> = {
+  dark: "#0F0D0A",
+  light: "#F5F0E4",
+};
+
+function applyThemeColorMeta(theme: Theme) {
+  if (typeof document === "undefined") return;
+  const color = THEME_COLORS[theme];
+  // Drop the static media-scoped tags (and any prior dynamic tag) so the
+  // active tag isn't overridden by a `(prefers-color-scheme: ...)` match.
+  document
+    .querySelectorAll('meta[name="theme-color"]')
+    .forEach((el) => el.parentNode?.removeChild(el));
+  const meta = document.createElement("meta");
+  meta.setAttribute("name", "theme-color");
+  meta.setAttribute("content", color);
+  meta.setAttribute("data-dynamic-theme-color", "");
+  document.head.appendChild(meta);
+}
+
 function apply(theme: Theme) {
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
   root.style.colorScheme = theme;
+  applyThemeColorMeta(theme);
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
