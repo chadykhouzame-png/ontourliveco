@@ -1040,6 +1040,48 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          ip: string | null
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          ip?: string | null
+          role: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          ip?: string | null
+          role?: string
+        }
+        Relationships: []
+      }
+      waitlist_rate_limits: {
+        Row: {
+          attempted_at: string
+          id: string
+          ip: string
+        }
+        Insert: {
+          attempted_at?: string
+          id?: string
+          ip: string
+        }
+        Update: {
+          attempted_at?: string
+          id?: string
+          ip?: string
+        }
+        Relationships: []
+      }
       waitlist_signups: {
         Row: {
           created_at: string
@@ -1289,6 +1331,10 @@ export type Database = {
       user_in_conversation: { Args: { conv_id: string }; Returns: boolean }
       user_owns_artist: { Args: { artist_uuid: string }; Returns: boolean }
       user_owns_venue: { Args: { venue_uuid: string }; Returns: boolean }
+      waitlist_signup: {
+        Args: { p_email: string; p_ip?: string; p_role: string }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "artist" | "venue" | "admin"
