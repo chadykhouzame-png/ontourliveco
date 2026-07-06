@@ -11,8 +11,7 @@ import AdminStats from '@/components/admin/AdminStats';
 import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
-import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
-const logo = logoAsset.url;
+import { BrandLockup } from '@/components/BrandLockup';
 
 const AdminDashboard = () => {
   const { user, userRole, isLoading } = useAuth();
@@ -40,9 +39,7 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="On Tour Live" className="h-14 w-auto" />
-          </Link>
+          <BrandLockup size="md" lazy={false} />
           <div className="flex items-center gap-3">
             <Shield className="h-6 w-6 text-primary" />
             <div>

@@ -16,8 +16,7 @@ import { RatingDisplay } from '@/components/StarRating';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
 import { format } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
-const logo = logoAsset.url;
+import { BrandLockup } from '@/components/BrandLockup';
 
 type SortOption = 'name_asc' | 'name_desc' | 'rating_desc' | 'rating_asc' | 'capacity_desc' | 'capacity_asc';
 
@@ -247,9 +246,7 @@ const SearchVenues = () => {
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="On Tour Live" className="h-14 w-auto" />
-          </Link>
+          <BrandLockup size="md" lazy={false} />
           <div className="flex items-center gap-4">
             {user && userRole === 'artist' && (
               <Button variant="outline" onClick={() => navigate('/artist/dashboard')}>

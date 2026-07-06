@@ -31,8 +31,7 @@ import BookingDetailModal from '@/components/BookingDetailModal';
 import { useBookingNotifications } from '@/hooks/useBookingNotifications';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import StripeReturnBanner from '@/components/StripeReturnBanner';
-import logoAsset from '@/assets/lockup-horizontal-ivory.png.asset.json';
-const logo = logoAsset.url;
+import { BrandLockup } from '@/components/BrandLockup';
 const VenueDashboard = () => {
   const navigate = useNavigate();
   const { user, signOut, isLoading: authLoading } = useAuth();
@@ -602,9 +601,7 @@ const VenueDashboard = () => {
       {/* Header - Frosted Glass */}
       <header className="sticky top-0 z-50 border-b border-border/50 bg-card/80 backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="On Tour Live" className="h-14 w-auto" />
-          </Link>
+          <BrandLockup size="md" lazy={false} />
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground hidden sm:block">
               {venue?.venue_name}
