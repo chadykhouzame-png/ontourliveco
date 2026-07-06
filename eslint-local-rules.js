@@ -33,6 +33,8 @@ function getClassNameAttrName(node) {
 
 function reportMatches(context, node, matches) {
   if (matches.length === 0) return;
+  if (reported.has(node)) return;
+  reported.add(node);
   const unique = [...new Set(matches)];
   const isBlackWhite = unique.some((m) => /-(?:black|white)\b/.test(m));
   const isRawColor = unique.some((m) => /-(?:green|yellow|red|blue)(?:-[0-9]+)?\b/.test(m));
