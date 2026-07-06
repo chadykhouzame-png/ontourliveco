@@ -1,0 +1,2 @@
+GRANT EXECUTE ON FUNCTION public.waitlist_signup(text, text, text, text, text, text, text) TO service_role;
+REVOKE EXECUTE ON FUNCTION public.waitlist_signup(text, text, text, text, text, text, text) FROM anon, authenticated;

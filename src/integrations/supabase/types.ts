@@ -1042,25 +1042,37 @@ export type Database = {
       }
       waitlist: {
         Row: {
+          artist_name: string | null
           created_at: string
           email: string
+          first_name: string | null
           id: string
           ip: string | null
+          last_name: string | null
           role: string
+          venue_name: string | null
         }
         Insert: {
+          artist_name?: string | null
           created_at?: string
           email: string
+          first_name?: string | null
           id?: string
           ip?: string | null
+          last_name?: string | null
           role: string
+          venue_name?: string | null
         }
         Update: {
+          artist_name?: string | null
           created_at?: string
           email?: string
+          first_name?: string | null
           id?: string
           ip?: string | null
+          last_name?: string | null
           role?: string
+          venue_name?: string | null
         }
         Relationships: []
       }
@@ -1332,7 +1344,15 @@ export type Database = {
       user_owns_artist: { Args: { artist_uuid: string }; Returns: boolean }
       user_owns_venue: { Args: { venue_uuid: string }; Returns: boolean }
       waitlist_signup: {
-        Args: { p_email: string; p_ip?: string; p_role: string }
+        Args: {
+          p_artist_name?: string
+          p_email: string
+          p_first_name?: string
+          p_ip?: string
+          p_last_name?: string
+          p_role: string
+          p_venue_name?: string
+        }
         Returns: number
       }
     }

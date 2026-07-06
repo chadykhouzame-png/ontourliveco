@@ -10,6 +10,10 @@ import stageBg from "@/assets/fl-stage-bg.jpg";
  */
 export default function FirstLight() {
   const [role, setRole] = useState<"artist" | "venue">("artist");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [artistName, setArtistName] = useState("");
+  const [venueName, setVenueName] = useState("");
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [hint, setHint] = useState("App launches September 2026 · Sydney first");
@@ -20,15 +24,32 @@ export default function FirstLight() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const value = email.trim();
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      setHint("Enter a valid email to hold your place.");
+    const first = firstName.trim();
+    const last = lastName.trim();
+    const artist = artistName.trim();
+    const venue = venueName.trim();
+
+    const required = role === "artist"
+      ? [first, last, artist, value]
+      : [first, last, venue, value];
+
+    if (required.some((v) => !v) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      setHint("Please fill in all fields with a valid email.");
       setHintTone("gold");
       return;
     }
+
     setSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("waitlist-signup", {
-        body: { email: value, role },
+        body: {
+          email: value,
+          role,
+          firstName: first,
+          lastName: last,
+          artistName: role === "artist" ? artist : "",
+          venueName: role === "venue" ? venue : "",
+        },
       });
       if (error) throw error;
       if (data?.position) {
@@ -78,8 +99,6 @@ export default function FirstLight() {
       <div className="fl-bg-wash" aria-hidden="true" />
       <div className="fl-aura" aria-hidden="true" />
       <div className="fl-grain" aria-hidden="true" />
-
-
 
       <header className="fl-bar">
         <svg className="fl-mini" viewBox="0 0 512 512" aria-hidden="true">
@@ -132,15 +151,85 @@ export default function FirstLight() {
                 Venue
               </button>
             </div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              autoComplete="email"
-              required
-              aria-label="Email address"
-            />
+            <div className="fl-fields">
+              {role === "artist" ? (
+                <>
+                  <input
+                    className="fl-input"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="First name"
+                    autoComplete="given-name"
+                    required
+                    aria-label="First name"
+                  />
+                  <input
+                    className="fl-input"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name"
+                    autoComplete="family-name"
+                    required
+                    aria-label="Last name"
+                  />
+                  <input
+                    className="fl-input"
+                    type="text"
+                    value={artistName}
+                    onChange={(e) => setArtistName(e.target.value)}
+                    placeholder="Artist name"
+                    autoComplete="nickname"
+                    required
+                    aria-label="Artist name"
+                  />
+                </>
+              ) : (
+                <>
+                  <input
+                    className="fl-input"
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Full name"
+                    autoComplete="name"
+                    required
+                    aria-label="Full name"
+                  />
+                  <input
+                    className="fl-input"
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Last name"
+                    autoComplete="family-name"
+                    required
+                    aria-label="Last name"
+                  />
+                  <input
+                    className="fl-input"
+                    type="text"
+                    value={venueName}
+                    onChange={(e) => setVenueName(e.target.value)}
+                    placeholder="Venue name"
+                    autoComplete="organization"
+                    required
+                    aria-label="Venue name"
+                  />
+                </>
+              )}
+              <input
+                className="fl-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                autoComplete="email"
+                required
+                aria-label="Email address"
+              />
+            </div>
             <button className="fl-cta" type="submit" disabled={submitting}>
               {submitting ? "Holding your place…" : "Take your place"}
             </button>
@@ -233,6 +322,7 @@ const styles = `
   color:var(--fl-champagne);margin-top:clamp(18px,3vh,26px)}
 .fl-descriptor{font-size:11.5px;letter-spacing:.3em;color:var(--fl-smoke);text-transform:uppercase;margin-top:14px}
 .fl-form{margin-top:clamp(34px,5.5vh,52px);width:min(420px,100%)}
+.fl-fields{display:flex;flex-direction:column;gap:14px}
 .fl-seg{display:flex;border:1px solid rgba(199,164,94,.5);border-radius:6px;overflow:hidden;margin-bottom:18px}
 .fl-seg button{
   flex:1;background:transparent;border:0;color:var(--fl-smoke);font-family:var(--fl-body);
@@ -243,13 +333,13 @@ const styles = `
 .fl-seg button[aria-pressed="true"]{background:var(--fl-champagne);color:var(--fl-noir);font-weight:600}
 .fl-seg button:focus-visible, .fl-form input:focus-visible, .fl-cta:focus-visible, .fl-ghost:focus-visible{
   outline:2px solid var(--fl-champagne-light);outline-offset:2px}
-.fl-form input[type=email]{
+.fl-form input.fl-input{
   width:100%;background:transparent;border:0;border-bottom:1px solid rgba(143,136,122,.45);
   color:var(--fl-ivory);font-family:var(--fl-body);font-weight:300;font-size:16px;
   padding:12px 2px;text-align:center;letter-spacing:.04em;border-radius:0;transition:border-color .25s;
 }
-.fl-form input[type=email]::placeholder{color:var(--fl-smoke)}
-.fl-form input[type=email]:focus{border-bottom-color:var(--fl-champagne)}
+.fl-form input.fl-input::placeholder{color:var(--fl-smoke)}
+.fl-form input.fl-input:focus{border-bottom-color:var(--fl-champagne)}
 .fl-cta{
   margin-top:24px;width:100%;background:var(--fl-champagne);color:var(--fl-noir);border:0;
   border-radius:6px;font-family:var(--fl-body);font-weight:600;font-size:13px;
