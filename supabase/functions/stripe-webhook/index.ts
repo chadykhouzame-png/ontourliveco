@@ -35,6 +35,32 @@ function maybeCleanup() {
   }
 }
 
+async function fireAlert(payload: {
+  stage: string;
+  event_id?: string | null;
+  event_type?: string | null;
+  error_message: string;
+  ip?: string | null;
+}) {
+  try {
+    const url = `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-webhook-failure-alert`;
+    await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      },
+      body: JSON.stringify({
+        source: "stripe-webhook",
+        occurred_at: new Date().toISOString(),
+        ...payload,
+      }),
+    });
+  } catch (e) {
+    console.error("Failed to dispatch webhook failure alert:", e);
+  }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
