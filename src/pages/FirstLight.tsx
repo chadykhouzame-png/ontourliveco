@@ -1,5 +1,6 @@
 import { useState, FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import stageBg from "@/assets/fl-stage-bg.jpg";
 
 /**
  * First Light — On Tour Live waitlist landing page.
