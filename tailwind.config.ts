@@ -116,6 +116,8 @@ export default {
         sand: "hsl(var(--sand))",
       },
       borderRadius: {
+        pill: '999px',
+        card: '14px',
         "3xl": "1.5rem",
         "2xl": "1.25rem",
         xl: "1rem",
