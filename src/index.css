@@ -9,27 +9,37 @@
 
 @layer base {
   :root {
-    /* First Light palette (HSL) — palette constants, referenced by both themes */
+    /* Club palette (HSL) — heritage members'-club: bone, pine, ink, oxblood */
+    --bone: 40 33% 90%;
+    --bone-lift: 40 40% 94%;
+    --pine: 141 32% 19%;
+    --pine-deep: 141 34% 14%;
+    --ink: 36 15% 9%;
+    --ox: 0 34% 25%;
+    --sand: 42 12% 50%;
+
+    /* Legacy noir/champagne tokens kept for existing components */
     --noir: 36 17% 5%;
     --noir-lift: 30 17% 7%;
-    --ivory: 41 47% 93%;
-    --ivory-lift: 41 30% 97%;
-    --champagne: 38 49% 58%;
-    --champagne-light: 39 66% 77%;
-    --champagne-deep: 37 43% 42%;
-    --velvet: 350 39% 23%;
-    --smoke: 45 8% 52%;
-    --ink: 36 17% 12%;
+    --ivory: 40 33% 90%;
+    --ivory-lift: 40 40% 94%;
+    --champagne: 141 32% 19%;
+    --champagne-light: 141 24% 32%;
+    --champagne-deep: 141 34% 14%;
+    --velvet: 0 34% 25%;
+    --smoke: 42 12% 50%;
 
     /* Typography (theme-independent) */
-    --font-display: 'Italiana', serif;
-    --font-accent: 'Cormorant Garamond', serif;
-    --font-body: 'Outfit', 'Inter', -apple-system, system-ui, sans-serif;
-    --tracking-display: 0.1em;
-    --tracking-label: 0.3em;
+    --font-display: 'Young Serif', 'Italiana', serif;
+    --font-accent: 'Instrument Serif', 'Cormorant Garamond', serif;
+    --font-body: 'Archivo', 'Outfit', -apple-system, system-ui, sans-serif;
+    --tracking-display: 0.02em;
+    --tracking-label: 0.28em;
 
-    /* Small, engraved corners (both themes) */
-    --radius: 0.375rem;
+    /* Pill radii */
+    --radius: 0.875rem;
+    --radius-pill: 999px;
+    --hairline: 1px solid hsl(var(--ink) / 0.14);
 
     /* Status tokens — read on both light and dark surfaces */
     --success: 150 38% 33%;
