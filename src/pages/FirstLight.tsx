@@ -1,13 +1,11 @@
 import { useState, FormEvent } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import stageBg from "@/assets/fl-stage-bg.jpg";
 import LaunchCountdown from "@/components/LaunchCountdown";
 
 /**
- * First Light — On Tour Live waitlist landing page.
- * Design is locked to the brand direction supplied by the founder:
- * dark noir, champagne gold disc, Italiana/Cormorant/Outfit typography,
- * "first light" entrance animation, artist/venue segmentation.
+ * On Tour Live — Founding List holding page.
+ * Heritage members' club aesthetic: bone field, pine action, ink text,
+ * oxblood italic accents. Typography: Young Serif / Archivo / Instrument Serif.
  */
 export default function FirstLight() {
   const [role, setRole] = useState<"artist" | "venue">("artist");
@@ -18,7 +16,7 @@ export default function FirstLight() {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [hint, setHint] = useState("App launches September 2026 · Sydney first");
-  const [hintTone, setHintTone] = useState<"muted" | "gold">("muted");
+  const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
 
@@ -35,8 +33,8 @@ export default function FirstLight() {
       : [first, last, venue, value];
 
     if (required.some((v) => !v) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      setHint("Please fill in all fields with a valid email.");
-      setHintTone("gold");
+      setHint("Please fill in every field with a valid email.");
+      setHintTone("ox");
       return;
     }
 
@@ -57,14 +55,14 @@ export default function FirstLight() {
         setPosition(data.position as number);
       } else if (data?.error === "rate_limited") {
         setHint("Too many attempts — try again in an hour.");
-        setHintTone("gold");
+        setHintTone("ox");
       } else {
         throw new Error(data?.error ?? "signup_failed");
       }
     } catch (err) {
       console.error(err);
       setHint("Something went wrong. Try again in a moment.");
-      setHintTone("gold");
+      setHintTone("ox");
     } finally {
       setSubmitting(false);
     }
@@ -73,7 +71,7 @@ export default function FirstLight() {
   async function onShare() {
     const data = {
       title: "On Tour Live",
-      text: "The booking app for artists & venues. Launching September 2026 — take your place.",
+      text: "Join the founding list. Members book first — launching September 2026, Sydney first.",
       url: typeof window !== "undefined" ? window.location.href : "",
     };
     try {
@@ -89,57 +87,27 @@ export default function FirstLight() {
   }
 
   return (
-    <div className="fl-root">
+    <div className="cl-root">
       <style>{styles}</style>
 
-      <div
-        className="fl-bg"
-        aria-hidden="true"
-        style={{ backgroundImage: `url(${stageBg})` }}
-      />
-      <div className="fl-bg-wash" aria-hidden="true" />
-      <div className="fl-aura" aria-hidden="true" />
-      <div className="fl-grain" aria-hidden="true" />
-
-      <header className="fl-bar">
-        <svg className="fl-mini" viewBox="0 0 512 512" aria-hidden="true">
-          <rect x="128" y="133" width="256" height="14" fill="#F5F0E4" />
-          <rect x="171" y="133" width="14" height="246" fill="#F5F0E4" />
-          <rect x="171" y="365" width="220" height="14" fill="#F5F0E4" />
-          <circle cx="291" cy="258" r="57" fill="#C7A45E" />
-        </svg>
-        <span className="fl-eyebrow">Sydney · MMXXVI</span>
+      <header className="cl-bar">
+        <Crest className="cl-mini" />
+        <span className="cl-eyebrow">Sydney · MMXXVI</span>
       </header>
 
-      <main className="fl-main">
-        <svg className="fl-mark" viewBox="0 0 512 512" role="img" aria-label="On Tour Live monogram">
-          <defs>
-            <radialGradient id="flGold" cx="0.38" cy="0.32" r="0.85">
-              <stop offset="0" stopColor="#EBD3A0" />
-              <stop offset="0.55" stopColor="#C7A45E" />
-              <stop offset="1" stopColor="#99763D" />
-            </radialGradient>
-          </defs>
-          <g className="fl-frame">
-            <rect x="128" y="133" width="256" height="14" fill="#F5F0E4" />
-            <rect x="171" y="133" width="14" height="246" fill="#F5F0E4" />
-            <rect x="171" y="365" width="220" height="14" fill="#F5F0E4" />
-          </g>
-          <circle className="fl-theDisc" cx="291" cy="258" r="57" fill="url(#flGold)" />
-        </svg>
+      <main className="cl-main">
+        <Crest className="cl-mark" />
 
-        <h1 className="fl-wordmark">
-          ON&nbsp;TOUR <span className="fl-disc" aria-hidden="true" /> LIVE
-        </h1>
-        <p className="fl-tag">The stage awaits.</p>
-        <p className="fl-descriptor">The booking app for artists &amp; venues</p>
+        <p className="cl-eyebrow cl-pine">On Tour Live</p>
+        <h1 className="cl-wordmark">Join the founding list</h1>
+        <p className="cl-aside">Members book first.</p>
+        <p className="cl-descriptor">The booking app for artists &amp; venues</p>
 
         <LaunchCountdown />
 
-
         {position === null ? (
-          <form className="fl-form" onSubmit={onSubmit} noValidate>
-            <div className="fl-seg" role="group" aria-label="I am an">
+          <form className="cl-form" onSubmit={onSubmit} noValidate>
+            <div className="cl-seg" role="group" aria-label="I am an">
               <button
                 type="button"
                 aria-pressed={role === "artist"}
@@ -155,11 +123,11 @@ export default function FirstLight() {
                 Venue
               </button>
             </div>
-            <div className="fl-fields">
+            <div className="cl-fields">
               {role === "artist" ? (
                 <>
                   <input
-                    className="fl-input"
+                    className="cl-input"
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -169,7 +137,7 @@ export default function FirstLight() {
                     aria-label="First name"
                   />
                   <input
-                    className="fl-input"
+                    className="cl-input"
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
@@ -179,7 +147,7 @@ export default function FirstLight() {
                     aria-label="Last name"
                   />
                   <input
-                    className="fl-input"
+                    className="cl-input"
                     type="text"
                     value={artistName}
                     onChange={(e) => setArtistName(e.target.value)}
@@ -192,7 +160,7 @@ export default function FirstLight() {
               ) : (
                 <>
                   <input
-                    className="fl-input"
+                    className="cl-input"
                     type="text"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
@@ -202,7 +170,7 @@ export default function FirstLight() {
                     aria-label="Full name"
                   />
                   <input
-                    className="fl-input"
+                    className="cl-input"
                     type="text"
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
@@ -212,7 +180,7 @@ export default function FirstLight() {
                     aria-label="Last name"
                   />
                   <input
-                    className="fl-input"
+                    className="cl-input"
                     type="text"
                     value={venueName}
                     onChange={(e) => setVenueName(e.target.value)}
@@ -224,7 +192,7 @@ export default function FirstLight() {
                 </>
               )}
               <input
-                className="fl-input"
+                className="cl-input"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -234,169 +202,238 @@ export default function FirstLight() {
                 aria-label="Email address"
               />
             </div>
-            <button className="fl-cta" type="submit" disabled={submitting}>
+            <button className="cl-cta" type="submit" disabled={submitting}>
               {submitting ? "Holding your place…" : "Take your place"}
             </button>
-            <p className="fl-hint" data-tone={hintTone}>{hint}</p>
+            <p className="cl-hint" data-tone={hintTone}>{hint}</p>
           </form>
         ) : (
-          <div className="fl-held" aria-live="polite">
-            <div className="fl-rule" />
-            <h2>Your place is held</h2>
-            <div className="fl-num">№ {position}</div>
-            <p className="fl-sub">
-              in line for launch.
+          <div className="cl-held" aria-live="polite">
+            <div className="cl-rule" />
+            <h2>You&rsquo;re on the list</h2>
+            <div className="cl-num">No. {position}</div>
+            <p className="cl-sub">of the founding list.</p>
+            <p className="cl-sub cl-sub-quiet">
+              App launches September 2026 · Sydney first.
               <br />
-              Launching September 2026. Watch{" "}
-              <a
-                href="https://instagram.com/ontourlive"
-                style={{ color: "var(--fl-champagne)", textDecoration: "none" }}
-              >
+              Watch{" "}
+              <a href="https://instagram.com/ontourlive" className="cl-link">
                 @ontourlive
               </a>
               .
             </p>
-            <button className="fl-ghost" onClick={onShare}>
-              Move up the line — share your invite
+            <button className="cl-ghost" onClick={onShare}>
+              Move up the list — share your invite
             </button>
-            <p className="fl-hint">{shareHint}</p>
+            <p className="cl-hint">{shareHint}</p>
           </div>
         )}
       </main>
 
-      <footer className="fl-footer">
-        <span className="fl-eyebrow">
-          <a href="https://instagram.com/ontourlive">@ontourlive</a>
+      <footer className="cl-footer">
+        <span className="cl-eyebrow">
+          <a href="https://instagram.com/ontourlive" className="cl-footer-link">@ontourlive</a>
         </span>
-        <span className="fl-eyebrow">First Light — MMXXVI</span>
+        <span className="cl-eyebrow">The Founding List — MMXXVI</span>
       </footer>
     </div>
   );
 }
 
-const styles = `
-.fl-root{
-  --fl-noir:#0F0D0A; --fl-noir-lift:#161310; --fl-ivory:#F5F0E4;
-  --fl-champagne:#C7A45E; --fl-champagne-light:#EBD3A0; --fl-champagne-deep:#99763D;
-  --fl-smoke:#8F887A;
-  --fl-display:'Italiana',serif; --fl-accent:'Cormorant Garamond',serif; --fl-body:'Outfit',sans-serif;
-  background:var(--fl-noir); color:var(--fl-ivory); font-family:var(--fl-body); font-weight:300;
-  display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden; position:relative; isolation:isolate;
+/** Interlock-style crest: pine square with an inner circle. */
+function Crest({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 120 120"
+      role="img"
+      aria-label="On Tour Live crest"
+    >
+      <rect
+        x="8"
+        y="8"
+        width="104"
+        height="104"
+        rx="6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+      />
+      <circle cx="60" cy="60" r="26" fill="currentColor" />
+      <rect x="8" y="80" width="104" height="3" fill="currentColor" />
+    </svg>
+  );
 }
-.fl-root ::selection{background:var(--fl-champagne);color:var(--fl-noir)}
-.fl-bg{
-  position:absolute;inset:0;z-index:-4;background-size:cover;background-position:center;
-  filter:grayscale(.55) contrast(1.12) brightness(.85);opacity:.32;pointer-events:none;
-}
-.fl-bg-wash{
-  position:absolute;inset:0;z-index:-3;pointer-events:none;
-  background:
-    linear-gradient(to bottom, var(--fl-noir) 0%, transparent 28%, transparent 72%, var(--fl-noir) 100%),
-    radial-gradient(ellipse 70% 55% at 50% 50%, transparent 0%, rgba(15,13,10,.55) 60%, var(--fl-noir) 100%);
-}
-.fl-aura{
-  position:absolute;left:50%;top:50%;width:min(680px,92vw);height:min(680px,92vw);
-  transform:translate(-50%,-50%);z-index:-2;pointer-events:none;
-  background:radial-gradient(circle, rgba(199,164,94,.14) 0%, rgba(199,164,94,.06) 40%, transparent 70%);
-  filter:blur(60px);
-}
-.fl-grain{
-  position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/></svg>");
-}
-.fl-bar{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;padding:26px clamp(22px,5vw,54px)}
-.fl-mini{width:30px;height:30px;flex:none}
-.fl-eyebrow{font-size:10.5px;letter-spacing:.32em;color:var(--fl-smoke);text-transform:uppercase}
-.fl-eyebrow a{color:var(--fl-smoke);text-decoration:none}
-.fl-eyebrow a:hover{color:var(--fl-champagne)}
-.fl-main{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;padding:24px clamp(22px,6vw,60px) 48px}
-.fl-mark{width:clamp(108px,16vw,150px);margin-bottom:clamp(28px,4.5vh,44px)}
-.fl-wordmark{
-  font-family:var(--fl-display);font-size:clamp(34px,7.2vw,64px);letter-spacing:.14em;
-  color:var(--fl-ivory);display:flex;align-items:center;justify-content:center;
-  gap:clamp(10px,1.6vw,18px);white-space:nowrap;line-height:1;font-weight:400;
-}
-.fl-wordmark .fl-disc{
-  width:clamp(9px,1.1vw,13px);height:clamp(9px,1.1vw,13px);border-radius:50%;flex:none;
-  background:radial-gradient(circle at 38% 32%, var(--fl-champagne-light), var(--fl-champagne) 55%, var(--fl-champagne-deep));
-  transform:translateY(12%);
-}
-.fl-tag{font-family:var(--fl-accent);font-style:italic;font-size:clamp(21px,3vw,29px);
-  color:var(--fl-champagne);margin-top:clamp(18px,3vh,26px)}
-.fl-descriptor{font-size:11.5px;letter-spacing:.3em;color:var(--fl-smoke);text-transform:uppercase;margin-top:14px}
-.fl-form{margin-top:clamp(34px,5.5vh,52px);width:min(420px,100%)}
-.fl-fields{display:flex;flex-direction:column;gap:14px}
-.fl-seg{display:flex;border:1px solid rgba(199,164,94,.5);border-radius:6px;overflow:hidden;margin-bottom:18px}
-.fl-seg button{
-  flex:1;background:transparent;border:0;color:var(--fl-smoke);font-family:var(--fl-body);
-  font-weight:400;font-size:12px;letter-spacing:.22em;text-transform:uppercase;
-  padding:13px 0;cursor:pointer;transition:background .25s,color .25s;
-}
-.fl-seg button + button{border-left:1px solid rgba(199,164,94,.5)}
-.fl-seg button[aria-pressed="true"]{background:var(--fl-champagne);color:var(--fl-noir);font-weight:600}
-.fl-seg button:focus-visible, .fl-form input:focus-visible, .fl-cta:focus-visible, .fl-ghost:focus-visible{
-  outline:2px solid var(--fl-champagne-light);outline-offset:2px}
-.fl-form input.fl-input{
-  width:100%;background:transparent;border:0;border-bottom:1px solid rgba(143,136,122,.45);
-  color:var(--fl-ivory);font-family:var(--fl-body);font-weight:300;font-size:16px;
-  padding:12px 2px;text-align:center;letter-spacing:.04em;border-radius:0;transition:border-color .25s;
-}
-.fl-form input.fl-input::placeholder{color:var(--fl-smoke)}
-.fl-form input.fl-input:focus{border-bottom-color:var(--fl-champagne)}
-.fl-cta{
-  margin-top:24px;width:100%;background:var(--fl-champagne);color:var(--fl-noir);border:0;
-  border-radius:6px;font-family:var(--fl-body);font-weight:600;font-size:13px;
-  letter-spacing:.24em;text-transform:uppercase;padding:16px 0;cursor:pointer;
-  transition:background .25s,transform .15s;
-}
-.fl-cta:hover{background:var(--fl-champagne-deep)}
-.fl-cta:active{transform:translateY(1px)}
-.fl-cta:disabled{opacity:.6;cursor:not-allowed}
-.fl-hint{font-size:11px;color:var(--fl-smoke);letter-spacing:.06em;margin-top:14px;min-height:14px}
-.fl-hint[data-tone="gold"]{color:var(--fl-champagne)}
-.fl-held{margin-top:clamp(34px,5.5vh,52px)}
-.fl-rule{width:56px;height:1px;background:var(--fl-champagne);opacity:.85;margin:0 auto 26px}
-.fl-held h2{font-family:var(--fl-display);font-weight:400;font-size:clamp(24px,3.6vw,32px);
-  letter-spacing:.12em;text-transform:uppercase}
-.fl-num{font-family:var(--fl-display);font-size:clamp(58px,10vw,88px);color:var(--fl-champagne);
-  line-height:1.05;margin:16px 0 8px}
-.fl-sub{color:var(--fl-smoke);font-size:13.5px;letter-spacing:.05em;line-height:1.7}
-.fl-ghost{
-  display:inline-block;margin-top:26px;background:transparent;color:var(--fl-ivory);
-  border:1px solid rgba(199,164,94,.6);border-radius:6px;font-family:var(--fl-body);
-  font-weight:400;font-size:11.5px;letter-spacing:.22em;text-transform:uppercase;
-  padding:13px 26px;cursor:pointer;transition:background .25s;
-}
-.fl-ghost:hover{background:rgba(199,164,94,.12)}
-.fl-footer{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:center;
-  padding:24px clamp(22px,5vw,54px);border-top:1px solid rgba(143,136,122,.18)}
-@media (prefers-reduced-motion: no-preference){
-  .fl-mark .fl-frame{opacity:0;animation:fl-rise .9s .55s ease-out forwards}
-  .fl-mark .fl-theDisc{opacity:0;animation:fl-glow 1.3s .1s ease-out forwards}
-  .fl-wordmark,.fl-tag,.fl-descriptor,.fl-form,.fl-held{
-    opacity:0;transform:translateY(10px);animation:fl-rise .8s ease-out forwards
-  }
-  .fl-wordmark{animation-delay:1.05s}.fl-tag{animation-delay:1.25s}
-  .fl-descriptor{animation-delay:1.4s}.fl-form,.fl-held{animation-delay:1.55s}
-  @keyframes fl-rise{to{opacity:1;transform:translateY(0)}}
-  @keyframes fl-glow{0%{opacity:0}60%{opacity:1}100%{opacity:1}}
-}
-@media (max-width:430px){ .fl-wordmark{letter-spacing:.11em} }
 
-.fl-countdown{margin-top:clamp(26px,4vh,36px);display:flex;flex-direction:column;align-items:center;gap:10px}
-.fl-cd-grid{display:flex;align-items:flex-start;justify-content:center;gap:clamp(10px,1.8vw,18px)}
-.fl-cd-unit{display:flex;flex-direction:column;align-items:center;min-width:clamp(48px,7vw,64px)}
-.fl-cd-num{font-family:var(--fl-display);font-weight:400;font-size:clamp(30px,4.6vw,42px);
-  color:var(--fl-ivory);line-height:1;letter-spacing:.06em;font-variant-numeric:tabular-nums}
-.fl-cd-label{margin-top:6px;font-size:9.5px;letter-spacing:.32em;color:var(--fl-smoke);text-transform:uppercase}
-.fl-cd-sep{font-family:var(--fl-display);font-size:clamp(24px,3.6vw,34px);color:var(--fl-champagne);
-  opacity:.7;line-height:1;transform:translateY(2px)}
-.fl-cd-cap{font-family:var(--fl-accent);font-style:italic;font-size:14px;color:var(--fl-champagne);
-  letter-spacing:.04em;margin-top:2px}
-.fl-live{font-family:var(--fl-display);font-size:clamp(22px,3.4vw,30px);letter-spacing:.12em;
-  color:var(--fl-champagne);text-transform:uppercase;margin:0}
+const styles = `
+.cl-root{
+  --bone:#EFE8DA; --bone-lift:#F5F0E6;
+  --pine:#21402C; --pine-deep:#182F20;
+  --ink:#171512; --ox:#572B2B; --sand:#8E8570;
+  --font-display:'Young Serif',serif;
+  --font-accent:'Instrument Serif',serif;
+  --font-body:'Archivo',sans-serif;
+  background:var(--bone); color:var(--ink); font-family:var(--font-body); font-weight:500;
+  min-height:100vh; display:flex; flex-direction:column; overflow-x:hidden; position:relative;
+}
+.cl-root ::selection{background:var(--pine);color:var(--bone)}
+
+.cl-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:26px clamp(22px,5vw,54px);
+  border-bottom:1px solid hsl(0 0% 9% / .14);
+}
+.cl-mini{width:26px;height:26px;color:var(--pine);flex:none}
+
+.cl-eyebrow{
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--sand);
+}
+.cl-eyebrow.cl-pine{color:var(--pine)}
+.cl-eyebrow a{color:inherit;text-decoration:none}
+.cl-eyebrow a:hover{color:var(--pine)}
+
+.cl-main{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:48px clamp(22px,6vw,60px) 56px;
+}
+.cl-mark{width:clamp(72px,10vw,96px);color:var(--pine);margin-bottom:clamp(24px,4vh,36px)}
+
+.cl-wordmark{
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(38px,7vw,64px);line-height:1.05;letter-spacing:.02em;
+  color:var(--ink);margin:14px 0 0;max-width:14ch;
+}
+.cl-aside{
+  font-family:var(--font-accent);font-style:italic;
+  font-size:clamp(20px,2.4vw,26px);color:var(--ox);
+  margin-top:14px;
+}
+.cl-descriptor{
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--sand);
+  margin-top:18px;
+}
+
+.cl-form{margin-top:clamp(34px,5vh,48px);width:min(440px,100%)}
+.cl-fields{display:flex;flex-direction:column;gap:12px}
+
+.cl-seg{
+  display:flex;border:1.5px solid var(--pine);border-radius:999px;
+  overflow:hidden;margin-bottom:20px;background:var(--bone-lift);
+}
+.cl-seg button{
+  flex:1;background:transparent;border:0;color:var(--pine);
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;
+  padding:14px 0;cursor:pointer;transition:background .2s,color .2s;
+}
+.cl-seg button[aria-pressed="true"]{background:var(--pine);color:var(--bone)}
+.cl-seg button:focus-visible,
+.cl-form input:focus-visible,
+.cl-cta:focus-visible,
+.cl-ghost:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
+
+.cl-form input.cl-input{
+  width:100%;background:var(--bone-lift);
+  border:1px solid hsl(0 0% 9% / .14);border-radius:999px;
+  color:var(--ink);font-family:var(--font-body);font-weight:500;font-size:15px;
+  padding:14px 20px;text-align:center;letter-spacing:.02em;
+  transition:border-color .2s;
+}
+.cl-form input.cl-input::placeholder{color:var(--sand)}
+.cl-form input.cl-input:focus{border-color:var(--pine);outline:none}
+
+.cl-cta{
+  margin-top:22px;width:100%;background:var(--pine);color:var(--bone);
+  border:0;border-radius:999px;
+  font-family:var(--font-body);font-weight:700;font-size:12px;
+  letter-spacing:.28em;text-transform:uppercase;
+  padding:16px 0;cursor:pointer;transition:background .2s,transform .1s;
+}
+.cl-cta:hover{background:var(--pine-deep)}
+.cl-cta:active{transform:translateY(1px)}
+.cl-cta:disabled{opacity:.55;cursor:not-allowed}
+
+.cl-hint{
+  font-family:var(--font-body);font-size:11.5px;color:var(--sand);
+  letter-spacing:.04em;margin-top:16px;min-height:14px;
+}
+.cl-hint[data-tone="ox"]{color:var(--ox);font-family:var(--font-accent);font-style:italic;font-size:14px}
+
+.cl-held{margin-top:clamp(34px,5vh,48px);max-width:460px}
+.cl-rule{width:56px;height:1px;background:var(--pine);opacity:.8;margin:0 auto 22px}
+.cl-held h2{
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(28px,4vw,38px);letter-spacing:.02em;color:var(--ink);
+  margin:0;
+}
+.cl-num{
+  font-family:var(--font-display);font-size:clamp(56px,9vw,84px);
+  color:var(--ink);line-height:1.05;margin:14px 0 6px;
+}
+.cl-sub{font-family:var(--font-accent);font-style:italic;color:var(--ox);font-size:18px;margin:6px 0 0}
+.cl-sub-quiet{
+  font-family:var(--font-body);font-style:normal;font-weight:500;
+  color:var(--sand);font-size:13.5px;letter-spacing:.04em;line-height:1.7;
+  margin-top:14px;
+}
+.cl-link{color:var(--pine);font-weight:700;text-decoration:none}
+.cl-link:hover{text-decoration:underline}
+
+.cl-ghost{
+  display:inline-block;margin-top:26px;background:transparent;color:var(--pine);
+  border:1.5px solid var(--pine);border-radius:999px;
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;
+  padding:14px 26px;cursor:pointer;transition:background .2s,color .2s;
+}
+.cl-ghost:hover{background:var(--pine);color:var(--bone)}
+
+.cl-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:24px clamp(22px,5vw,54px);
+  border-top:1px solid hsl(0 0% 9% / .14);
+}
+.cl-footer-link{color:var(--sand);text-decoration:none}
+.cl-footer-link:hover{color:var(--pine)}
+
+/* Countdown restyled to club aesthetic (uses fl-* class hooks in LaunchCountdown) */
+.fl-countdown{margin-top:clamp(24px,4vh,32px);display:flex;flex-direction:column;align-items:center;gap:8px}
+.fl-cd-grid{display:flex;align-items:flex-start;justify-content:center;gap:clamp(10px,1.6vw,16px)}
+.fl-cd-unit{display:flex;flex-direction:column;align-items:center;min-width:clamp(46px,7vw,60px)}
+.fl-cd-num{
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(28px,4.4vw,38px);color:var(--ink);line-height:1;
+  letter-spacing:.02em;font-variant-numeric:tabular-nums;
+}
+.fl-cd-label{
+  margin-top:6px;font-family:var(--font-body);font-weight:700;font-size:9.5px;
+  letter-spacing:.28em;color:var(--sand);text-transform:uppercase;
+}
+.fl-cd-sep{
+  font-family:var(--font-display);font-size:clamp(22px,3.4vw,32px);
+  color:var(--pine);opacity:.55;line-height:1;transform:translateY(2px);
+}
+.fl-cd-cap{
+  font-family:var(--font-accent);font-style:italic;font-size:14px;
+  color:var(--ox);letter-spacing:.02em;margin-top:2px;
+}
+.fl-live{
+  font-family:var(--font-display);font-size:clamp(22px,3.4vw,30px);
+  letter-spacing:.02em;color:var(--pine);margin:0;
+}
+
 @media (prefers-reduced-motion: no-preference){
-  .fl-countdown{opacity:0;transform:translateY(10px);animation:fl-rise .8s 1.5s ease-out forwards}
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown{
+    opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
+  }
+  .cl-mark{animation-delay:.05s}
+  .cl-wordmark{animation-delay:.25s}
+  .cl-aside{animation-delay:.45s}
+  .cl-descriptor{animation-delay:.6s}
+  .fl-countdown{animation-delay:.75s}
+  .cl-form,.cl-held{animation-delay:.9s}
+  @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
 `;

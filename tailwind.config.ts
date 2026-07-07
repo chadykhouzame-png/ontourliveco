@@ -14,14 +14,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Outfit', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-        display: ['Italiana', 'serif'],
-        accent: ['"Cormorant Garamond"', 'serif'],
-        body: ['Outfit', 'sans-serif'],
+        sans: ['Archivo', 'Outfit', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        display: ['"Young Serif"', 'Italiana', 'serif'],
+        accent: ['"Instrument Serif"', '"Cormorant Garamond"', 'serif'],
+        body: ['Archivo', 'Outfit', 'sans-serif'],
       },
       letterSpacing: {
-        display: '0.1em',
-        label: '0.3em',
+        display: '0.02em',
+        label: '0.28em',
       },
       colors: {
         border: "hsl(var(--border))",
@@ -103,8 +103,21 @@ export default {
         },
         velvet: "hsl(var(--velvet))",
         smoke: "hsl(var(--smoke))",
+        bone: {
+          DEFAULT: "hsl(var(--bone))",
+          lift: "hsl(var(--bone-lift))",
+        },
+        pine: {
+          DEFAULT: "hsl(var(--pine))",
+          deep: "hsl(var(--pine-deep))",
+        },
+        ink: "hsl(var(--ink))",
+        ox: "hsl(var(--ox))",
+        sand: "hsl(var(--sand))",
       },
       borderRadius: {
+        pill: '999px',
+        card: '14px',
         "3xl": "1.5rem",
         "2xl": "1.25rem",
         xl: "1rem",
