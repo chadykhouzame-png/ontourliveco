@@ -14,14 +14,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Outfit', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
-        display: ['Italiana', 'serif'],
-        accent: ['"Cormorant Garamond"', 'serif'],
-        body: ['Outfit', 'sans-serif'],
+        sans: ['Archivo', 'Outfit', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'sans-serif'],
+        display: ['"Young Serif"', 'Italiana', 'serif'],
+        accent: ['"Instrument Serif"', '"Cormorant Garamond"', 'serif'],
+        body: ['Archivo', 'Outfit', 'sans-serif'],
       },
       letterSpacing: {
-        display: '0.1em',
-        label: '0.3em',
+        display: '0.02em',
+        label: '0.28em',
       },
       colors: {
         border: "hsl(var(--border))",
