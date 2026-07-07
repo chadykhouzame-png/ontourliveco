@@ -103,6 +103,17 @@ export default {
         },
         velvet: "hsl(var(--velvet))",
         smoke: "hsl(var(--smoke))",
+        bone: {
+          DEFAULT: "hsl(var(--bone))",
+          lift: "hsl(var(--bone-lift))",
+        },
+        pine: {
+          DEFAULT: "hsl(var(--pine))",
+          deep: "hsl(var(--pine-deep))",
+        },
+        ink: "hsl(var(--ink))",
+        ox: "hsl(var(--ox))",
+        sand: "hsl(var(--sand))",
       },
       borderRadius: {
         "3xl": "1.5rem",
