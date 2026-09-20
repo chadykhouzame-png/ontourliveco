@@ -88,6 +88,44 @@ export default function FirstLight() {
     }
   }
 
+  async function onEnquirySubmit(e: FormEvent) {
+    e.preventDefault();
+    const name = enqName.trim();
+    const mail = enqEmail.trim();
+    const org = enqOrg.trim();
+    const msg = enqMessage.trim();
+
+    if (!name || !msg || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
+      setEnqHint("Please add your name, a valid email and a short message.");
+      setEnqTone("ox");
+      return;
+    }
+    if (msg.length > 1000) {
+      setEnqHint("Please keep your message under 1000 characters.");
+      setEnqTone("ox");
+      return;
+    }
+
+    setEnqSubmitting(true);
+    try {
+      const { error } = await supabase.from("booking_enquiries").insert({
+        name: name.slice(0, 100),
+        email: mail.slice(0, 255),
+        organisation: org ? org.slice(0, 120) : null,
+        enquiry_type: role,
+        message: msg,
+      });
+      if (error) throw error;
+      setEnqSent(true);
+    } catch (err) {
+      console.error(err);
+      setEnqHint("Something went wrong. Try again, or email hello@ontour.live.");
+      setEnqTone("ox");
+    } finally {
+      setEnqSubmitting(false);
+    }
+  }
+
   const location = useLocation();
   const seoPath = location.pathname === "/waitlist" ? "/waitlist" : "/";
 
