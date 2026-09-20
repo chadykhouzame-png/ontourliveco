@@ -536,6 +536,8 @@ const styles = `
   color:var(--ox);margin:0;
 }
 .cl-contact-cta{margin-top:18px;text-decoration:none}
+.cl-enq{width:100%;margin-top:20px;display:flex;flex-direction:column;align-items:center}
+.cl-textarea{resize:vertical;min-height:104px;line-height:1.6;font-family:var(--font-body)}
 .cl-contact-note{
   font-family:var(--font-body);font-size:12px;letter-spacing:.04em;
   color:var(--sand);margin-top:14px;
