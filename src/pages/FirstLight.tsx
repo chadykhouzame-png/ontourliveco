@@ -143,6 +143,7 @@ export default function FirstLight() {
               <button
                 type="button"
                 aria-pressed={role === "artist"}
+                aria-label="Sign up as an artist"
                 onClick={() => setRole("artist")}
               >
                 Artist
@@ -150,6 +151,7 @@ export default function FirstLight() {
               <button
                 type="button"
                 aria-pressed={role === "venue"}
+                aria-label="Sign up as a venue"
                 onClick={() => setRole("venue")}
               >
                 Venue
