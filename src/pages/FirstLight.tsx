@@ -341,7 +341,25 @@ export default function FirstLight() {
           </button>
         </section>
 
-
+        <section className="cl-tools" aria-labelledby="cl-tools-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">What&rsquo;s inside</p>
+          <h2 id="cl-tools-title" className="cl-how-title">The tools, in short</h2>
+          <ul className="cl-tools-grid">
+            <li><h3>Profiles &amp; press kits</h3><p>Bio, photos, music and past rooms in one page you keep current.</p></li>
+            <li><h3>Search &amp; filters</h3><p>Find acts or rooms by city, date, genre and audience size.</p></li>
+            <li><h3>Availability calendar</h3><p>Mark the nights you are free or the nights you need filled.</p></li>
+            <li><h3>Direct messaging</h3><p>Talk it through in one thread, with files and read receipts.</p></li>
+            <li><h3>Offers &amp; agreements</h3><p>Put terms in writing and keep every change on the record.</p></li>
+            <li><h3>Payments</h3><p>Secure transfers and receipts handled inside the app.</p></li>
+            <li><h3>Audience insights</h3><p>Live follower and reach numbers pulled from social accounts.</p></li>
+            <li><h3>Reviews &amp; history</h3><p>Ratings from past nights so both sides know who they are dealing with.</p></li>
+          </ul>
+          <p className="cl-tools-note">
+            On Tour Live is software for artists and venues to run their own arrangements —
+            we are not an agency and we do not book on anyone&rsquo;s behalf.
+          </p>
+        </section>
 
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
