@@ -3,7 +3,7 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineMcp, auth } from "npm:@lovable.dev/mcp-js@0.20.0";
 
 // src/lib/mcp/tools/search-artists.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
@@ -99,11 +99,18 @@ var search_venues_default = defineTool3({
 });
 
 // src/lib/mcp/index.ts
+var supabaseUrl = process.env.SUPABASE_URL ?? "";
 var mcp_default = defineMcp({
   name: "ontour-mcp",
   title: "OnTour",
   version: "0.1.0",
   instructions: "Tools for OnTour, a marketplace connecting venues with DJs and live artists. Use search_artists / get_artist to discover talent and search_venues to explore venues. All data returned is public profile information for approved users.",
+  auth: auth.oauth.issuer({
+    issuer: `${supabaseUrl}/auth/v1`,
+    jwksUri: `${supabaseUrl}/auth/v1/.well-known/jwks.json`,
+    acceptedAudiences: ["authenticated"],
+    resourceName: "OnTour"
+  }),
   tools: [search_artists_default, get_artist_default, search_venues_default]
 });
 
