@@ -294,7 +294,11 @@ export default function FirstLight() {
               </div>
             </li>
           </ol>
+          <button type="button" className="cl-ghost cl-how-cta" onClick={() => joinAs("artist")}>
+            Join as an artist
+          </button>
         </section>
+
 
         <section className="cl-how" aria-labelledby="cl-how-venues-title">
           <div className="cl-rule" />
