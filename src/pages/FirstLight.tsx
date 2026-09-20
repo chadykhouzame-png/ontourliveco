@@ -255,6 +255,17 @@ export default function FirstLight() {
                 Venue
               </button>
             </div>
+            <div className="cl-hp" aria-hidden="true">
+              <label htmlFor="cl-f-company">Company (leave blank)</label>
+              <input
+                id="cl-f-company"
+                name="company"
+                type="text"
+                ref={honeypotRef}
+                tabIndex={-1}
+                autoComplete="off"
+              />
+            </div>
             <div className="cl-fields">
               {activeFields.map((name) => {
                 const invalid = Boolean(errors[name]);
