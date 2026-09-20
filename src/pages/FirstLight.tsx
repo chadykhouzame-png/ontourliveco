@@ -865,6 +865,13 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   letter-spacing:.04em;margin-top:16px;min-height:14px;
 }
 .cl-hint[data-tone="ox"]{color:var(--ox);font-family:var(--font-accent);font-style:italic;font-size:14px}
+.cl-privacy{
+  margin:10px auto 0;max-width:380px;font-family:var(--font-body);font-size:11.5px;
+  line-height:1.6;color:var(--sand-ink);letter-spacing:.02em;
+}
+.cl-privacy .cl-link{color:var(--sand-ink);text-decoration:underline;text-underline-offset:3px}
+.cl-privacy .cl-link:hover{color:var(--pine)}
+
 
 .cl-held{margin-top:clamp(34px,5vh,48px);max-width:460px}
 .cl-confirm{
