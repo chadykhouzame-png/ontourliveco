@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import PageSeo from "@/components/PageSeo";
 import LaunchCountdown from "@/components/LaunchCountdown";
+import appPreview from "@/assets/app-preview.jpg";
 
 /**
  * On Tour Live — Founding List holding page.
@@ -346,21 +347,21 @@ export default function FirstLight() {
           <p className="cl-eyebrow cl-pine">How it works</p>
           <h2 id="cl-steps-title" className="cl-how-title">Three steps, either side of the stage</h2>
           <ol className="cl-how-list">
-            <li>
+            <li className="cl-how-item">
               <span className="cl-how-num">I</span>
               <div>
                 <h3>Set up your page</h3>
                 <p>Artists build a press kit, venues describe their rooms and the nights they run. It takes minutes and stays current.</p>
               </div>
             </li>
-            <li>
+            <li className="cl-how-item">
               <span className="cl-how-num">II</span>
               <div>
                 <h3>Find the match</h3>
                 <p>Search by city, date, genre and audience size, or post what you need and let the right side come to you.</p>
               </div>
             </li>
-            <li>
+            <li className="cl-how-item">
               <span className="cl-how-num">III</span>
               <div>
                 <h3>Agree it in one place</h3>
@@ -368,6 +369,25 @@ export default function FirstLight() {
               </div>
             </li>
           </ol>
+        </section>
+
+        <section className="cl-preview" aria-labelledby="cl-preview-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">A first look</p>
+          <h2 id="cl-preview-title" className="cl-how-title">What you&rsquo;ll be using</h2>
+          <figure className="cl-preview-figure">
+            <img
+              src={appPreview}
+              alt="Two phone screens from the On Tour Live app: a list of open slots at Australian venues, and an artist profile with genre tags and an availability calendar."
+              width={1408}
+              height={1024}
+              loading="lazy"
+            />
+            <figcaption>
+              Open slots across the country on one side, a living artist profile with real
+              availability on the other. Design in progress — final app may differ.
+            </figcaption>
+          </figure>
         </section>
 
         <section className="cl-tools" aria-labelledby="cl-tools-title">
@@ -631,6 +651,21 @@ const styles = `
   color:var(--ink);opacity:.82;margin:8px 0 0;
 }
 
+.cl-preview{
+  margin-top:clamp(40px,6vh,64px);width:min(620px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.cl-preview .cl-rule{margin-bottom:20px}
+.cl-preview-figure{margin:24px 0 0;width:100%}
+.cl-preview-figure img{
+  display:block;width:100%;height:auto;
+  border:1px solid hsl(0 0% 9% / .14);border-radius:14px;background:var(--bone-lift);
+}
+.cl-preview-figure figcaption{
+  font-family:var(--font-body);font-weight:500;font-size:12.5px;line-height:1.7;
+  color:var(--ink);opacity:.68;margin-top:12px;
+}
+
 .cl-tools{
   margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
   display:flex;flex-direction:column;align-items:center;text-align:left;
@@ -759,7 +794,7 @@ const styles = `
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-tools,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
@@ -769,7 +804,8 @@ const styles = `
   .fl-countdown{animation-delay:.75s}
   .cl-form,.cl-held{animation-delay:.9s}
   .cl-how{animation-delay:1.05s}
-  .cl-tools{animation-delay:1.15s}
+  .cl-preview{animation-delay:1.12s}
+  .cl-tools{animation-delay:1.2s}
   .cl-contact{animation-delay:1.25s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
