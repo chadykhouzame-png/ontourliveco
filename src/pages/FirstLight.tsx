@@ -244,7 +244,47 @@ export default function FirstLight() {
           </div>
         )}
 
+        <section className="cl-how" aria-labelledby="cl-how-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">What On Tour Live does</p>
+          <h2 id="cl-how-title" className="cl-how-title">Built for artists and the rooms that book them</h2>
+          <ol className="cl-how-list">
+            <li className="cl-how-item">
+              <span className="cl-how-num">I</span>
+              <div>
+                <h3>Discover opportunities</h3>
+                <p>
+                  See open slots and venue requests as they are posted, filtered by city,
+                  date and the kind of night you play — no cold outreach, no missed calls.
+                </p>
+              </div>
+            </li>
+            <li className="cl-how-item">
+              <span className="cl-how-num">II</span>
+              <div>
+                <h3>Manage your profile</h3>
+                <p>
+                  One living press kit: bio, photos, music, past rooms, live audience numbers
+                  and your travel calendar — always current, always ready to send.
+                </p>
+              </div>
+            </li>
+            <li className="cl-how-item">
+              <span className="cl-how-num">III</span>
+              <div>
+                <h3>Connect with venues</h3>
+                <p>
+                  Message directly, agree the fee, and lock the date in one thread —
+                  offers, confirmations and payment all handled in the app.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
         <section className="cl-contact" aria-label="Follow On Tour Live">
+          <div className="cl-rule" />
+
           <div className="cl-rule" />
           <p className="cl-contact-lead">Follow along</p>
           <div className="cl-social">
@@ -449,6 +489,36 @@ const styles = `
 }
 .cl-ghost:hover{background:var(--pine);color:var(--bone)}
 
+.cl-how{
+  margin-top:clamp(44px,7vh,72px);width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:left;
+}
+.cl-how .cl-rule{margin-bottom:20px}
+.cl-how .cl-eyebrow{text-align:center}
+.cl-how-title{
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(24px,3.4vw,34px);line-height:1.15;letter-spacing:.02em;
+  color:var(--ink);text-align:center;margin:12px 0 0;max-width:20ch;
+}
+.cl-how-list{list-style:none;margin:26px 0 0;padding:0;width:100%;display:flex;flex-direction:column}
+.cl-how-item{
+  display:flex;gap:16px;align-items:flex-start;
+  padding:18px 0;border-top:1px solid hsl(0 0% 9% / .14);
+}
+.cl-how-item:last-child{border-bottom:1px solid hsl(0 0% 9% / .14)}
+.cl-how-num{
+  font-family:var(--font-display);font-size:15px;color:var(--pine);
+  line-height:1;padding-top:3px;min-width:26px;letter-spacing:.06em;
+}
+.cl-how-item h3{
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--pine);margin:0;
+}
+.cl-how-item p{
+  font-family:var(--font-body);font-weight:500;font-size:14px;line-height:1.75;
+  color:var(--ink);opacity:.82;margin:8px 0 0;
+}
+
 .cl-contact{
   margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
   max-width:460px;
@@ -524,6 +594,12 @@ const styles = `
   .cl-form input.cl-input{padding:15px 18px;font-size:16px}
   .cl-cta{padding:18px 0;letter-spacing:.2em}
   .cl-held{margin-top:26px}
+  .cl-how{margin-top:34px}
+  .cl-how-title{font-size:23px;max-width:none}
+  .cl-how-list{margin-top:20px}
+  .cl-how-item{gap:12px;padding:16px 0}
+  .cl-how-num{min-width:20px;font-size:14px}
+  .cl-how-item h3{letter-spacing:.2em}
   .cl-contact{margin-top:34px;width:100%}
   .cl-social{margin-top:16px;gap:8px;width:100%;flex-wrap:nowrap}
   .cl-social-link{
@@ -540,7 +616,7 @@ const styles = `
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
@@ -549,7 +625,8 @@ const styles = `
   .cl-descriptor{animation-delay:.6s}
   .fl-countdown{animation-delay:.75s}
   .cl-form,.cl-held{animation-delay:.9s}
-  .cl-contact{animation-delay:1.05s}
+  .cl-how{animation-delay:1.05s}
+  .cl-contact{animation-delay:1.2s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
 `;
