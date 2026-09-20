@@ -483,9 +483,21 @@ export default function FirstLight() {
           </div>
         </section>
 
-
-
-
+        <section className="cl-tail" aria-labelledby="cl-tail-title">
+          <div className="cl-rule" />
+          <h2 className="cl-tail-title" id="cl-tail-title">Ready to join?</h2>
+          <p className="cl-tail-lead">
+            Leave your email and we'll tell you the moment On Tour Live opens in your city.
+          </p>
+          <div className="cl-tail-actions">
+            <button type="button" className="cl-ghost" onClick={() => joinAs("artist")}>
+              Join as an artist
+            </button>
+            <button type="button" className="cl-ghost" onClick={() => joinAs("venue")}>
+              Join as a venue
+            </button>
+          </div>
+        </section>
 
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
