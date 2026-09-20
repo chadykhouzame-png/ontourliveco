@@ -855,11 +855,22 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 .cl-form input.cl-input::placeholder{color:var(--sand-ink)}
 .cl-form input.cl-input:focus{border-color:var(--pine);outline:none}
 .cl-field{display:flex;flex-direction:column;gap:6px}
-.cl-form input.cl-input[data-invalid="true"]{border-color:var(--ox);background:hsl(0 40% 97%)}
+.cl-label{
+  font-family:var(--font-body);font-weight:600;font-size:10px;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--sand-ink);
+  text-align:center;
+}
+.cl-form input.cl-input[data-invalid="true"]{border-color:var(--ox);background:hsl(0 40% 97%);border-width:2px}
 .cl-form input.cl-input[data-invalid="true"]:focus{border-color:var(--ox)}
 .cl-error{
   margin:0;color:var(--ox);font-family:var(--font-accent);font-style:italic;
   font-size:13.5px;line-height:1.35;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.cl-error-mark{
+  flex:none;width:16px;height:16px;border-radius:999px;
+  border:1px solid var(--ox);font-family:var(--font-body);font-style:normal;
+  font-size:11px;font-weight:700;line-height:14px;text-align:center;
 }
 
 
