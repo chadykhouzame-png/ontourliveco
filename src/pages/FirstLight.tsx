@@ -120,7 +120,7 @@ export default function FirstLight() {
       <style>{styles}</style>
 
 
-      <a className="cl-skip" href="#cl-signup">Skip to sign-up form</a>
+      <a className="cl-skip" href="#cl-main">Skip to main content</a>
 
       <header className="cl-bar">
         <Crest className="cl-mini" />
