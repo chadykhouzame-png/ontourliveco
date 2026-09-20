@@ -400,6 +400,23 @@ export default function FirstLight() {
           </figure>
         </section>
 
+        <section className="cl-tail cl-midcta" aria-labelledby="cl-previewcta-title">
+          <h2 className="cl-tail-title" id="cl-previewcta-title">Want first access?</h2>
+          <p className="cl-tail-lead">
+            Join the launch waitlist and we&rsquo;ll send you an invite as soon as it&rsquo;s ready.
+          </p>
+          <div className="cl-tail-actions">
+            <button type="button" className="cl-ghost" onClick={() => joinAs("artist")}>
+              Join as an artist
+            </button>
+            <button type="button" className="cl-ghost" onClick={() => joinAs("venue")}>
+              Join as a venue
+            </button>
+          </div>
+        </section>
+
+
+
         <section className="cl-tools" aria-labelledby="cl-tools-title">
           <div className="cl-rule" />
           <p className="cl-eyebrow cl-pine">What&rsquo;s inside</p>
