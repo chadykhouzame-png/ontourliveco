@@ -272,30 +272,21 @@ export default function FirstLight() {
               <span className="cl-how-num">I</span>
               <div>
                 <h3>Discover opportunities</h3>
-                <p>
-                  See open slots and venue requests as they are posted, filtered by city,
-                  date and the kind of night you play — no cold outreach, no missed calls.
-                </p>
+                <p>Open slots in your city, filtered by date and the nights you play.</p>
               </div>
             </li>
             <li className="cl-how-item">
               <span className="cl-how-num">II</span>
               <div>
                 <h3>Manage your profile</h3>
-                <p>
-                  One living press kit: bio, photos, music, past rooms, live audience numbers
-                  and your travel calendar — always current, always ready to send.
-                </p>
+                <p>One living press kit — music, photos, past rooms and free dates.</p>
               </div>
             </li>
             <li className="cl-how-item">
               <span className="cl-how-num">III</span>
               <div>
                 <h3>Connect with venues</h3>
-                <p>
-                  Message directly, agree the fee, and lock the date in one thread —
-                  offers, confirmations and payment all handled in the app.
-                </p>
+                <p>Message, agree the fee and lock the date in one thread.</p>
               </div>
             </li>
           </ol>
