@@ -625,7 +625,8 @@ const styles = `
   .cl-descriptor{animation-delay:.6s}
   .fl-countdown{animation-delay:.75s}
   .cl-form,.cl-held{animation-delay:.9s}
-  .cl-contact{animation-delay:1.05s}
+  .cl-how{animation-delay:1.05s}
+  .cl-contact{animation-delay:1.2s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
 `;
