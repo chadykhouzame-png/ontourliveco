@@ -295,7 +295,7 @@ export default function FirstLight() {
 
           </form>
         ) : (
-          <div className="cl-held" role="status" aria-live="polite">
+          <div className="cl-held" ref={heldRef} tabIndex={-1} role="status" aria-live="polite">
             <div className="cl-rule" />
             <h2>You&rsquo;re on the list</h2>
             <div className="cl-num">No. {position}</div>
