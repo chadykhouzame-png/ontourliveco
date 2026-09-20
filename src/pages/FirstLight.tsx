@@ -418,6 +418,21 @@ const styles = `
 }
 .cl-ghost:hover{background:var(--pine);color:var(--bone)}
 
+.cl-contact{
+  margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
+  max-width:460px;
+}
+.cl-contact .cl-rule{margin-bottom:20px}
+.cl-contact-lead{
+  font-family:var(--font-accent);font-style:italic;font-size:clamp(18px,2.2vw,22px);
+  color:var(--ox);margin:0;
+}
+.cl-contact-cta{margin-top:18px;text-decoration:none}
+.cl-contact-note{
+  font-family:var(--font-body);font-size:12px;letter-spacing:.04em;
+  color:var(--sand);margin-top:14px;
+}
+
 .cl-footer{
   display:flex;justify-content:space-between;align-items:center;
   padding:24px clamp(22px,5vw,54px);
@@ -453,7 +468,7 @@ const styles = `
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
@@ -462,6 +477,7 @@ const styles = `
   .cl-descriptor{animation-delay:.6s}
   .fl-countdown{animation-delay:.75s}
   .cl-form,.cl-held{animation-delay:.9s}
+  .cl-contact{animation-delay:1.05s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
 `;
