@@ -804,7 +804,8 @@ const styles = `
   .fl-countdown{animation-delay:.75s}
   .cl-form,.cl-held{animation-delay:.9s}
   .cl-how{animation-delay:1.05s}
-  .cl-tools{animation-delay:1.15s}
+  .cl-preview{animation-delay:1.12s}
+  .cl-tools{animation-delay:1.2s}
   .cl-contact{animation-delay:1.25s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
