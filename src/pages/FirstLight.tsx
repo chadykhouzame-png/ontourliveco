@@ -24,6 +24,7 @@ export default function FirstLight() {
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
+  const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
 
   function joinAs(next: "artist" | "venue") {
@@ -73,6 +74,7 @@ export default function FirstLight() {
       if (error) throw error;
       if (data?.position) {
         setPosition(data.position as number);
+        setConfirmed({ email: value, role, name: role === "artist" ? artist : venue });
       } else if (data?.error === "rate_limited") {
         setHint("Too many attempts — try again in an hour.");
         setHintTone("ox");
@@ -247,6 +249,11 @@ export default function FirstLight() {
             <h2>You&rsquo;re on the list</h2>
             <div className="cl-num">No. {position}</div>
             <p className="cl-sub">of the founding list.</p>
+            <p className="cl-confirm">
+              Thanks{confirmed?.name ? `, ${confirmed.name}` : ""} — your spot as
+              {confirmed?.role === "venue" ? " a venue" : " an artist"} is saved. We&rsquo;ll email{" "}
+              <strong>{confirmed?.email}</strong> when On Tour Live opens. Nothing else to do for now.
+            </p>
             <p className="cl-sub cl-sub-quiet">
               App launches September 2026 · Sydney first.
               <br />
@@ -697,6 +704,12 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 .cl-hint[data-tone="ox"]{color:var(--ox);font-family:var(--font-accent);font-style:italic;font-size:14px}
 
 .cl-held{margin-top:clamp(34px,5vh,48px);max-width:460px}
+.cl-confirm{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
+  color:var(--pine-deep);margin:14px auto 0;max-width:42ch;
+  border:1px solid hsl(0 0% 9% / .14);border-radius:12px;padding:14px 16px;
+}
+.cl-confirm strong{font-weight:700;word-break:break-word}
 .cl-rule{width:56px;height:1px;background:var(--pine);opacity:.8;margin:0 auto 22px}
 .cl-held h2{
   font-family:var(--font-display);font-weight:400;
