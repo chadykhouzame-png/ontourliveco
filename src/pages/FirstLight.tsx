@@ -239,6 +239,23 @@ export default function FirstLight() {
             <p className="cl-hint">{shareHint}</p>
           </div>
         )}
+
+        <section className="cl-contact" aria-label="Contact">
+          <div className="cl-rule" />
+          <p className="cl-contact-lead">Ready to book now?</p>
+          <a
+            className="cl-ghost cl-contact-cta"
+            href="mailto:hello@ontour.live?subject=Booking%20enquiry%20%E2%80%94%20On%20Tour%20Live"
+          >
+            Talk to us about a booking
+          </a>
+          <p className="cl-contact-note">
+            Or email{" "}
+            <a href="mailto:hello@ontour.live" className="cl-link">
+              hello@ontour.live
+            </a>
+          </p>
+        </section>
       </main>
 
       <footer className="cl-footer">
