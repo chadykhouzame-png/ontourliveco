@@ -88,6 +88,7 @@ export default function FirstLight() {
     }
   }
 
+  const location = useLocation();
   const seoPath = location.pathname === "/waitlist" ? "/waitlist" : "/";
 
   return (
