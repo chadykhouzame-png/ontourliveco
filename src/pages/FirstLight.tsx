@@ -424,7 +424,7 @@ export default function FirstLight() {
               href={socialLinks.instagram.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={socialLinks.instagram.label}
+              aria-label={`${socialLinks.instagram.label} — opens in a new tab`}
             >
               <Instagram aria-hidden="true" />
               <span>Instagram</span>
