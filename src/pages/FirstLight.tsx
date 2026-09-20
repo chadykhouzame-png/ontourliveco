@@ -396,11 +396,21 @@ export default function FirstLight() {
               />
             </div>
             <p className="cl-preview-hint" aria-hidden="true">Swipe to see both screens</p>
+            <ul className="cl-preview-notes">
+              <li>
+                <span className="cl-preview-note-label">Left — for artists</span>
+                <span className="cl-preview-note-text">Open slots near you, with date, venue and fee up front.</span>
+              </li>
+              <li>
+                <span className="cl-preview-note-label">Right — for venues</span>
+                <span className="cl-preview-note-text">A full artist profile: genre, past nights and real availability.</span>
+              </li>
+            </ul>
             <figcaption>
-              Open slots across the country on one side, a living artist profile with real
-              availability on the other. Design in progress — final app may differ.
+              Design in progress — final app may differ.
             </figcaption>
           </figure>
+
 
         </section>
 
@@ -879,10 +889,27 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   border:1px solid hsl(0 0% 9% / .14);border-radius:14px;background:var(--bone-lift);
 }
 .cl-preview-hint{display:none}
+.cl-preview-notes{
+  list-style:none;margin:16px 0 0;padding:0;width:100%;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:14px 24px;text-align:left;
+}
+.cl-preview-notes li{
+  display:flex;flex-direction:column;gap:6px;
+  border-top:1px solid hsl(0 0% 9% / .14);padding-top:10px;
+}
+.cl-preview-note-label{
+  font-family:var(--font-body);font-weight:600;font-size:10.5px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--pine);
+}
+.cl-preview-note-text{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
+  color:var(--ink);opacity:.82;
+}
 .cl-preview-figure figcaption{
   font-family:var(--font-body);font-weight:500;font-size:12.5px;line-height:1.7;
-  color:var(--ink);opacity:.68;margin-top:12px;
+  color:var(--sand-ink);margin-top:14px;
 }
+
 
 
 .cl-tools{
@@ -1092,7 +1119,9 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
     font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
     color:var(--sand-ink);margin:10px 0 0;
   }
-  .cl-preview-figure figcaption{margin-top:8px;font-size:12px}
+  .cl-preview-notes{grid-template-columns:1fr;gap:12px;margin-top:14px}
+  .cl-preview-figure figcaption{margin-top:12px;font-size:12px}
+
   .cl-tools{margin-top:34px}
 
   .cl-quotes{margin-top:34px}
