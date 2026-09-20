@@ -246,8 +246,8 @@ export default function FirstLight() {
 
         <section className="cl-how" aria-labelledby="cl-how-title">
           <div className="cl-rule" />
-          <p className="cl-eyebrow cl-pine">What On Tour Live does</p>
-          <h2 id="cl-how-title" className="cl-how-title">Built for artists and the rooms that book them</h2>
+          <p className="cl-eyebrow cl-pine">For artists</p>
+          <h2 id="cl-how-title" className="cl-how-title">Find the rooms, keep the work coming</h2>
           <ol className="cl-how-list">
             <li className="cl-how-item">
               <span className="cl-how-num">I</span>
@@ -281,6 +281,46 @@ export default function FirstLight() {
             </li>
           </ol>
         </section>
+
+        <section className="cl-how" aria-labelledby="cl-how-venues-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">For venues</p>
+          <h2 id="cl-how-venues-title" className="cl-how-title">Fill every night with the right act</h2>
+          <ol className="cl-how-list">
+            <li className="cl-how-item">
+              <span className="cl-how-num">I</span>
+              <div>
+                <h3>Find artists</h3>
+                <p>
+                  Search by genre, city, date and audience reach, and see who is genuinely
+                  free that night before you reach out.
+                </p>
+              </div>
+            </li>
+            <li className="cl-how-item">
+              <span className="cl-how-num">II</span>
+              <div>
+                <h3>Post what you need</h3>
+                <p>
+                  Put an open slot to the whole roster in one go — matching acts are notified
+                  and reply with their fee, so you compare real offers, not guesses.
+                </p>
+              </div>
+            </li>
+            <li className="cl-how-item">
+              <span className="cl-how-num">III</span>
+              <div>
+                <h3>Run your calendar</h3>
+                <p>
+                  Confirmations, contacts, fees and payment sit in one place, with reviews
+                  from past nights to tell you who to book again.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
           <div className="cl-rule" />
@@ -494,6 +534,7 @@ const styles = `
   display:flex;flex-direction:column;align-items:center;text-align:left;
 }
 .cl-how .cl-rule{margin-bottom:20px}
+.cl-how + .cl-how{margin-top:clamp(30px,4.5vh,48px)}
 .cl-how .cl-eyebrow{text-align:center}
 .cl-how-title{
   font-family:var(--font-display);font-weight:400;
