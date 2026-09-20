@@ -32,6 +32,16 @@ export default function FirstLight() {
   const [shareHint, setShareHint] = useState("");
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
+  const heldRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (position === null) return;
+    const el = heldRef.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.focus({ preventScroll: true });
+  }, [position]);
+
 
   const values: Record<FieldName, string> = { firstName, lastName, artistName, venueName, email };
   const setters: Record<FieldName, (v: string) => void> = {
