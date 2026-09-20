@@ -396,11 +396,21 @@ export default function FirstLight() {
               />
             </div>
             <p className="cl-preview-hint" aria-hidden="true">Swipe to see both screens</p>
+            <ul className="cl-preview-notes">
+              <li>
+                <span className="cl-preview-note-label">Left — for artists</span>
+                <span className="cl-preview-note-text">Open slots near you, with date, venue and fee up front.</span>
+              </li>
+              <li>
+                <span className="cl-preview-note-label">Right — for venues</span>
+                <span className="cl-preview-note-text">A full artist profile: genre, past nights and real availability.</span>
+              </li>
+            </ul>
             <figcaption>
-              Open slots across the country on one side, a living artist profile with real
-              availability on the other. Design in progress — final app may differ.
+              Design in progress — final app may differ.
             </figcaption>
           </figure>
+
 
         </section>
 
