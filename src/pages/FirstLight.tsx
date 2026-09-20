@@ -614,9 +614,8 @@ export default function FirstLight() {
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
           <div className="cl-rule" />
-
-          <div className="cl-rule" />
           <p className="cl-contact-lead">Follow along</p>
+
           <div className="cl-social">
             <a
               className="cl-social-link"
