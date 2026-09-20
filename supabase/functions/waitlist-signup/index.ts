@@ -110,6 +110,7 @@ serve(async (req) => {
     const json = await req.json();
     const result = BodySchema.safeParse(json);
     if (!result.success) {
+      await logBlocked("invalid_body", ip, userAgent);
       return new Response(JSON.stringify({ error: "invalid_body" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -117,6 +118,7 @@ serve(async (req) => {
     }
     parsed = result.data;
   } catch {
+    await logBlocked("invalid_body", ip, userAgent);
     return new Response(JSON.stringify({ error: "invalid_body" }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
