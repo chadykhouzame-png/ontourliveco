@@ -23,6 +23,20 @@ export default function FirstLight() {
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  function joinAs(next: "artist" | "venue") {
+    setRole(next);
+    const form = formRef.current;
+    if (form) {
+      form.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => {
+        form.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+      }, 450);
+    }
+  }
+
+
 
 
   async function onSubmit(e: FormEvent) {
