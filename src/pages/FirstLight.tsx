@@ -414,6 +414,41 @@ export default function FirstLight() {
           </p>
         </section>
 
+        <section className="cl-quotes" aria-labelledby="cl-quotes-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">In their words</p>
+          <h2 id="cl-quotes-title" className="cl-how-title">Artists &amp; venues on On Tour Live</h2>
+          <ul className="cl-quotes-list">
+            <li>
+              <blockquote>
+                <p>Every open slot in the city in one place — I stopped chasing bookers and started
+                filling my calendar a month ahead.</p>
+                <footer>Artist &middot; Sydney NSW</footer>
+              </blockquote>
+            </li>
+            <li>
+              <blockquote>
+                <p>I post the night, the right acts reply with their fee, and the whole thing is
+                agreed before close. No more ringing round on a Thursday.</p>
+                <footer>Venue &middot; Newcastle NSW</footer>
+              </blockquote>
+            </li>
+            <li>
+              <blockquote>
+                <p>My profile does the introductions now. Rooms can see my past gigs, my audience
+                numbers and the nights I&rsquo;m free.</p>
+                <footer>Artist &middot; Melbourne VIC</footer>
+              </blockquote>
+            </li>
+          </ul>
+          <p className="cl-quotes-note">
+            Placeholder wording while we&rsquo;re in build — these will be replaced with real quotes
+            from our founding artists and venues at launch.
+          </p>
+        </section>
+
+
+
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
           <div className="cl-rule" />
