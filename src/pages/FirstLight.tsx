@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageSeo from "@/components/PageSeo";
 import LaunchCountdown from "@/components/LaunchCountdown";
 import appPreview from "@/assets/app-preview.jpg";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * On Tour Live — Founding List holding page.
@@ -35,6 +36,26 @@ export default function FirstLight() {
   const heldRef = useRef<HTMLDivElement | null>(null);
   const honeypotRef = useRef<HTMLInputElement | null>(null);
   const startedAtRef = useRef<number>(Date.now());
+
+  const viewTrackedRef = useRef(false);
+
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form || viewTrackedRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && !viewTrackedRef.current) {
+          viewTrackedRef.current = true;
+          trackEvent("waitlist_form_view", { role });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(form);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (position === null) return;
