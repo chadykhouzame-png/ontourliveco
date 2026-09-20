@@ -602,6 +602,33 @@ const styles = `
   color:var(--ink);opacity:.82;margin:8px 0 0;
 }
 
+.cl-tools{
+  margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:left;
+}
+.cl-tools .cl-rule{margin-bottom:20px}
+.cl-tools .cl-eyebrow{text-align:center}
+.cl-tools-grid{
+  list-style:none;margin:24px 0 0;padding:0;width:100%;
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:18px 24px;
+}
+.cl-tools-grid li{border-top:1px solid hsl(0 0% 9% / .14);padding-top:12px}
+.cl-tools-grid h3{
+  font-family:var(--font-body);font-weight:700;font-size:10px;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--pine);margin:0;
+}
+.cl-tools-grid p{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
+  color:var(--ink);opacity:.8;margin:6px 0 0;
+}
+.cl-tools-note{
+  font-family:var(--font-accent);font-style:italic;
+  font-size:clamp(14px,1.8vw,16px);line-height:1.6;text-align:center;
+  color:var(--ink);opacity:.72;margin:22px 0 0;max-width:44ch;
+}
+
+
 .cl-contact{
   margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
   max-width:460px;
