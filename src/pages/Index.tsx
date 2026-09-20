@@ -15,7 +15,7 @@ import PhotoGallery from "@/components/PhotoGallery";
 import FAQ from "@/components/FAQ";
 import SiteFooter from "@/components/SiteFooter";
 import PageSeo from "@/components/PageSeo";
-import { Helmet } from "react-helmet-async";
+import LocalBusinessSchema from "@/components/LocalBusinessSchema";
 
 
 const Index = () => {
