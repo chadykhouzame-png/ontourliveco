@@ -9,6 +9,7 @@ import AdminProfileApproval from '@/components/admin/AdminProfileApproval';
 import AdminDisputes from '@/components/admin/AdminDisputes';
 import AdminStats from '@/components/admin/AdminStats';
 import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
+import AdminWebhookHealth from '@/components/admin/AdminWebhookHealth';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import RunStripeTestCheckout from '@/components/admin/RunStripeTestCheckout';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
@@ -109,6 +110,7 @@ const AdminDashboard = () => {
 
           <TabsContent value="webhooks" className="mt-6 space-y-6">
             <WebhookTestProvider>
+              <AdminWebhookHealth />
               <RunStripeTestCheckout />
               <AdminWebhookEvents />
               <WebhookTestingGuide />
