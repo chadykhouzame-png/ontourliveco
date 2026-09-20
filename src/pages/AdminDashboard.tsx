@@ -14,6 +14,7 @@ import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import RunStripeTestCheckout from '@/components/admin/RunStripeTestCheckout';
 import { WebhookTestProvider } from '@/components/admin/WebhookTestContext';
 import PrePublishChecklist from '@/components/admin/PrePublishChecklist';
+import AdminDomainChecklist from '@/components/admin/AdminDomainChecklist';
 import AdminSiteMode from '@/components/admin/AdminSiteMode';
 import AdminWaitlist from '@/components/admin/AdminWaitlist';
 import { BrandLockup } from '@/components/BrandLockup';
