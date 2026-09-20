@@ -120,6 +120,8 @@ export default function FirstLight() {
       <style>{styles}</style>
 
 
+      <a className="cl-skip" href="#cl-signup">Skip to sign-up form</a>
+
       <header className="cl-bar">
         <Crest className="cl-mini" />
         <span className="cl-eyebrow">Sydney · MMXXVI</span>
