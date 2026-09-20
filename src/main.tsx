@@ -8,12 +8,15 @@ import "@fontsource/outfit/300.css";
 import "@fontsource/outfit/400.css";
 import "@fontsource/outfit/600.css";
 import { initSentry } from "./lib/sentry";
+import { HelmetProvider } from "react-helmet-async";
 
 // Initialize Sentry before rendering
 initSentry();
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <HelmetProvider>
+      <App />
+    </HelmetProvider>
   </React.StrictMode>
 );
