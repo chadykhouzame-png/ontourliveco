@@ -139,7 +139,7 @@ export default function FirstLight() {
 
         {position === null ? (
           <form className="cl-form" id="cl-signup" ref={formRef} onSubmit={onSubmit} noValidate>
-            <div className="cl-seg" role="group" aria-label="I am an">
+            <div className="cl-seg" role="group" aria-label="Sign up as">
               <button
                 type="button"
                 aria-pressed={role === "artist"}
