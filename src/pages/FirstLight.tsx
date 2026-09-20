@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import PageSeo from "@/components/PageSeo";
 import LaunchCountdown from "@/components/LaunchCountdown";
 import appPreview from "@/assets/app-preview.jpg";
+import { trackEvent } from "@/lib/analytics";
 
 /**
  * On Tour Live — Founding List holding page.
@@ -35,6 +36,26 @@ export default function FirstLight() {
   const heldRef = useRef<HTMLDivElement | null>(null);
   const honeypotRef = useRef<HTMLInputElement | null>(null);
   const startedAtRef = useRef<number>(Date.now());
+
+  const viewTrackedRef = useRef(false);
+
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form || viewTrackedRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && !viewTrackedRef.current) {
+          viewTrackedRef.current = true;
+          trackEvent("waitlist_form_view", { role });
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 },
+    );
+    observer.observe(form);
+    return () => observer.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (position === null) return;
@@ -93,6 +114,9 @@ export default function FirstLight() {
     setTouched((prev) => ({ ...prev, [name]: true }));
     const message = validate(name, values[name]);
     setErrors((prev) => ({ ...prev, [name]: message || undefined }));
+    if (message) {
+      trackEvent("waitlist_validation_error", { role, field: name, stage: "blur" });
+    }
   }
 
   function chooseRole(next: "artist" | "venue") {
@@ -138,6 +162,13 @@ export default function FirstLight() {
           : "Please fix the highlighted field.",
       );
       setHintTone("ox");
+      trackEvent("waitlist_validation_error", {
+        role,
+        stage: "submit",
+        field: firstInvalid,
+        error_count: Object.keys(nextErrors).length,
+        fields: Object.keys(nextErrors).join(","),
+      });
       formRef.current?.querySelector<HTMLInputElement>(`#cl-f-${firstInvalid}`)?.focus();
       return;
     }
@@ -166,13 +197,17 @@ export default function FirstLight() {
       if (data?.position) {
         setPosition(data.position as number);
         setConfirmed({ email: value, role, name: role === "artist" ? artist : venue });
+        trackEvent("waitlist_signup", { role, position: data.position as number });
+        trackEvent("sign_up", { method: "waitlist", role });
       } else if (data?.error === "rate_limited") {
         setHint("Too many attempts — try again in an hour.");
         setHintTone("ox");
+        trackEvent("waitlist_signup_failed", { role, reason: "rate_limited" });
       } else if (data?.error === "duplicate" || data?.error === "already_registered") {
         setErrors((prev) => ({ ...prev, email: "This email is already on the list — you're all set." }));
         setHint("You're already on the list with that email.");
         setHintTone("ox");
+        trackEvent("waitlist_signup_failed", { role, reason: "duplicate" });
       } else {
         throw new Error(data?.error ?? "signup_failed");
       }
@@ -180,6 +215,7 @@ export default function FirstLight() {
       console.error(err);
       setHint("Something went wrong. Try again in a moment.");
       setHintTone("ox");
+      trackEvent("waitlist_signup_failed", { role, reason: "error" });
     } finally {
       setSubmitting(false);
     }
