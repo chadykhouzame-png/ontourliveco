@@ -827,6 +827,32 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   text-align:center;color:var(--sand-ink);margin:20px 0 0;max-width:46ch;
 }
 
+.cl-faq{
+  margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:left;
+}
+.cl-faq .cl-rule{margin-bottom:20px}
+.cl-faq .cl-eyebrow{text-align:center}
+.cl-faq-list{width:100%;margin-top:24px}
+.cl-faq-list details{border-top:1px solid hsl(0 0% 9% / .14)}
+.cl-faq-list details:last-child{border-bottom:1px solid hsl(0 0% 9% / .14)}
+.cl-faq-list summary{
+  list-style:none;cursor:pointer;padding:14px 28px 14px 0;position:relative;
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--pine);
+}
+.cl-faq-list summary::-webkit-details-marker{display:none}
+.cl-faq-list summary::after{
+  content:"+";position:absolute;right:2px;top:50%;transform:translateY(-50%);
+  font-family:var(--font-body);font-weight:500;font-size:16px;color:var(--pine);
+}
+.cl-faq-list details[open] summary::after{content:"\2212"}
+.cl-faq-list summary:focus-visible{outline:3px solid var(--pine);outline-offset:2px;border-radius:4px}
+.cl-faq-list details p{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.75;
+  color:var(--ink);opacity:.82;margin:0 0 16px;max-width:52ch;
+}
+
 
 
 .cl-contact{
