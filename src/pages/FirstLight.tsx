@@ -749,6 +749,29 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   color:var(--ink);opacity:.72;margin:22px 0 0;max-width:44ch;
 }
 
+.cl-quotes{
+  margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:left;
+}
+.cl-quotes .cl-rule{margin-bottom:20px}
+.cl-quotes .cl-eyebrow{text-align:center}
+.cl-quotes-list{list-style:none;margin:24px 0 0;padding:0;width:100%;display:grid;gap:18px}
+.cl-quotes-list li{border-top:1px solid hsl(0 0% 9% / .14);padding-top:14px}
+.cl-quotes-list blockquote{margin:0}
+.cl-quotes-list blockquote p{
+  font-family:var(--font-accent);font-style:italic;
+  font-size:clamp(15px,2vw,17px);line-height:1.6;color:var(--ink);margin:0;
+}
+.cl-quotes-list blockquote footer{
+  font-family:var(--font-body);font-weight:700;font-size:10px;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--pine);margin-top:10px;
+}
+.cl-quotes-note{
+  font-family:var(--font-body);font-weight:500;font-size:12px;line-height:1.7;
+  text-align:center;color:var(--sand-ink);margin:20px 0 0;max-width:46ch;
+}
+
+
 
 .cl-contact{
   margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
