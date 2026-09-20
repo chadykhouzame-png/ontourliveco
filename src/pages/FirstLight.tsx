@@ -83,8 +83,17 @@ export default function FirstLight() {
     setErrors((prev) => ({ ...prev, [name]: message || undefined }));
   }
 
-  function joinAs(next: "artist" | "venue") {
+  function chooseRole(next: "artist" | "venue") {
     setRole(next);
+    setErrors({});
+    setTouched({});
+    setHint("App launches September 2026 · Sydney first");
+    setHintTone("muted");
+  }
+
+  function joinAs(next: "artist" | "venue") {
+    chooseRole(next);
+
     const form = formRef.current;
     if (form) {
       form.scrollIntoView({ behavior: "smooth", block: "center" });
