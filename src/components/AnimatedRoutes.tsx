@@ -85,8 +85,9 @@ const AnimatedRoutes = () => {
         <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         
         {/* Legal */}
-        <Route path="/terms" element={<ProtectedRoute><TermsOfService /></ProtectedRoute>} />
-        <Route path="/privacy" element={<ProtectedRoute><PrivacyPolicy /></ProtectedRoute>} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+
         
         {/* Legacy hyphenated redirects — prevent 404s from old Stripe URLs, bookmarks, emails */}
         <Route path="/artist-dashboard" element={<LegacyRedirect to="/artist/dashboard" />} />
