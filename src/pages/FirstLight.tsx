@@ -889,10 +889,27 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   border:1px solid hsl(0 0% 9% / .14);border-radius:14px;background:var(--bone-lift);
 }
 .cl-preview-hint{display:none}
+.cl-preview-notes{
+  list-style:none;margin:16px 0 0;padding:0;width:100%;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:14px 24px;text-align:left;
+}
+.cl-preview-notes li{
+  display:flex;flex-direction:column;gap:6px;
+  border-top:1px solid hsl(0 0% 9% / .14);padding-top:10px;
+}
+.cl-preview-note-label{
+  font-family:var(--font-body);font-weight:600;font-size:10.5px;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--pine);
+}
+.cl-preview-note-text{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
+  color:var(--ink);opacity:.82;
+}
 .cl-preview-figure figcaption{
   font-family:var(--font-body);font-weight:500;font-size:12.5px;line-height:1.7;
-  color:var(--ink);opacity:.68;margin-top:12px;
+  color:var(--sand-ink);margin-top:14px;
 }
+
 
 
 .cl-tools{
