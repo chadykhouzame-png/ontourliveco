@@ -287,6 +287,12 @@ export default function FirstLight() {
               {submitting ? "Holding your place…" : "Take your place"}
             </button>
             <p className="cl-hint" data-tone={hintTone} role="status" aria-live="polite">{hint}</p>
+            <p className="cl-privacy">
+              We&rsquo;ll only email you about the launch and your place on the list. No spam, no sharing
+              or selling your details, and you can ask us to remove you any time. See our{" "}
+              <a className="cl-link" href="/privacy">privacy policy</a>.
+            </p>
+
           </form>
         ) : (
           <div className="cl-held" role="status" aria-live="polite">
