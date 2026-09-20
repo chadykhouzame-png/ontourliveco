@@ -341,7 +341,25 @@ export default function FirstLight() {
           </button>
         </section>
 
-
+        <section className="cl-tools" aria-labelledby="cl-tools-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">What&rsquo;s inside</p>
+          <h2 id="cl-tools-title" className="cl-how-title">The tools, in short</h2>
+          <ul className="cl-tools-grid">
+            <li><h3>Profiles &amp; press kits</h3><p>Bio, photos, music and past rooms in one page you keep current.</p></li>
+            <li><h3>Search &amp; filters</h3><p>Find acts or rooms by city, date, genre and audience size.</p></li>
+            <li><h3>Availability calendar</h3><p>Mark the nights you are free or the nights you need filled.</p></li>
+            <li><h3>Direct messaging</h3><p>Talk it through in one thread, with files and read receipts.</p></li>
+            <li><h3>Offers &amp; agreements</h3><p>Put terms in writing and keep every change on the record.</p></li>
+            <li><h3>Payments</h3><p>Secure transfers and receipts handled inside the app.</p></li>
+            <li><h3>Audience insights</h3><p>Live follower and reach numbers pulled from social accounts.</p></li>
+            <li><h3>Reviews &amp; history</h3><p>Ratings from past nights so both sides know who they are dealing with.</p></li>
+          </ul>
+          <p className="cl-tools-note">
+            On Tour Live is software for artists and venues to run their own arrangements —
+            we are not an agency and we do not book on anyone&rsquo;s behalf.
+          </p>
+        </section>
 
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
@@ -584,6 +602,33 @@ const styles = `
   color:var(--ink);opacity:.82;margin:8px 0 0;
 }
 
+.cl-tools{
+  margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:left;
+}
+.cl-tools .cl-rule{margin-bottom:20px}
+.cl-tools .cl-eyebrow{text-align:center}
+.cl-tools-grid{
+  list-style:none;margin:24px 0 0;padding:0;width:100%;
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:18px 24px;
+}
+.cl-tools-grid li{border-top:1px solid hsl(0 0% 9% / .14);padding-top:12px}
+.cl-tools-grid h3{
+  font-family:var(--font-body);font-weight:700;font-size:10px;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--pine);margin:0;
+}
+.cl-tools-grid p{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
+  color:var(--ink);opacity:.8;margin:6px 0 0;
+}
+.cl-tools-note{
+  font-family:var(--font-accent);font-style:italic;
+  font-size:clamp(14px,1.8vw,16px);line-height:1.6;text-align:center;
+  color:var(--ink);opacity:.72;margin:22px 0 0;max-width:44ch;
+}
+
+
 .cl-contact{
   margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
   max-width:460px;
@@ -665,7 +710,11 @@ const styles = `
   .cl-how-item{gap:12px;padding:16px 0}
   .cl-how-num{min-width:20px;font-size:14px}
   .cl-how-item h3{letter-spacing:.2em}
+  .cl-tools{margin-top:34px}
+  .cl-tools-grid{grid-template-columns:1fr;gap:0}
+  .cl-tools-grid li{padding:14px 0}
   .cl-contact{margin-top:34px;width:100%}
+
   .cl-social{margin-top:16px;gap:8px;width:100%;flex-wrap:nowrap}
   .cl-social-link{
     flex:1;justify-content:center;padding:13px 6px;
@@ -681,7 +730,7 @@ const styles = `
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-tools,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
@@ -691,7 +740,9 @@ const styles = `
   .fl-countdown{animation-delay:.75s}
   .cl-form,.cl-held{animation-delay:.9s}
   .cl-how{animation-delay:1.05s}
-  .cl-contact{animation-delay:1.2s}
+  .cl-tools{animation-delay:1.15s}
+  .cl-contact{animation-delay:1.25s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
 `;
+
