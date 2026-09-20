@@ -237,10 +237,10 @@ export default function FirstLight() {
             <button className="cl-cta" type="submit" disabled={submitting}>
               {submitting ? "Holding your place…" : "Take your place"}
             </button>
-            <p className="cl-hint" data-tone={hintTone}>{hint}</p>
+            <p className="cl-hint" data-tone={hintTone} role="status" aria-live="polite">{hint}</p>
           </form>
         ) : (
-          <div className="cl-held" aria-live="polite">
+          <div className="cl-held" role="status" aria-live="polite">
             <div className="cl-rule" />
             <h2>You&rsquo;re on the list</h2>
             <div className="cl-num">No. {position}</div>
