@@ -24,7 +24,7 @@ export default function FirstLight() {
   const [venueName, setVenueName] = useState("");
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
-  const [touched, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
+  const [, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [hint, setHint] = useState("App launches September 2026 · Sydney first");
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
