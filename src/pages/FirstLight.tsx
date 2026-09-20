@@ -1,4 +1,4 @@
-import { useState, useRef, FormEvent } from "react";
+import { useState, useRef, useEffect, FormEvent } from "react";
 import { Instagram, Facebook, Music2 } from "lucide-react";
 import { socialLinks } from "@/config/social";
 import { useLocation } from "react-router-dom";
