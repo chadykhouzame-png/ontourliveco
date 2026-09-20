@@ -497,7 +497,7 @@ const styles = `
 .cl-root{
   --bone:#EFE8DA; --bone-lift:#F5F0E6;
   --pine:#21402C; --pine-deep:#182F20;
-  --ink:#171512; --ox:#572B2B; --sand:#8E8570;
+  --ink:#171512; --ox:#572B2B; --sand:#8E8570; --sand-ink:#5C5445;
   --font-display:'Young Serif',serif;
   --font-accent:'Instrument Serif',serif;
   --font-body:'Archivo',sans-serif;
@@ -515,7 +515,7 @@ const styles = `
 
 .cl-eyebrow{
   font-family:var(--font-body);font-weight:700;font-size:11px;
-  letter-spacing:.28em;text-transform:uppercase;color:var(--sand);
+  letter-spacing:.28em;text-transform:uppercase;color:var(--sand-ink);
 }
 .cl-eyebrow.cl-pine{color:var(--pine)}
 .cl-eyebrow a{color:inherit;text-decoration:none}
@@ -539,7 +539,7 @@ const styles = `
 }
 .cl-descriptor{
   font-family:var(--font-body);font-weight:700;font-size:11px;
-  letter-spacing:.28em;text-transform:uppercase;color:var(--sand);
+  letter-spacing:.28em;text-transform:uppercase;color:var(--sand-ink);
   margin-top:18px;
 }
 
@@ -569,7 +569,7 @@ const styles = `
   padding:14px 20px;text-align:center;letter-spacing:.02em;
   transition:border-color .2s;
 }
-.cl-form input.cl-input::placeholder{color:var(--sand)}
+.cl-form input.cl-input::placeholder{color:var(--sand-ink)}
 .cl-form input.cl-input:focus{border-color:var(--pine);outline:none}
 
 .cl-cta{
@@ -584,7 +584,7 @@ const styles = `
 .cl-cta:disabled{opacity:.55;cursor:not-allowed}
 
 .cl-hint{
-  font-family:var(--font-body);font-size:11.5px;color:var(--sand);
+  font-family:var(--font-body);font-size:11.5px;color:var(--sand-ink);
   letter-spacing:.04em;margin-top:16px;min-height:14px;
 }
 .cl-hint[data-tone="ox"]{color:var(--ox);font-family:var(--font-accent);font-style:italic;font-size:14px}
@@ -603,7 +603,7 @@ const styles = `
 .cl-sub{font-family:var(--font-accent);font-style:italic;color:var(--ox);font-size:18px;margin:6px 0 0}
 .cl-sub-quiet{
   font-family:var(--font-body);font-style:normal;font-weight:500;
-  color:var(--sand);font-size:13.5px;letter-spacing:.04em;line-height:1.7;
+  color:var(--sand-ink);font-size:13.5px;letter-spacing:.04em;line-height:1.7;
   margin-top:14px;
 }
 .cl-link{color:var(--pine);font-weight:700;text-decoration:none}
@@ -717,7 +717,7 @@ const styles = `
 .cl-social-link:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
 .cl-contact-note{
   font-family:var(--font-body);font-size:12px;letter-spacing:.04em;
-  color:var(--sand);margin-top:14px;
+  color:var(--sand-ink);margin-top:14px;
 }
 
 .cl-footer{
@@ -725,7 +725,7 @@ const styles = `
   padding:24px clamp(22px,5vw,54px);
   border-top:1px solid hsl(0 0% 9% / .14);
 }
-.cl-footer-link{color:var(--sand);text-decoration:none}
+.cl-footer-link{color:var(--sand-ink);text-decoration:none}
 .cl-footer-link:hover{color:var(--pine)}
 
 /* Countdown restyled to club aesthetic (uses fl-* class hooks in LaunchCountdown) */
@@ -739,7 +739,7 @@ const styles = `
 }
 .fl-cd-label{
   margin-top:6px;font-family:var(--font-body);font-weight:700;font-size:9.5px;
-  letter-spacing:.28em;color:var(--sand);text-transform:uppercase;
+  letter-spacing:.28em;color:var(--sand-ink);text-transform:uppercase;
 }
 .fl-cd-sep{
   font-family:var(--font-display);font-size:clamp(22px,3.4vw,32px);
