@@ -364,6 +364,23 @@ export default function FirstLight() {
           </ol>
         </section>
 
+        <section className="cl-tail cl-midcta" aria-labelledby="cl-midcta-title">
+          <h2 className="cl-tail-title" id="cl-midcta-title">Be there on day one</h2>
+          <p className="cl-tail-lead">
+            Join the founding list and we&rsquo;ll let you know the moment On Tour Live opens in your city.
+          </p>
+          <div className="cl-tail-actions">
+            <button type="button" className="cl-ghost" onClick={() => joinAs("artist")}>
+              Join as an artist
+            </button>
+            <button type="button" className="cl-ghost" onClick={() => joinAs("venue")}>
+              Join as a venue
+            </button>
+          </div>
+        </section>
+
+
+
         <section className="cl-preview" aria-labelledby="cl-preview-title">
           <div className="cl-rule" />
           <p className="cl-eyebrow cl-pine">A first look</p>
