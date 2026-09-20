@@ -244,7 +244,47 @@ export default function FirstLight() {
           </div>
         )}
 
+        <section className="cl-how" aria-labelledby="cl-how-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">What On Tour Live does</p>
+          <h2 id="cl-how-title" className="cl-how-title">Built for artists and the rooms that book them</h2>
+          <ol className="cl-how-list">
+            <li className="cl-how-item">
+              <span className="cl-how-num">I</span>
+              <div>
+                <h3>Discover opportunities</h3>
+                <p>
+                  See open slots and venue requests as they are posted, filtered by city,
+                  date and the kind of night you play — no cold outreach, no missed calls.
+                </p>
+              </div>
+            </li>
+            <li className="cl-how-item">
+              <span className="cl-how-num">II</span>
+              <div>
+                <h3>Manage your profile</h3>
+                <p>
+                  One living press kit: bio, photos, music, past rooms, live audience numbers
+                  and your travel calendar — always current, always ready to send.
+                </p>
+              </div>
+            </li>
+            <li className="cl-how-item">
+              <span className="cl-how-num">III</span>
+              <div>
+                <h3>Connect with venues</h3>
+                <p>
+                  Message directly, agree the fee, and lock the date in one thread —
+                  offers, confirmations and payment all handled in the app.
+                </p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
         <section className="cl-contact" aria-label="Follow On Tour Live">
+          <div className="cl-rule" />
+
           <div className="cl-rule" />
           <p className="cl-contact-lead">Follow along</p>
           <div className="cl-social">
