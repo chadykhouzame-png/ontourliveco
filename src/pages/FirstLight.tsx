@@ -825,6 +825,14 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 .cl-form input.cl-input::placeholder{color:var(--sand-ink)}
 .cl-form input.cl-input:focus{border-color:var(--pine);outline:none}
+.cl-field{display:flex;flex-direction:column;gap:6px}
+.cl-form input.cl-input[data-invalid="true"]{border-color:var(--ox);background:hsl(0 40% 97%)}
+.cl-form input.cl-input[data-invalid="true"]:focus{border-color:var(--ox)}
+.cl-error{
+  margin:0;color:var(--ox);font-family:var(--font-accent);font-style:italic;
+  font-size:13.5px;line-height:1.35;text-align:center;
+}
+
 
 .cl-cta{
   margin-top:22px;width:100%;background:var(--pine);color:var(--bone);
