@@ -360,7 +360,7 @@ export default function FirstLight() {
                 <p>Search by city, date, genre and audience size, or post what you need and let the right side come to you.</p>
               </div>
             </li>
-            <li>
+            <li className="cl-how-item">
               <span className="cl-how-num">III</span>
               <div>
                 <h3>Agree it in one place</h3>
