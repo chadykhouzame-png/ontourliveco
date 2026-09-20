@@ -1,5 +1,7 @@
 import { useState, FormEvent } from "react";
+import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import PageSeo from "@/components/PageSeo";
 import LaunchCountdown from "@/components/LaunchCountdown";
 
 /**
@@ -86,9 +88,18 @@ export default function FirstLight() {
     }
   }
 
+  const location = useLocation();
+  const seoPath = location.pathname === "/waitlist" ? "/waitlist" : "/";
+
   return (
     <div className="cl-root">
+      <PageSeo
+        title="On Tour Live — Join the founding list"
+        description="The booking app for artists and venues. Launching September 2026, Sydney first. Join the founding list and take your place."
+        path={seoPath}
+      />
       <style>{styles}</style>
+
 
       <header className="cl-bar">
         <Crest className="cl-mini" />

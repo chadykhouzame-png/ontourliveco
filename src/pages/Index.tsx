@@ -14,6 +14,7 @@ import EventHighlights from "@/components/EventHighlights";
 import PhotoGallery from "@/components/PhotoGallery";
 import FAQ from "@/components/FAQ";
 import SiteFooter from "@/components/SiteFooter";
+import PageSeo from "@/components/PageSeo";
 
 
 const Index = () => {
@@ -71,6 +72,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageSeo
+        title="On Tour Live — Book artists and venues"
+        description="On Tour Live connects artists and venues: discover talent, send offers, manage bookings and payments in one place. Sydney first, launching September 2026."
+        path="/"
+      />
       
       
       {/* Navigation - iOS frosted glass style */}
