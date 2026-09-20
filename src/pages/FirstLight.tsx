@@ -1,4 +1,4 @@
-import { useState, useRef, FormEvent } from "react";
+import { useState, useRef, useEffect, FormEvent } from "react";
 import { Instagram, Facebook, Music2 } from "lucide-react";
 import { socialLinks } from "@/config/social";
 import { useLocation } from "react-router-dom";
@@ -32,6 +32,16 @@ export default function FirstLight() {
   const [shareHint, setShareHint] = useState("");
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
+  const heldRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (position === null) return;
+    const el = heldRef.current;
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.focus({ preventScroll: true });
+  }, [position]);
+
 
   const values: Record<FieldName, string> = { firstName, lastName, artistName, venueName, email };
   const setters: Record<FieldName, (v: string) => void> = {
@@ -295,7 +305,7 @@ export default function FirstLight() {
 
           </form>
         ) : (
-          <div className="cl-held" role="status" aria-live="polite">
+          <div className="cl-held" ref={heldRef} tabIndex={-1} role="status" aria-live="polite">
             <div className="cl-rule" />
             <h2>You&rsquo;re on the list</h2>
             <div className="cl-num">No. {position}</div>
@@ -1156,12 +1166,27 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-wordmark{font-size:clamp(34px,10vw,44px);max-width:12ch}
   .cl-aside{margin-top:10px}
   .cl-descriptor{margin-top:14px;letter-spacing:.2em;line-height:1.7}
-  .cl-form{margin-top:26px}
+  .cl-form{margin-top:26px;width:100%}
   .cl-seg{margin-bottom:14px}
   .cl-seg button{padding:15px 0;letter-spacing:.2em}
+  .cl-fields{gap:14px}
+  .cl-field{gap:5px}
   .cl-form input.cl-input{padding:15px 18px;font-size:16px}
-  .cl-cta{padding:18px 0;letter-spacing:.2em}
-  .cl-held{margin-top:26px}
+  .cl-error{font-size:13px;line-height:1.4;padding:0 4px}
+  .cl-cta{padding:18px 0;letter-spacing:.2em;margin-top:18px}
+  .cl-hint{margin-top:12px}
+  .cl-privacy{font-size:12px;line-height:1.65;padding:0 2px;margin-top:12px}
+  .cl-held{margin-top:26px;width:100%}
+  .cl-held h2{font-size:26px}
+  .cl-num{font-size:clamp(48px,16vw,64px);margin:10px 0 4px}
+  .cl-sub{font-size:16px}
+  .cl-sub-quiet{font-size:13px}
+  .cl-confirm{font-size:13.5px;padding:14px;margin-top:16px;max-width:none}
+  .cl-held .cl-ghost{
+    width:100%;margin-top:20px;padding:16px 12px;
+    letter-spacing:.16em;font-size:10.5px;line-height:1.4;
+  }
+
   .cl-how{margin-top:34px}
   .cl-how-title{font-size:23px;max-width:none}
   .cl-how-list{margin-top:20px}
