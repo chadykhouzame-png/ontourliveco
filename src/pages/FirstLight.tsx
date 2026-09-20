@@ -353,7 +353,7 @@ export default function FirstLight() {
                 <p>Artists build a press kit, venues describe their rooms and the nights they run. It takes minutes and stays current.</p>
               </div>
             </li>
-            <li>
+            <li className="cl-how-item">
               <span className="cl-how-num">II</span>
               <div>
                 <h3>Find the match</h3>
