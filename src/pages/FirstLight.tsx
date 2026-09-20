@@ -1124,7 +1124,10 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-tools{margin-top:34px}
 
   .cl-quotes{margin-top:34px}
+  .cl-benefits{margin-top:34px}
+  .cl-faq{margin-top:34px}
   .cl-tail{margin-top:34px;width:100%}
+
   .cl-midcta{margin-top:26px}
   .cl-tail-title{font-size:22px}
   .cl-tail-lead{margin-top:8px;max-width:34ch}
