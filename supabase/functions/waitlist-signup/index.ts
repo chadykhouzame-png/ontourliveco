@@ -80,7 +80,7 @@ serve(async (req) => {
   // Honeypot + submit-speed trap: pretend it worked, store nothing.
   if ((company ?? "").trim().length > 0 || (elapsedMs !== undefined && elapsedMs < MIN_FILL_MS)) {
     console.warn("waitlist-signup: bot submission blocked", { ip, honeypot: Boolean(company) });
-    return new Response(JSON.stringify({ position: 0 }), {
+    return new Response(JSON.stringify({ position: 1 }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
