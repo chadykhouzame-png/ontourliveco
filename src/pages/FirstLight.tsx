@@ -651,6 +651,21 @@ const styles = `
   color:var(--ink);opacity:.82;margin:8px 0 0;
 }
 
+.cl-preview{
+  margin-top:clamp(40px,6vh,64px);width:min(620px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.cl-preview .cl-rule{margin-bottom:20px}
+.cl-preview-figure{margin:24px 0 0;width:100%}
+.cl-preview-figure img{
+  display:block;width:100%;height:auto;
+  border:1px solid hsl(0 0% 9% / .14);border-radius:14px;background:var(--bone-lift);
+}
+.cl-preview-figure figcaption{
+  font-family:var(--font-body);font-weight:500;font-size:12.5px;line-height:1.7;
+  color:var(--ink);opacity:.68;margin-top:12px;
+}
+
 .cl-tools{
   margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
   display:flex;flex-direction:column;align-items:center;text-align:left;
