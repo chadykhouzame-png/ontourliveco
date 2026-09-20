@@ -370,6 +370,25 @@ export default function FirstLight() {
           </ol>
         </section>
 
+        <section className="cl-preview" aria-labelledby="cl-preview-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">A first look</p>
+          <h2 id="cl-preview-title" className="cl-how-title">What you&rsquo;ll be using</h2>
+          <figure className="cl-preview-figure">
+            <img
+              src={appPreview}
+              alt="Two phone screens from the On Tour Live app: a list of open slots at Australian venues, and an artist profile with genre tags and an availability calendar."
+              width={1408}
+              height={1024}
+              loading="lazy"
+            />
+            <figcaption>
+              Open slots across the country on one side, a living artist profile with real
+              availability on the other. Design in progress — final app may differ.
+            </figcaption>
+          </figure>
+        </section>
+
         <section className="cl-tools" aria-labelledby="cl-tools-title">
           <div className="cl-rule" />
           <p className="cl-eyebrow cl-pine">What&rsquo;s inside</p>
