@@ -246,8 +246,8 @@ export default function FirstLight() {
 
         <section className="cl-how" aria-labelledby="cl-how-title">
           <div className="cl-rule" />
-          <p className="cl-eyebrow cl-pine">What On Tour Live does</p>
-          <h2 id="cl-how-title" className="cl-how-title">Built for artists and the rooms that book them</h2>
+          <p className="cl-eyebrow cl-pine">For artists</p>
+          <h2 id="cl-how-title" className="cl-how-title">Find the rooms, keep the work coming</h2>
           <ol className="cl-how-list">
             <li className="cl-how-item">
               <span className="cl-how-num">I</span>
