@@ -121,7 +121,7 @@ export default function FirstLight() {
         <LaunchCountdown />
 
         {position === null ? (
-          <form className="cl-form" onSubmit={onSubmit} noValidate>
+          <form className="cl-form" id="cl-signup" ref={formRef} onSubmit={onSubmit} noValidate>
             <div className="cl-seg" role="group" aria-label="I am an">
               <button
                 type="button"
