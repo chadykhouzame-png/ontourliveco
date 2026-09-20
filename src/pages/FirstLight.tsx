@@ -1119,7 +1119,9 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
     font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
     color:var(--sand-ink);margin:10px 0 0;
   }
-  .cl-preview-figure figcaption{margin-top:8px;font-size:12px}
+  .cl-preview-notes{grid-template-columns:1fr;gap:12px;margin-top:14px}
+  .cl-preview-figure figcaption{margin-top:12px;font-size:12px}
+
   .cl-tools{margin-top:34px}
 
   .cl-quotes{margin-top:34px}
