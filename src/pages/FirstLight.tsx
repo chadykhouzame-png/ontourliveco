@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import PageSeo from "@/components/PageSeo";
 import LaunchCountdown from "@/components/LaunchCountdown";
-import LocalBusinessSchema from "@/components/LocalBusinessSchema";
 
 /**
  * On Tour Live — Founding List holding page.
@@ -99,7 +98,6 @@ export default function FirstLight() {
         description="The booking app for artists and venues. Launching September 2026, Sydney first. Join the founding list and take your place."
         path={seoPath}
       />
-      <LocalBusinessSchema />
       <style>{styles}</style>
 
 

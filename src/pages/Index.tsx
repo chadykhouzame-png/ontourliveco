@@ -15,7 +15,6 @@ import PhotoGallery from "@/components/PhotoGallery";
 import FAQ from "@/components/FAQ";
 import SiteFooter from "@/components/SiteFooter";
 import PageSeo from "@/components/PageSeo";
-import LocalBusinessSchema from "@/components/LocalBusinessSchema";
 
 
 const Index = () => {
@@ -78,7 +77,6 @@ const Index = () => {
         description="On Tour Live connects artists and venues: discover talent, send offers, manage bookings and payments in one place. Sydney first, launching September 2026."
         path="/"
       />
-      <LocalBusinessSchema />
       
       
       {/* Navigation - iOS frosted glass style */}
