@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import PageSeo from "@/components/PageSeo";
 import LaunchCountdown from "@/components/LaunchCountdown";
+import LocalBusinessSchema from "@/components/LocalBusinessSchema";
 
 /**
  * On Tour Live — Founding List holding page.
