@@ -156,6 +156,8 @@ export default function FirstLight() {
           lastName: last,
           artistName: role === "artist" ? artist : "",
           venueName: role === "venue" ? venue : "",
+          company: honeypotRef.current?.value ?? "",
+          elapsedMs: Date.now() - startedAtRef.current,
         },
       });
       if (error) throw error;
