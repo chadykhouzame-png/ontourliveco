@@ -127,7 +127,7 @@ export default function FirstLight() {
         <span className="cl-eyebrow">Sydney · MMXXVI</span>
       </header>
 
-      <main className="cl-main">
+      <main className="cl-main" id="cl-main" tabIndex={-1}>
         <Crest className="cl-mark" />
 
         <p className="cl-eyebrow cl-pine">On Tour Live</p>
