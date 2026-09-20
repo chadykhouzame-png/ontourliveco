@@ -614,9 +614,8 @@ export default function FirstLight() {
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
           <div className="cl-rule" />
-
-          <div className="cl-rule" />
           <p className="cl-contact-lead">Follow along</p>
+
           <div className="cl-social">
             <a
               className="cl-social-link"
@@ -1127,10 +1126,19 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-quotes{margin-top:34px}
   .cl-benefits{margin-top:34px}
   .cl-faq{margin-top:34px}
-  .cl-tail{margin-top:34px}
+  .cl-tail{margin-top:34px;width:100%}
+
+  .cl-midcta{margin-top:26px}
+  .cl-tail-title{font-size:22px}
+  .cl-tail-lead{margin-top:8px;max-width:34ch}
+  .cl-tail-actions{
+    flex-direction:column;flex-wrap:nowrap;gap:10px;width:100%;margin-top:16px;
+  }
+  .cl-tail-actions .cl-ghost{width:100%;padding:15px 0;letter-spacing:.18em}
   .cl-faq-list summary{font-size:11px;padding:16px 28px 16px 0}
   .cl-quotes-list{gap:14px}
   .cl-tools-grid{grid-template-columns:1fr;gap:0}
+
   .cl-tools-grid li{padding:14px 0}
   .cl-contact{margin-top:34px;width:100%}
 
