@@ -489,6 +489,36 @@ const styles = `
 }
 .cl-ghost:hover{background:var(--pine);color:var(--bone)}
 
+.cl-how{
+  margin-top:clamp(44px,7vh,72px);width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:left;
+}
+.cl-how .cl-rule{margin-bottom:20px}
+.cl-how .cl-eyebrow{text-align:center}
+.cl-how-title{
+  font-family:var(--font-display);font-weight:400;
+  font-size:clamp(24px,3.4vw,34px);line-height:1.15;letter-spacing:.02em;
+  color:var(--ink);text-align:center;margin:12px 0 0;max-width:20ch;
+}
+.cl-how-list{list-style:none;margin:26px 0 0;padding:0;width:100%;display:flex;flex-direction:column}
+.cl-how-item{
+  display:flex;gap:16px;align-items:flex-start;
+  padding:18px 0;border-top:1px solid hsl(0 0% 9% / .14);
+}
+.cl-how-item:last-child{border-bottom:1px solid hsl(0 0% 9% / .14)}
+.cl-how-num{
+  font-family:var(--font-display);font-size:15px;color:var(--pine);
+  line-height:1;padding-top:3px;min-width:26px;letter-spacing:.06em;
+}
+.cl-how-item h3{
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;color:var(--pine);margin:0;
+}
+.cl-how-item p{
+  font-family:var(--font-body);font-weight:500;font-size:14px;line-height:1.75;
+  color:var(--ink);opacity:.82;margin:8px 0 0;
+}
+
 .cl-contact{
   margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
   max-width:460px;
