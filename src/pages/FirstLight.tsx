@@ -534,6 +534,7 @@ const styles = `
   display:flex;flex-direction:column;align-items:center;text-align:left;
 }
 .cl-how .cl-rule{margin-bottom:20px}
+.cl-how + .cl-how{margin-top:clamp(30px,4.5vh,48px)}
 .cl-how .cl-eyebrow{text-align:center}
 .cl-how-title{
   font-family:var(--font-display);font-weight:400;
