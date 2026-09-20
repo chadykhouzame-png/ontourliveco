@@ -233,84 +233,47 @@ export default function FirstLight() {
               </button>
             </div>
             <div className="cl-fields">
-              {role === "artist" ? (
-                <>
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="First name"
-                    autoComplete="given-name"
-                    required
-                    aria-label="First name"
-                  />
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last name"
-                    autoComplete="family-name"
-                    required
-                    aria-label="Last name"
-                  />
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    placeholder="Artist name"
-                    autoComplete="nickname"
-                    required
-                    aria-label="Artist name"
-                  />
-                </>
-              ) : (
-                <>
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Full name"
-                    autoComplete="name"
-                    required
-                    aria-label="Full name"
-                  />
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last name"
-                    autoComplete="family-name"
-                    required
-                    aria-label="Last name"
-                  />
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={venueName}
-                    onChange={(e) => setVenueName(e.target.value)}
-                    placeholder="Venue name"
-                    autoComplete="organization"
-                    required
-                    aria-label="Venue name"
-                  />
-                </>
-              )}
-              <input
-                className="cl-input"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                autoComplete="email"
-                required
-                aria-label="Email address"
-              />
+              {activeFields.map((name) => {
+                const invalid = Boolean(errors[name]);
+                return (
+                  <div className="cl-field" key={name}>
+                    <input
+                      id={`cl-f-${name}`}
+                      className="cl-input"
+                      type={name === "email" ? "email" : "text"}
+                      value={values[name]}
+                      onChange={(e) => onFieldChange(name, e.target.value)}
+                      onBlur={() => onFieldBlur(name)}
+                      placeholder={name === "email" ? "your@email.com" : labels[name]}
+                      autoComplete={
+                        name === "email"
+                          ? "email"
+                          : name === "lastName"
+                            ? "family-name"
+                            : name === "artistName"
+                              ? "nickname"
+                              : name === "venueName"
+                                ? "organization"
+                                : role === "artist"
+                                  ? "given-name"
+                                  : "name"
+                      }
+                      maxLength={name === "email" ? 255 : 100}
+                      aria-label={labels[name]}
+                      aria-invalid={invalid}
+                      aria-describedby={invalid ? `cl-e-${name}` : undefined}
+                      data-invalid={invalid ? "true" : undefined}
+                    />
+                    {invalid && (
+                      <p className="cl-error" id={`cl-e-${name}`}>
+                        {errors[name]}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+
             <button className="cl-cta" type="submit" disabled={submitting}>
               {submitting ? "Holding your place…" : "Take your place"}
             </button>
