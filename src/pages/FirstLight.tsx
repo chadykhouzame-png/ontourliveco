@@ -256,6 +256,9 @@ export default function FirstLight() {
                 const invalid = Boolean(errors[name]);
                 return (
                   <div className="cl-field" key={name}>
+                    <label className="cl-label" htmlFor={`cl-f-${name}`}>
+                      {labels[name]}
+                    </label>
                     <input
                       id={`cl-f-${name}`}
                       className="cl-input"
@@ -278,14 +281,15 @@ export default function FirstLight() {
                                   : "name"
                       }
                       maxLength={name === "email" ? 255 : 100}
-                      aria-label={labels[name]}
+                      required
                       aria-invalid={invalid}
                       aria-describedby={invalid ? `cl-e-${name}` : undefined}
                       data-invalid={invalid ? "true" : undefined}
                     />
                     {invalid && (
-                      <p className="cl-error" id={`cl-e-${name}`}>
-                        {errors[name]}
+                      <p className="cl-error" id={`cl-e-${name}`} role="alert">
+                        <span aria-hidden="true" className="cl-error-mark">!</span>
+                        <span>{errors[name]}</span>
                       </p>
                     )}
                   </div>
@@ -851,11 +855,22 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 .cl-form input.cl-input::placeholder{color:var(--sand-ink)}
 .cl-form input.cl-input:focus{border-color:var(--pine);outline:none}
 .cl-field{display:flex;flex-direction:column;gap:6px}
-.cl-form input.cl-input[data-invalid="true"]{border-color:var(--ox);background:hsl(0 40% 97%)}
+.cl-label{
+  font-family:var(--font-body);font-weight:600;font-size:10px;
+  letter-spacing:.24em;text-transform:uppercase;color:var(--sand-ink);
+  text-align:center;
+}
+.cl-form input.cl-input[data-invalid="true"]{border-color:var(--ox);background:hsl(0 40% 97%);border-width:2px}
 .cl-form input.cl-input[data-invalid="true"]:focus{border-color:var(--ox)}
 .cl-error{
   margin:0;color:var(--ox);font-family:var(--font-accent);font-style:italic;
   font-size:13.5px;line-height:1.35;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.cl-error-mark{
+  flex:none;width:16px;height:16px;border-radius:999px;
+  border:1px solid var(--ox);font-family:var(--font-body);font-style:normal;
+  font-size:11px;font-weight:700;line-height:14px;text-align:center;
 }
 
 
@@ -1172,7 +1187,8 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-fields{gap:14px}
   .cl-field{gap:5px}
   .cl-form input.cl-input{padding:15px 18px;font-size:16px}
-  .cl-error{font-size:13px;line-height:1.4;padding:0 4px}
+  .cl-error{font-size:13.5px;line-height:1.45;padding:0 4px}
+  .cl-label{font-size:10.5px;letter-spacing:.2em}
   .cl-cta{padding:18px 0;letter-spacing:.2em;margin-top:18px}
   .cl-hint{margin-top:12px}
   .cl-privacy{font-size:12px;line-height:1.65;padding:0 2px;margin-top:12px}
