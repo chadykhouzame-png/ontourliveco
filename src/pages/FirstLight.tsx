@@ -532,7 +532,36 @@ export default function FirstLight() {
                 above and we will email you the moment it opens in your city.
               </p>
             </details>
+            <details>
+              <summary>Who can join?</summary>
+              <p>
+                Artists of any size — DJs, bands, solo singers — and any venue that puts on live
+                music, from small bars to clubs. We start in Sydney and open other cities from there.
+              </p>
+            </details>
+            <details>
+              <summary>What happens after I join the list?</summary>
+              <p>
+                You get one email confirming your place, then a note when the app opens in your city.
+                No spam, and you can ask us to remove you at any time.
+              </p>
+            </details>
+            <details>
+              <summary>Do I have to accept every offer?</summary>
+              <p>
+                No. Every slot and every offer is yours to accept, counter or ignore. Nothing is
+                agreed until both sides confirm it in the app.
+              </p>
+            </details>
+            <details>
+              <summary>Is my information private?</summary>
+              <p>
+                Only what you put on your public profile is visible. Your email, messages and payment
+                details stay private, and we never sell your details.
+              </p>
+            </details>
           </div>
+
         </section>
 
         <section className="cl-tail" aria-labelledby="cl-tail-title">
