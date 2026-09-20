@@ -733,6 +733,9 @@ const styles = `
   .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-tools,.cl-contact{
+    opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
+  }
   .cl-mark{animation-delay:.05s}
   .cl-wordmark{animation-delay:.25s}
   .cl-aside{animation-delay:.45s}
@@ -740,7 +743,9 @@ const styles = `
   .fl-countdown{animation-delay:.75s}
   .cl-form,.cl-held{animation-delay:.9s}
   .cl-how{animation-delay:1.05s}
-  .cl-contact{animation-delay:1.2s}
+  .cl-tools{animation-delay:1.15s}
+  .cl-contact{animation-delay:1.25s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
 `;
+
