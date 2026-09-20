@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async";
 
-const SITE_URL = "https://app.ontourlive.co";
+const SITE_URL = "https://ontourlive.co";
 
 interface PageSeoProps {
   title: string;

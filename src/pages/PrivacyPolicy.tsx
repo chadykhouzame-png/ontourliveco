@@ -29,7 +29,7 @@ const PrivacyPolicy = () => {
 
         <div className="prose prose-invert max-w-none space-y-8 text-muted-foreground [&_h2]:text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-foreground [&_h3]:font-medium [&_h3]:mt-6 [&_h3]:mb-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2">
           <p>
-            On Tour Live ("we", "us", or "our") respects your privacy. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our platform at app.ontourlive.co.
+            On Tour Live ("we", "us", or "our") respects your privacy. This Privacy Policy explains how we collect, use, disclose, and protect your information when you use our platform at ontourlive.co.
           </p>
 
           <h2>1. Information We Collect</h2>

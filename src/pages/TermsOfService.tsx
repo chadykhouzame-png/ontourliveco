@@ -29,7 +29,7 @@ const TermsOfService = () => {
 
         <div className="prose prose-invert max-w-none space-y-8 text-muted-foreground [&_h2]:text-foreground [&_h2]:text-xl [&_h2]:font-semibold [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-foreground [&_h3]:font-medium [&_h3]:mt-6 [&_h3]:mb-2 [&_p]:leading-relaxed [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:space-y-2">
           <p>
-            Welcome to On Tour Live ("Platform", "we", "us", or "our"). By accessing or using our platform at app.ontourlive.co, you agree to be bound by these Terms of Service ("Terms"). Please read them carefully.
+            Welcome to On Tour Live ("Platform", "we", "us", or "our"). By accessing or using our platform at ontourlive.co, you agree to be bound by these Terms of Service ("Terms"). Please read them carefully.
           </p>
 
           <h2>1. Acceptance of Terms</h2>
