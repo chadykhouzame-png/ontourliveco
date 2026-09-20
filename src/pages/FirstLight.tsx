@@ -846,7 +846,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   content:"+";position:absolute;right:2px;top:50%;transform:translateY(-50%);
   font-family:var(--font-body);font-weight:500;font-size:16px;color:var(--pine);
 }
-.cl-faq-list details[open] summary::after{content:"\2212"}
+.cl-faq-list details[open] summary::after{content:"–"}
 .cl-faq-list summary:focus-visible{outline:3px solid var(--pine);outline-offset:2px;border-radius:4px}
 .cl-faq-list details p{
   font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.75;
