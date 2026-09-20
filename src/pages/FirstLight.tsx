@@ -510,6 +510,35 @@ const styles = `
   letter-spacing:.02em;color:var(--pine);margin:0;
 }
 
+/* ---- Small screens: tighter rhythm, bigger tap targets ---- */
+@media (max-width:520px){
+  .cl-bar{padding:18px 20px}
+  .cl-main{padding:28px 20px 40px;justify-content:flex-start}
+  .cl-mark{margin-bottom:18px}
+  .cl-wordmark{font-size:clamp(34px,10vw,44px);max-width:12ch}
+  .cl-aside{margin-top:10px}
+  .cl-descriptor{margin-top:14px;letter-spacing:.2em;line-height:1.7}
+  .cl-form{margin-top:26px}
+  .cl-seg{margin-bottom:14px}
+  .cl-seg button{padding:15px 0;letter-spacing:.2em}
+  .cl-form input.cl-input{padding:15px 18px;font-size:16px}
+  .cl-cta{padding:18px 0;letter-spacing:.2em}
+  .cl-held{margin-top:26px}
+  .cl-contact{margin-top:34px;width:100%}
+  .cl-social{margin-top:16px;gap:8px;width:100%;flex-wrap:nowrap}
+  .cl-social-link{
+    flex:1;justify-content:center;padding:13px 6px;
+    letter-spacing:.1em;font-size:10px;gap:6px;
+  }
+  .cl-social-link svg{width:14px;height:14px}
+  .cl-contact-note{margin-top:16px;line-height:1.7}
+  .cl-footer{
+    flex-direction:column;gap:8px;text-align:center;padding:20px;
+  }
+  .cl-footer .cl-eyebrow{letter-spacing:.2em;line-height:1.6}
+  .fl-cd-unit{min-width:54px}
+}
+
 @media (prefers-reduced-motion: no-preference){
   .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
