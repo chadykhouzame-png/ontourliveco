@@ -710,7 +710,11 @@ const styles = `
   .cl-how-item{gap:12px;padding:16px 0}
   .cl-how-num{min-width:20px;font-size:14px}
   .cl-how-item h3{letter-spacing:.2em}
+  .cl-tools{margin-top:34px}
+  .cl-tools-grid{grid-template-columns:1fr;gap:0}
+  .cl-tools-grid li{padding:14px 0}
   .cl-contact{margin-top:34px;width:100%}
+
   .cl-social{margin-top:16px;gap:8px;width:100%;flex-wrap:nowrap}
   .cl-social-link{
     flex:1;justify-content:center;padding:13px 6px;
