@@ -560,7 +560,25 @@ const styles = `
 .cl-seg button:focus-visible,
 .cl-form input:focus-visible,
 .cl-cta:focus-visible,
-.cl-ghost:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
+.cl-ghost:focus-visible,
+.cl-link:focus-visible,
+.cl-footer-link:focus-visible,
+.cl-skip:focus-visible,
+a:focus-visible,
+button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-radius:4px}
+
+.cl-sr{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+.cl-skip{
+  position:absolute;left:50%;top:-60px;transform:translateX(-50%);
+  z-index:20;background:var(--pine);color:var(--bone);
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.24em;text-transform:uppercase;text-decoration:none;
+  padding:12px 20px;border-radius:0 0 999px 999px;transition:top .15s;
+}
+.cl-skip:focus{top:0}
 
 .cl-form input.cl-input{
   width:100%;background:var(--bone-lift);
