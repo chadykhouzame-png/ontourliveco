@@ -177,7 +177,8 @@ serve(async (req) => {
     else if (msg.includes("invalid_last_name")) code = "invalid_last_name";
     else if (msg.includes("invalid_artist_name")) code = "invalid_artist_name";
     else if (msg.includes("invalid_venue_name")) code = "invalid_venue_name";
-    console.error("waitlist_signup error:", error);
+    console.error("waitlist_signup error:", code);
+    if (code === "rate_limited") await logBlocked("rate_limited", ip, userAgent, role);
     return new Response(JSON.stringify({ error: code }), {
       status: code === "rate_limited" ? 429 : 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
