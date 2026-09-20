@@ -594,6 +594,12 @@ const styles = `
   .cl-form input.cl-input{padding:15px 18px;font-size:16px}
   .cl-cta{padding:18px 0;letter-spacing:.2em}
   .cl-held{margin-top:26px}
+  .cl-how{margin-top:34px}
+  .cl-how-title{font-size:23px;max-width:none}
+  .cl-how-list{margin-top:20px}
+  .cl-how-item{gap:12px;padding:16px 0}
+  .cl-how-num{min-width:20px;font-size:14px}
+  .cl-how-item h3{letter-spacing:.2em}
   .cl-contact{margin-top:34px;width:100%}
   .cl-social{margin-top:16px;gap:8px;width:100%;flex-wrap:nowrap}
   .cl-social-link{
