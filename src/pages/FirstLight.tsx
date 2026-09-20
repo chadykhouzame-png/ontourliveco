@@ -447,6 +447,62 @@ export default function FirstLight() {
           </p>
         </section>
 
+        <section className="cl-faq" aria-labelledby="cl-faq-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">Questions, answered</p>
+          <h2 id="cl-faq-title" className="cl-how-title">Common questions</h2>
+          <div className="cl-faq-list">
+            <details>
+              <summary>How do venues discover artists?</summary>
+              <p>
+                Search the roster by city, date, genre and audience reach, and see who is genuinely
+                free that night before you get in touch. Every artist keeps a profile with past
+                rooms, music, photos and live follower numbers, so you can judge the fit first.
+              </p>
+            </details>
+            <details>
+              <summary>How do artists find work?</summary>
+              <p>
+                Open slots and venue requests appear in one feed, filtered by city, date and the
+                kind of night it is. You reply with your fee — no cold outreach, no missed calls.
+              </p>
+            </details>
+            <details>
+              <summary>How does posting a venue slot work?</summary>
+              <p>
+                Put the night, the slot and what you need to the whole roster in one go. Matching
+                artists are notified and respond with their fee, so you compare real offers side by
+                side instead of guessing.
+              </p>
+            </details>
+            <details>
+              <summary>How are payments handled?</summary>
+              <p>
+                Fees are agreed in the app and paid through it, with secure transfers and receipts
+                on both sides. On Tour Live charges a small platform fee on completed payments — we
+                are software for artists and venues, not an agency, and we never book on your behalf.
+              </p>
+            </details>
+            <details>
+              <summary>How do reviews work?</summary>
+              <p>
+                After a night is marked complete, the artist and the venue can each leave a one to
+                five star review. Ratings build up over time so both sides know who they are
+                dealing with before agreeing anything.
+              </p>
+            </details>
+            <details>
+              <summary>What does it cost to join?</summary>
+              <p>
+                Creating a profile and using the app is free while we launch. Join the founding list
+                above and we will email you the moment it opens in your city.
+              </p>
+            </details>
+          </div>
+        </section>
+
+
+
 
 
 
@@ -771,6 +827,32 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   text-align:center;color:var(--sand-ink);margin:20px 0 0;max-width:46ch;
 }
 
+.cl-faq{
+  margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:left;
+}
+.cl-faq .cl-rule{margin-bottom:20px}
+.cl-faq .cl-eyebrow{text-align:center}
+.cl-faq-list{width:100%;margin-top:24px}
+.cl-faq-list details{border-top:1px solid hsl(0 0% 9% / .14)}
+.cl-faq-list details:last-child{border-bottom:1px solid hsl(0 0% 9% / .14)}
+.cl-faq-list summary{
+  list-style:none;cursor:pointer;padding:14px 28px 14px 0;position:relative;
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--pine);
+}
+.cl-faq-list summary::-webkit-details-marker{display:none}
+.cl-faq-list summary::after{
+  content:"+";position:absolute;right:2px;top:50%;transform:translateY(-50%);
+  font-family:var(--font-body);font-weight:500;font-size:16px;color:var(--pine);
+}
+.cl-faq-list details[open] summary::after{content:"–"}
+.cl-faq-list summary:focus-visible{outline:3px solid var(--pine);outline-offset:2px;border-radius:4px}
+.cl-faq-list details p{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.75;
+  color:var(--ink);opacity:.82;margin:0 0 16px;max-width:52ch;
+}
+
 
 
 .cl-contact{
@@ -856,6 +938,8 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-how-item h3{letter-spacing:.2em}
   .cl-tools{margin-top:34px}
   .cl-quotes{margin-top:34px}
+  .cl-faq{margin-top:34px}
+  .cl-faq-list summary{font-size:11px;padding:16px 28px 16px 0}
   .cl-quotes-list{gap:14px}
   .cl-tools-grid{grid-template-columns:1fr;gap:0}
   .cl-tools-grid li{padding:14px 0}
@@ -876,7 +960,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-faq,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
@@ -889,6 +973,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-preview{animation-delay:1.12s}
   .cl-tools{animation-delay:1.2s}
   .cl-quotes{animation-delay:1.22s}
+  .cl-faq{animation-delay:1.24s}
   .cl-contact{animation-delay:1.25s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
