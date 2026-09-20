@@ -22,6 +22,16 @@ export default function FirstLight() {
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
 
+  const [enqOpen, setEnqOpen] = useState(false);
+  const [enqName, setEnqName] = useState("");
+  const [enqEmail, setEnqEmail] = useState("");
+  const [enqOrg, setEnqOrg] = useState("");
+  const [enqMessage, setEnqMessage] = useState("");
+  const [enqSubmitting, setEnqSubmitting] = useState(false);
+  const [enqSent, setEnqSent] = useState(false);
+  const [enqHint, setEnqHint] = useState("");
+  const [enqTone, setEnqTone] = useState<"muted" | "ox">("muted");
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const value = email.trim();
