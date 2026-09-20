@@ -120,12 +120,14 @@ export default function FirstLight() {
       <style>{styles}</style>
 
 
+      <a className="cl-skip" href="#cl-main">Skip to main content</a>
+
       <header className="cl-bar">
         <Crest className="cl-mini" />
         <span className="cl-eyebrow">Sydney · MMXXVI</span>
       </header>
 
-      <main className="cl-main">
+      <main className="cl-main" id="cl-main" tabIndex={-1}>
         <Crest className="cl-mark" />
 
         <p className="cl-eyebrow cl-pine">On Tour Live</p>
@@ -137,10 +139,11 @@ export default function FirstLight() {
 
         {position === null ? (
           <form className="cl-form" id="cl-signup" ref={formRef} onSubmit={onSubmit} noValidate>
-            <div className="cl-seg" role="group" aria-label="I am an">
+            <div className="cl-seg" role="group" aria-label="Sign up as">
               <button
                 type="button"
                 aria-pressed={role === "artist"}
+                aria-label="Sign up as an artist"
                 onClick={() => setRole("artist")}
               >
                 Artist
@@ -148,6 +151,7 @@ export default function FirstLight() {
               <button
                 type="button"
                 aria-pressed={role === "venue"}
+                aria-label="Sign up as a venue"
                 onClick={() => setRole("venue")}
               >
                 Venue
@@ -235,10 +239,10 @@ export default function FirstLight() {
             <button className="cl-cta" type="submit" disabled={submitting}>
               {submitting ? "Holding your place…" : "Take your place"}
             </button>
-            <p className="cl-hint" data-tone={hintTone}>{hint}</p>
+            <p className="cl-hint" data-tone={hintTone} role="status" aria-live="polite">{hint}</p>
           </form>
         ) : (
-          <div className="cl-held" aria-live="polite">
+          <div className="cl-held" role="status" aria-live="polite">
             <div className="cl-rule" />
             <h2>You&rsquo;re on the list</h2>
             <div className="cl-num">No. {position}</div>
@@ -248,7 +252,7 @@ export default function FirstLight() {
               <br />
               Watch{" "}
               <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-link">
-                @ontourlive
+                @ontourlive<span className="cl-sr"> (opens in a new tab)</span>
               </a>
               .
             </p>
@@ -422,7 +426,7 @@ export default function FirstLight() {
               href={socialLinks.instagram.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={socialLinks.instagram.label}
+              aria-label={`${socialLinks.instagram.label} — opens in a new tab`}
             >
               <Instagram aria-hidden="true" />
               <span>Instagram</span>
@@ -432,7 +436,7 @@ export default function FirstLight() {
               href={socialLinks.facebook.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={socialLinks.facebook.label}
+              aria-label={`${socialLinks.facebook.label} — opens in a new tab`}
             >
               <Facebook aria-hidden="true" />
               <span>Facebook</span>
@@ -442,7 +446,7 @@ export default function FirstLight() {
               href={socialLinks.tiktok.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={socialLinks.tiktok.label}
+              aria-label={`${socialLinks.tiktok.label} — opens in a new tab`}
             >
               <Music2 aria-hidden="true" />
               <span>TikTok</span>
@@ -460,7 +464,7 @@ export default function FirstLight() {
 
       <footer className="cl-footer">
         <span className="cl-eyebrow">
-          <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-footer-link">@ontour.live</a>
+          <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-footer-link">@ontour.live<span className="cl-sr"> on Instagram (opens in a new tab)</span></a>
         </span>
         <span className="cl-eyebrow">The Founding List — MMXXVI</span>
       </footer>
@@ -497,7 +501,7 @@ const styles = `
 .cl-root{
   --bone:#EFE8DA; --bone-lift:#F5F0E6;
   --pine:#21402C; --pine-deep:#182F20;
-  --ink:#171512; --ox:#572B2B; --sand:#8E8570;
+  --ink:#171512; --ox:#572B2B; --sand:#8E8570; --sand-ink:#5C5445;
   --font-display:'Young Serif',serif;
   --font-accent:'Instrument Serif',serif;
   --font-body:'Archivo',sans-serif;
@@ -515,7 +519,7 @@ const styles = `
 
 .cl-eyebrow{
   font-family:var(--font-body);font-weight:700;font-size:11px;
-  letter-spacing:.28em;text-transform:uppercase;color:var(--sand);
+  letter-spacing:.28em;text-transform:uppercase;color:var(--sand-ink);
 }
 .cl-eyebrow.cl-pine{color:var(--pine)}
 .cl-eyebrow a{color:inherit;text-decoration:none}
@@ -539,7 +543,7 @@ const styles = `
 }
 .cl-descriptor{
   font-family:var(--font-body);font-weight:700;font-size:11px;
-  letter-spacing:.28em;text-transform:uppercase;color:var(--sand);
+  letter-spacing:.28em;text-transform:uppercase;color:var(--sand-ink);
   margin-top:18px;
 }
 
@@ -560,7 +564,25 @@ const styles = `
 .cl-seg button:focus-visible,
 .cl-form input:focus-visible,
 .cl-cta:focus-visible,
-.cl-ghost:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
+.cl-ghost:focus-visible,
+.cl-link:focus-visible,
+.cl-footer-link:focus-visible,
+.cl-skip:focus-visible,
+a:focus-visible,
+button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-radius:4px}
+
+.cl-sr{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+.cl-skip{
+  position:absolute;left:50%;top:-60px;transform:translateX(-50%);
+  z-index:20;background:var(--pine);color:var(--bone);
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.24em;text-transform:uppercase;text-decoration:none;
+  padding:12px 20px;border-radius:0 0 999px 999px;transition:top .15s;
+}
+.cl-skip:focus{top:0}
 
 .cl-form input.cl-input{
   width:100%;background:var(--bone-lift);
@@ -569,7 +591,7 @@ const styles = `
   padding:14px 20px;text-align:center;letter-spacing:.02em;
   transition:border-color .2s;
 }
-.cl-form input.cl-input::placeholder{color:var(--sand)}
+.cl-form input.cl-input::placeholder{color:var(--sand-ink)}
 .cl-form input.cl-input:focus{border-color:var(--pine);outline:none}
 
 .cl-cta{
@@ -584,7 +606,7 @@ const styles = `
 .cl-cta:disabled{opacity:.55;cursor:not-allowed}
 
 .cl-hint{
-  font-family:var(--font-body);font-size:11.5px;color:var(--sand);
+  font-family:var(--font-body);font-size:11.5px;color:var(--sand-ink);
   letter-spacing:.04em;margin-top:16px;min-height:14px;
 }
 .cl-hint[data-tone="ox"]{color:var(--ox);font-family:var(--font-accent);font-style:italic;font-size:14px}
@@ -603,7 +625,7 @@ const styles = `
 .cl-sub{font-family:var(--font-accent);font-style:italic;color:var(--ox);font-size:18px;margin:6px 0 0}
 .cl-sub-quiet{
   font-family:var(--font-body);font-style:normal;font-weight:500;
-  color:var(--sand);font-size:13.5px;letter-spacing:.04em;line-height:1.7;
+  color:var(--sand-ink);font-size:13.5px;letter-spacing:.04em;line-height:1.7;
   margin-top:14px;
 }
 .cl-link{color:var(--pine);font-weight:700;text-decoration:none}
@@ -717,7 +739,7 @@ const styles = `
 .cl-social-link:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
 .cl-contact-note{
   font-family:var(--font-body);font-size:12px;letter-spacing:.04em;
-  color:var(--sand);margin-top:14px;
+  color:var(--sand-ink);margin-top:14px;
 }
 
 .cl-footer{
@@ -725,7 +747,7 @@ const styles = `
   padding:24px clamp(22px,5vw,54px);
   border-top:1px solid hsl(0 0% 9% / .14);
 }
-.cl-footer-link{color:var(--sand);text-decoration:none}
+.cl-footer-link{color:var(--sand-ink);text-decoration:none}
 .cl-footer-link:hover{color:var(--pine)}
 
 /* Countdown restyled to club aesthetic (uses fl-* class hooks in LaunchCountdown) */
@@ -739,7 +761,7 @@ const styles = `
 }
 .fl-cd-label{
   margin-top:6px;font-family:var(--font-body);font-weight:700;font-size:9.5px;
-  letter-spacing:.28em;color:var(--sand);text-transform:uppercase;
+  letter-spacing:.28em;color:var(--sand-ink);text-transform:uppercase;
 }
 .fl-cd-sep{
   font-family:var(--font-display);font-size:clamp(22px,3.4vw,32px);
