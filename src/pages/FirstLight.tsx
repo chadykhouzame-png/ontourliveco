@@ -256,6 +256,9 @@ export default function FirstLight() {
                 const invalid = Boolean(errors[name]);
                 return (
                   <div className="cl-field" key={name}>
+                    <label className="cl-label" htmlFor={`cl-f-${name}`}>
+                      {labels[name]}
+                    </label>
                     <input
                       id={`cl-f-${name}`}
                       className="cl-input"
@@ -278,14 +281,15 @@ export default function FirstLight() {
                                   : "name"
                       }
                       maxLength={name === "email" ? 255 : 100}
-                      aria-label={labels[name]}
+                      required
                       aria-invalid={invalid}
                       aria-describedby={invalid ? `cl-e-${name}` : undefined}
                       data-invalid={invalid ? "true" : undefined}
                     />
                     {invalid && (
-                      <p className="cl-error" id={`cl-e-${name}`}>
-                        {errors[name]}
+                      <p className="cl-error" id={`cl-e-${name}`} role="alert">
+                        <span aria-hidden="true" className="cl-error-mark">!</span>
+                        <span>{errors[name]}</span>
                       </p>
                     )}
                   </div>
