@@ -1,4 +1,6 @@
 import { useState, FormEvent } from "react";
+import { Instagram, Facebook, Music2 } from "lucide-react";
+import { socialLinks } from "@/config/social";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import PageSeo from "@/components/PageSeo";
@@ -230,7 +232,7 @@ export default function FirstLight() {
               App launches September 2026 · Sydney first.
               <br />
               Watch{" "}
-              <a href="https://instagram.com/ontourlive" className="cl-link">
+              <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-link">
                 @ontourlive
               </a>
               .
@@ -242,8 +244,41 @@ export default function FirstLight() {
           </div>
         )}
 
-        <section className="cl-contact" aria-label="Contact">
+        <section className="cl-contact" aria-label="Follow On Tour Live">
           <div className="cl-rule" />
+          <p className="cl-contact-lead">Follow along</p>
+          <div className="cl-social">
+            <a
+              className="cl-social-link"
+              href={socialLinks.instagram.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={socialLinks.instagram.label}
+            >
+              <Instagram aria-hidden="true" />
+              <span>Instagram</span>
+            </a>
+            <a
+              className="cl-social-link"
+              href={socialLinks.facebook.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={socialLinks.facebook.label}
+            >
+              <Facebook aria-hidden="true" />
+              <span>Facebook</span>
+            </a>
+            <a
+              className="cl-social-link"
+              href={socialLinks.tiktok.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={socialLinks.tiktok.label}
+            >
+              <Music2 aria-hidden="true" />
+              <span>TikTok</span>
+            </a>
+          </div>
           <p className="cl-contact-note">
             Questions?{" "}
             <a href="mailto:hello@ontour.live" className="cl-link">
@@ -256,7 +291,7 @@ export default function FirstLight() {
 
       <footer className="cl-footer">
         <span className="cl-eyebrow">
-          <a href="https://instagram.com/ontourlive" className="cl-footer-link">@ontourlive</a>
+          <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-footer-link">@ontour.live</a>
         </span>
         <span className="cl-eyebrow">The Founding List — MMXXVI</span>
       </footer>
@@ -424,8 +459,18 @@ const styles = `
   color:var(--ox);margin:0;
 }
 .cl-contact-cta{margin-top:18px;text-decoration:none}
-.cl-enq{width:100%;margin-top:20px;display:flex;flex-direction:column;align-items:center}
-.cl-textarea{resize:vertical;min-height:104px;line-height:1.6;font-family:var(--font-body)}
+.cl-social{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:20px}
+.cl-social-link{
+  display:inline-flex;align-items:center;gap:8px;text-decoration:none;
+  border:1.5px solid var(--pine);border-radius:999px;color:var(--pine);
+  background:transparent;padding:11px 20px;
+  font-family:var(--font-body);font-weight:700;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;
+  transition:background .2s,color .2s;
+}
+.cl-social-link svg{width:15px;height:15px;flex:none}
+.cl-social-link:hover{background:var(--pine);color:var(--bone)}
+.cl-social-link:focus-visible{outline:2px solid var(--pine);outline-offset:3px}
 .cl-contact-note{
   font-family:var(--font-body);font-size:12px;letter-spacing:.04em;
   color:var(--sand);margin-top:14px;
