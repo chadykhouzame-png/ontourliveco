@@ -403,6 +403,20 @@ export default function FirstLight() {
           </p>
         </section>
 
+        <section className="cl-benefits" aria-labelledby="cl-benefits-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">Why artists use it</p>
+          <h2 id="cl-benefits-title" className="cl-how-title">More nights booked, less chasing</h2>
+          <ul className="cl-benefits-list">
+            <li><h3>See the work first</h3><p>Open slots land in your feed the day a venue posts them.</p></li>
+            <li><h3>Pitch in one tap</h3><p>Your profile, music and past rooms go with every reply.</p></li>
+            <li><h3>Never double-book</h3><p>Your calendar shows venues only the nights you are free.</p></li>
+            <li><h3>Agree the fee in writing</h3><p>Offers, counter-offers and the final terms stay on the record.</p></li>
+            <li><h3>Get paid on time</h3><p>Payment is handled in the app with a receipt for every gig.</p></li>
+            <li><h3>Build a track record</h3><p>Reviews and past nights make the next booking an easier yes.</p></li>
+          </ul>
+        </section>
+
         <section className="cl-quotes" aria-labelledby="cl-quotes-title">
           <div className="cl-rule" />
           <p className="cl-eyebrow cl-pine">In their words</p>
@@ -834,6 +848,24 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   text-align:center;color:var(--sand-ink);margin:20px 0 0;max-width:46ch;
 }
 
+.cl-benefits{
+  margin-top:clamp(40px,6vh,64px);width:min(680px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.cl-benefits .cl-rule{margin-bottom:20px}
+.cl-benefits-list{
+  list-style:none;margin:24px 0 0;padding:0;width:100%;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px 24px;text-align:left;
+}
+.cl-benefits-list h3{
+  font-family:var(--font-body);font-weight:700;font-size:11px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--pine-deep);margin:0 0 6px;
+}
+.cl-benefits-list p{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
+  color:var(--sand-ink);margin:0;
+}
+
 .cl-faq{
   margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
   display:flex;flex-direction:column;align-items:center;text-align:left;
@@ -960,6 +992,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-how-item h3{letter-spacing:.2em}
   .cl-tools{margin-top:34px}
   .cl-quotes{margin-top:34px}
+  .cl-benefits{margin-top:34px}
   .cl-faq{margin-top:34px}
   .cl-tail{margin-top:34px}
   .cl-faq-list summary{font-size:11px;padding:16px 28px 16px 0}
@@ -983,7 +1016,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-faq,.cl-tail,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-benefits,.cl-faq,.cl-tail,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
@@ -996,6 +1029,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-preview{animation-delay:1.12s}
   .cl-tools{animation-delay:1.2s}
   .cl-quotes{animation-delay:1.22s}
+  .cl-benefits{animation-delay:1.23s}
   .cl-faq{animation-delay:1.24s}
   .cl-tail{animation-delay:1.25s}
   .cl-contact{animation-delay:1.25s}
