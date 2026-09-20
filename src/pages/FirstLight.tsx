@@ -938,6 +938,8 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-how-item h3{letter-spacing:.2em}
   .cl-tools{margin-top:34px}
   .cl-quotes{margin-top:34px}
+  .cl-faq{margin-top:34px}
+  .cl-faq-list summary{font-size:11px;padding:16px 28px 16px 0}
   .cl-quotes-list{gap:14px}
   .cl-tools-grid{grid-template-columns:1fr;gap:0}
   .cl-tools-grid li{padding:14px 0}
