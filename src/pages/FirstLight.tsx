@@ -483,9 +483,21 @@ export default function FirstLight() {
           </div>
         </section>
 
-
-
-
+        <section className="cl-tail" aria-labelledby="cl-tail-title">
+          <div className="cl-rule" />
+          <h2 className="cl-tail-title" id="cl-tail-title">Ready to join?</h2>
+          <p className="cl-tail-lead">
+            Leave your email and we'll tell you the moment On Tour Live opens in your city.
+          </p>
+          <div className="cl-tail-actions">
+            <button type="button" className="cl-ghost" onClick={() => joinAs("artist")}>
+              Join as an artist
+            </button>
+            <button type="button" className="cl-ghost" onClick={() => joinAs("venue")}>
+              Join as a venue
+            </button>
+          </div>
+        </section>
 
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
@@ -836,6 +848,21 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 
+.cl-tail{
+  margin-top:clamp(40px,6vh,64px);width:min(520px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.cl-tail .cl-rule{margin-bottom:20px}
+.cl-tail-title{
+  font-family:var(--font-display);font-weight:400;font-size:clamp(22px,3vw,28px);
+  color:var(--pine-deep);margin:0;
+}
+.cl-tail-lead{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
+  color:var(--sand-ink);margin:10px 0 0;max-width:42ch;
+}
+.cl-tail-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
+
 
 .cl-contact{
   margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
@@ -921,6 +948,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-tools{margin-top:34px}
   .cl-quotes{margin-top:34px}
   .cl-faq{margin-top:34px}
+  .cl-tail{margin-top:34px}
   .cl-faq-list summary{font-size:11px;padding:16px 28px 16px 0}
   .cl-quotes-list{gap:14px}
   .cl-tools-grid{grid-template-columns:1fr;gap:0}
@@ -942,7 +970,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-faq,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-faq,.cl-tail,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
@@ -956,6 +984,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-tools{animation-delay:1.2s}
   .cl-quotes{animation-delay:1.22s}
   .cl-faq{animation-delay:1.24s}
+  .cl-tail{animation-delay:1.25s}
   .cl-contact{animation-delay:1.25s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
