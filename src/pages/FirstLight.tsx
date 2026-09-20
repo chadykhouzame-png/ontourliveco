@@ -937,6 +937,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
   color:var(--sand-ink);margin:10px 0 0;max-width:42ch;
 }
+.cl-midcta{margin-top:clamp(28px,4vh,40px)}
 .cl-tail-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
 
 
@@ -1047,7 +1048,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-benefits,.cl-faq,.cl-tail,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-benefits,.cl-faq,.cl-tail:not(.cl-midcta),.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
