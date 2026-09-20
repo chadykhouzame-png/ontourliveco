@@ -341,6 +341,35 @@ export default function FirstLight() {
           </button>
         </section>
 
+        <section className="cl-how" aria-labelledby="cl-steps-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">How it works</p>
+          <h2 id="cl-steps-title" className="cl-how-title">Three steps, either side of the stage</h2>
+          <ol className="cl-how-list">
+            <li>
+              <span className="cl-how-num">I</span>
+              <div>
+                <h3>Set up your page</h3>
+                <p>Artists build a press kit, venues describe their rooms and the nights they run. It takes minutes and stays current.</p>
+              </div>
+            </li>
+            <li>
+              <span className="cl-how-num">II</span>
+              <div>
+                <h3>Find the match</h3>
+                <p>Search by city, date, genre and audience size, or post what you need and let the right side come to you.</p>
+              </div>
+            </li>
+            <li>
+              <span className="cl-how-num">III</span>
+              <div>
+                <h3>Agree it in one place</h3>
+                <p>Message, settle the fee, confirm the date and handle payment in the app — then review each other afterwards.</p>
+              </div>
+            </li>
+          </ol>
+        </section>
+
         <section className="cl-tools" aria-labelledby="cl-tools-title">
           <div className="cl-rule" />
           <p className="cl-eyebrow cl-pine">What&rsquo;s inside</p>
