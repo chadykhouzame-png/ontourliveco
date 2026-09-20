@@ -444,7 +444,7 @@ export default function FirstLight() {
               href={socialLinks.tiktok.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={socialLinks.tiktok.label}
+              aria-label={`${socialLinks.tiktok.label} — opens in a new tab`}
             >
               <Music2 aria-hidden="true" />
               <span>TikTok</span>
