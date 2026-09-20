@@ -12,6 +12,10 @@ import appPreview from "@/assets/app-preview.jpg";
  * Heritage members' club aesthetic: bone field, pine action, ink text,
  * oxblood italic accents. Typography: Young Serif / Archivo / Instrument Serif.
  */
+type FieldName = "firstName" | "lastName" | "artistName" | "venueName" | "email";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+
 export default function FirstLight() {
   const [role, setRole] = useState<"artist" | "venue">("artist");
   const [firstName, setFirstName] = useState("");
@@ -19,6 +23,8 @@ export default function FirstLight() {
   const [artistName, setArtistName] = useState("");
   const [venueName, setVenueName] = useState("");
   const [email, setEmail] = useState("");
+  const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
+  const [, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [hint, setHint] = useState("App launches September 2026 · Sydney first");
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
@@ -27,8 +33,67 @@ export default function FirstLight() {
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
 
-  function joinAs(next: "artist" | "venue") {
+  const values: Record<FieldName, string> = { firstName, lastName, artistName, venueName, email };
+  const setters: Record<FieldName, (v: string) => void> = {
+    firstName: setFirstName,
+    lastName: setLastName,
+    artistName: setArtistName,
+    venueName: setVenueName,
+    email: setEmail,
+  };
+
+  const labels: Record<FieldName, string> = {
+    firstName: role === "artist" ? "First name" : "Full name",
+    lastName: "Last name",
+    artistName: "Artist name",
+    venueName: "Venue name",
+    email: "Email address",
+  };
+
+  const activeFields: FieldName[] =
+    role === "artist"
+      ? ["firstName", "lastName", "artistName", "email"]
+      : ["firstName", "lastName", "venueName", "email"];
+
+  function validate(name: FieldName, raw: string): string {
+    const v = raw.trim();
+    if (name === "email") {
+      if (!v) return "Enter your email so we can let you know when we launch.";
+      if (v.length > 255) return "That email is too long.";
+      if (!EMAIL_RE.test(v)) return "That email doesn't look right — check for a typo, e.g. you@venue.com.";
+      return "";
+    }
+    if (!v) return `${labels[name]} is required.`;
+    if (v.length < 2) return `${labels[name]} looks too short.`;
+    if (v.length > 100) return `${labels[name]} must be under 100 characters.`;
+    return "";
+  }
+
+  function onFieldChange(name: FieldName, raw: string) {
+    setters[name](raw);
+    if (errors[name]) {
+      const next = validate(name, raw);
+      setErrors((prev) => ({ ...prev, [name]: next || undefined }));
+    }
+  }
+
+  function onFieldBlur(name: FieldName) {
+    setTouched((prev) => ({ ...prev, [name]: true }));
+    const message = validate(name, values[name]);
+    setErrors((prev) => ({ ...prev, [name]: message || undefined }));
+  }
+
+  function chooseRole(next: "artist" | "venue") {
     setRole(next);
+    setErrors({});
+    setTouched({});
+    setHint("App launches September 2026 · Sydney first");
+    setHintTone("muted");
+  }
+
+  function joinAs(next: "artist" | "venue") {
+    chooseRole(next);
+
     const form = formRef.current;
     if (form) {
       form.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -38,26 +103,38 @@ export default function FirstLight() {
     }
   }
 
-
-
-
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
+
+    const nextErrors: Partial<Record<FieldName, string>> = {};
+    activeFields.forEach((name) => {
+      const message = validate(name, values[name]);
+      if (message) nextErrors[name] = message;
+    });
+    setErrors(nextErrors);
+    setTouched((prev) => {
+      const next = { ...prev };
+      activeFields.forEach((name) => (next[name] = true));
+      return next;
+    });
+
+    const firstInvalid = activeFields.find((name) => nextErrors[name]);
+    if (firstInvalid) {
+      setHint(
+        Object.keys(nextErrors).length > 1
+          ? "Please fix the highlighted fields."
+          : "Please fix the highlighted field.",
+      );
+      setHintTone("ox");
+      formRef.current?.querySelector<HTMLInputElement>(`#cl-f-${firstInvalid}`)?.focus();
+      return;
+    }
+
     const value = email.trim();
     const first = firstName.trim();
     const last = lastName.trim();
     const artist = artistName.trim();
     const venue = venueName.trim();
-
-    const required = role === "artist"
-      ? [first, last, artist, value]
-      : [first, last, venue, value];
-
-    if (required.some((v) => !v) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-      setHint("Please fill in every field with a valid email.");
-      setHintTone("ox");
-      return;
-    }
 
     setSubmitting(true);
     try {
@@ -78,6 +155,10 @@ export default function FirstLight() {
       } else if (data?.error === "rate_limited") {
         setHint("Too many attempts — try again in an hour.");
         setHintTone("ox");
+      } else if (data?.error === "duplicate" || data?.error === "already_registered") {
+        setErrors((prev) => ({ ...prev, email: "This email is already on the list — you're all set." }));
+        setHint("You're already on the list with that email.");
+        setHintTone("ox");
       } else {
         throw new Error(data?.error ?? "signup_failed");
       }
@@ -89,6 +170,7 @@ export default function FirstLight() {
       setSubmitting(false);
     }
   }
+
 
   async function onShare() {
     const data = {
@@ -146,7 +228,7 @@ export default function FirstLight() {
                 type="button"
                 aria-pressed={role === "artist"}
                 aria-label="Sign up as an artist"
-                onClick={() => setRole("artist")}
+                onClick={() => chooseRole("artist")}
               >
                 Artist
               </button>
@@ -154,90 +236,53 @@ export default function FirstLight() {
                 type="button"
                 aria-pressed={role === "venue"}
                 aria-label="Sign up as a venue"
-                onClick={() => setRole("venue")}
+                onClick={() => chooseRole("venue")}
               >
                 Venue
               </button>
             </div>
             <div className="cl-fields">
-              {role === "artist" ? (
-                <>
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="First name"
-                    autoComplete="given-name"
-                    required
-                    aria-label="First name"
-                  />
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last name"
-                    autoComplete="family-name"
-                    required
-                    aria-label="Last name"
-                  />
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={artistName}
-                    onChange={(e) => setArtistName(e.target.value)}
-                    placeholder="Artist name"
-                    autoComplete="nickname"
-                    required
-                    aria-label="Artist name"
-                  />
-                </>
-              ) : (
-                <>
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Full name"
-                    autoComplete="name"
-                    required
-                    aria-label="Full name"
-                  />
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Last name"
-                    autoComplete="family-name"
-                    required
-                    aria-label="Last name"
-                  />
-                  <input
-                    className="cl-input"
-                    type="text"
-                    value={venueName}
-                    onChange={(e) => setVenueName(e.target.value)}
-                    placeholder="Venue name"
-                    autoComplete="organization"
-                    required
-                    aria-label="Venue name"
-                  />
-                </>
-              )}
-              <input
-                className="cl-input"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="your@email.com"
-                autoComplete="email"
-                required
-                aria-label="Email address"
-              />
+              {activeFields.map((name) => {
+                const invalid = Boolean(errors[name]);
+                return (
+                  <div className="cl-field" key={name}>
+                    <input
+                      id={`cl-f-${name}`}
+                      className="cl-input"
+                      type={name === "email" ? "email" : "text"}
+                      value={values[name]}
+                      onChange={(e) => onFieldChange(name, e.target.value)}
+                      onBlur={() => onFieldBlur(name)}
+                      placeholder={name === "email" ? "your@email.com" : labels[name]}
+                      autoComplete={
+                        name === "email"
+                          ? "email"
+                          : name === "lastName"
+                            ? "family-name"
+                            : name === "artistName"
+                              ? "nickname"
+                              : name === "venueName"
+                                ? "organization"
+                                : role === "artist"
+                                  ? "given-name"
+                                  : "name"
+                      }
+                      maxLength={name === "email" ? 255 : 100}
+                      aria-label={labels[name]}
+                      aria-invalid={invalid}
+                      aria-describedby={invalid ? `cl-e-${name}` : undefined}
+                      data-invalid={invalid ? "true" : undefined}
+                    />
+                    {invalid && (
+                      <p className="cl-error" id={`cl-e-${name}`}>
+                        {errors[name]}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+
             <button className="cl-cta" type="submit" disabled={submitting}>
               {submitting ? "Holding your place…" : "Take your place"}
             </button>
@@ -789,6 +834,14 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 .cl-form input.cl-input::placeholder{color:var(--sand-ink)}
 .cl-form input.cl-input:focus{border-color:var(--pine);outline:none}
+.cl-field{display:flex;flex-direction:column;gap:6px}
+.cl-form input.cl-input[data-invalid="true"]{border-color:var(--ox);background:hsl(0 40% 97%)}
+.cl-form input.cl-input[data-invalid="true"]:focus{border-color:var(--ox)}
+.cl-error{
+  margin:0;color:var(--ox);font-family:var(--font-accent);font-style:italic;
+  font-size:13.5px;line-height:1.35;text-align:center;
+}
+
 
 .cl-cta{
   margin-top:22px;width:100%;background:var(--pine);color:var(--bone);
