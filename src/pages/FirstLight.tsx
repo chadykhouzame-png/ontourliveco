@@ -414,6 +414,41 @@ export default function FirstLight() {
           </p>
         </section>
 
+        <section className="cl-quotes" aria-labelledby="cl-quotes-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">In their words</p>
+          <h2 id="cl-quotes-title" className="cl-how-title">Artists &amp; venues on On Tour Live</h2>
+          <ul className="cl-quotes-list">
+            <li>
+              <blockquote>
+                <p>Every open slot in the city in one place — I stopped chasing bookers and started
+                filling my calendar a month ahead.</p>
+                <footer>Artist &middot; Sydney NSW</footer>
+              </blockquote>
+            </li>
+            <li>
+              <blockquote>
+                <p>I post the night, the right acts reply with their fee, and the whole thing is
+                agreed before close. No more ringing round on a Thursday.</p>
+                <footer>Venue &middot; Newcastle NSW</footer>
+              </blockquote>
+            </li>
+            <li>
+              <blockquote>
+                <p>My profile does the introductions now. Rooms can see my past gigs, my audience
+                numbers and the nights I&rsquo;m free.</p>
+                <footer>Artist &middot; Melbourne VIC</footer>
+              </blockquote>
+            </li>
+          </ul>
+          <p className="cl-quotes-note">
+            Placeholder wording while we&rsquo;re in build — these will be replaced with real quotes
+            from our founding artists and venues at launch.
+          </p>
+        </section>
+
+
+
 
         <section className="cl-contact" aria-label="Follow On Tour Live">
           <div className="cl-rule" />
@@ -714,6 +749,29 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   color:var(--ink);opacity:.72;margin:22px 0 0;max-width:44ch;
 }
 
+.cl-quotes{
+  margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:left;
+}
+.cl-quotes .cl-rule{margin-bottom:20px}
+.cl-quotes .cl-eyebrow{text-align:center}
+.cl-quotes-list{list-style:none;margin:24px 0 0;padding:0;width:100%;display:grid;gap:18px}
+.cl-quotes-list li{border-top:1px solid hsl(0 0% 9% / .14);padding-top:14px}
+.cl-quotes-list blockquote{margin:0}
+.cl-quotes-list blockquote p{
+  font-family:var(--font-accent);font-style:italic;
+  font-size:clamp(15px,2vw,17px);line-height:1.6;color:var(--ink);margin:0;
+}
+.cl-quotes-list blockquote footer{
+  font-family:var(--font-body);font-weight:700;font-size:10px;
+  letter-spacing:.26em;text-transform:uppercase;color:var(--pine);margin-top:10px;
+}
+.cl-quotes-note{
+  font-family:var(--font-body);font-weight:500;font-size:12px;line-height:1.7;
+  text-align:center;color:var(--sand-ink);margin:20px 0 0;max-width:46ch;
+}
+
+
 
 .cl-contact{
   margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
@@ -797,6 +855,8 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-how-num{min-width:20px;font-size:14px}
   .cl-how-item h3{letter-spacing:.2em}
   .cl-tools{margin-top:34px}
+  .cl-quotes{margin-top:34px}
+  .cl-quotes-list{gap:14px}
   .cl-tools-grid{grid-template-columns:1fr;gap:0}
   .cl-tools-grid li{padding:14px 0}
   .cl-contact{margin-top:34px;width:100%}
@@ -816,7 +876,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
@@ -828,6 +888,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-how{animation-delay:1.05s}
   .cl-preview{animation-delay:1.12s}
   .cl-tools{animation-delay:1.2s}
+  .cl-quotes{animation-delay:1.22s}
   .cl-contact{animation-delay:1.25s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
