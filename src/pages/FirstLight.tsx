@@ -272,30 +272,21 @@ export default function FirstLight() {
               <span className="cl-how-num">I</span>
               <div>
                 <h3>Discover opportunities</h3>
-                <p>
-                  See open slots and venue requests as they are posted, filtered by city,
-                  date and the kind of night you play — no cold outreach, no missed calls.
-                </p>
+                <p>Open slots in your city, filtered by date and the nights you play.</p>
               </div>
             </li>
             <li className="cl-how-item">
               <span className="cl-how-num">II</span>
               <div>
                 <h3>Manage your profile</h3>
-                <p>
-                  One living press kit: bio, photos, music, past rooms, live audience numbers
-                  and your travel calendar — always current, always ready to send.
-                </p>
+                <p>One living press kit — music, photos, past rooms and free dates.</p>
               </div>
             </li>
             <li className="cl-how-item">
               <span className="cl-how-num">III</span>
               <div>
                 <h3>Connect with venues</h3>
-                <p>
-                  Message directly, agree the fee, and lock the date in one thread —
-                  offers, confirmations and payment all handled in the app.
-                </p>
+                <p>Message, agree the fee and lock the date in one thread.</p>
               </div>
             </li>
           </ol>
@@ -314,30 +305,21 @@ export default function FirstLight() {
               <span className="cl-how-num">I</span>
               <div>
                 <h3>Find artists</h3>
-                <p>
-                  Search by genre, city, date and audience reach, and see who is genuinely
-                  free that night before you reach out.
-                </p>
+                <p>Search by genre, reach and date — and see who is actually free.</p>
               </div>
             </li>
             <li className="cl-how-item">
               <span className="cl-how-num">II</span>
               <div>
                 <h3>Post what you need</h3>
-                <p>
-                  Put an open slot to the whole roster in one go — matching acts are notified
-                  and reply with their fee, so you compare real offers, not guesses.
-                </p>
+                <p>One post reaches every matching act. They reply with their fee.</p>
               </div>
             </li>
             <li className="cl-how-item">
               <span className="cl-how-num">III</span>
               <div>
                 <h3>Run your calendar</h3>
-                <p>
-                  Confirmations, contacts, fees and payment sit in one place, with reviews
-                  from past nights to tell you who to book again.
-                </p>
+                <p>Confirmations, fees, payment and past reviews in one place.</p>
               </div>
             </li>
           </ol>
