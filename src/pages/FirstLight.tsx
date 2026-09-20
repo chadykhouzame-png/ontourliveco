@@ -336,7 +336,11 @@ export default function FirstLight() {
               </div>
             </li>
           </ol>
+          <button type="button" className="cl-ghost cl-how-cta" onClick={() => joinAs("venue")}>
+            Join as a venue
+          </button>
         </section>
+
 
 
 
