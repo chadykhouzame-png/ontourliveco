@@ -973,6 +973,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-preview{animation-delay:1.12s}
   .cl-tools{animation-delay:1.2s}
   .cl-quotes{animation-delay:1.22s}
+  .cl-faq{animation-delay:1.24s}
   .cl-contact{animation-delay:1.25s}
   @keyframes cl-rise{to{opacity:1;transform:translateY(0)}}
 }
