@@ -33,6 +33,8 @@ export default function FirstLight() {
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const heldRef = useRef<HTMLDivElement | null>(null);
+  const honeypotRef = useRef<HTMLInputElement | null>(null);
+  const startedAtRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (position === null) return;
