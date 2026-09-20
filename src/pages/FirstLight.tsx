@@ -1,4 +1,4 @@
-import { useState, FormEvent } from "react";
+import { useState, useRef, FormEvent } from "react";
 import { Instagram, Facebook, Music2 } from "lucide-react";
 import { socialLinks } from "@/config/social";
 import { useLocation } from "react-router-dom";
@@ -23,6 +23,20 @@ export default function FirstLight() {
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  function joinAs(next: "artist" | "venue") {
+    setRole(next);
+    const form = formRef.current;
+    if (form) {
+      form.scrollIntoView({ behavior: "smooth", block: "center" });
+      window.setTimeout(() => {
+        form.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+      }, 450);
+    }
+  }
+
+
 
 
   async function onSubmit(e: FormEvent) {
@@ -121,7 +135,7 @@ export default function FirstLight() {
         <LaunchCountdown />
 
         {position === null ? (
-          <form className="cl-form" onSubmit={onSubmit} noValidate>
+          <form className="cl-form" id="cl-signup" ref={formRef} onSubmit={onSubmit} noValidate>
             <div className="cl-seg" role="group" aria-label="I am an">
               <button
                 type="button"
@@ -280,7 +294,11 @@ export default function FirstLight() {
               </div>
             </li>
           </ol>
+          <button type="button" className="cl-ghost cl-how-cta" onClick={() => joinAs("artist")}>
+            Join as an artist
+          </button>
         </section>
+
 
         <section className="cl-how" aria-labelledby="cl-how-venues-title">
           <div className="cl-rule" />
@@ -318,7 +336,11 @@ export default function FirstLight() {
               </div>
             </li>
           </ol>
+          <button type="button" className="cl-ghost cl-how-cta" onClick={() => joinAs("venue")}>
+            Join as a venue
+          </button>
         </section>
+
 
 
 
@@ -528,6 +550,8 @@ const styles = `
   padding:14px 26px;cursor:pointer;transition:background .2s,color .2s;
 }
 .cl-ghost:hover{background:var(--pine);color:var(--bone)}
+.cl-how-cta{align-self:center;margin-top:22px}
+
 
 .cl-how{
   margin-top:clamp(44px,7vh,72px);width:min(560px,100%);
