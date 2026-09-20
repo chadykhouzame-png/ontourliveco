@@ -417,6 +417,20 @@ export default function FirstLight() {
           </ul>
         </section>
 
+        <section className="cl-benefits" aria-labelledby="cl-benefits-venues-title">
+          <div className="cl-rule" />
+          <p className="cl-eyebrow cl-pine">Why venues use it</p>
+          <h2 id="cl-benefits-venues-title" className="cl-how-title">Fill the room, without the ring-around</h2>
+          <ul className="cl-benefits-list">
+            <li><h3>Post a night in minutes</h3><p>Set the date, the fee and the sound you want, then let acts come to you.</p></li>
+            <li><h3>See who is actually free</h3><p>Artist calendars show real availability for the night you need.</p></li>
+            <li><h3>Judge before you book</h3><p>Music, photos, past rooms and audience numbers on every profile.</p></li>
+            <li><h3>One thread per booking</h3><p>Messages, offers and final terms all kept in the same place.</p></li>
+            <li><h3>Clean payment records</h3><p>Fees paid through the app with receipts for your books.</p></li>
+            <li><h3>Build your regulars</h3><p>Reviews and past nights make rebooking the right acts simple.</p></li>
+          </ul>
+        </section>
+
         <section className="cl-quotes" aria-labelledby="cl-quotes-title">
           <div className="cl-rule" />
           <p className="cl-eyebrow cl-pine">In their words</p>
