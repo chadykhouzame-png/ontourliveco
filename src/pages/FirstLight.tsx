@@ -364,6 +364,23 @@ export default function FirstLight() {
           </ol>
         </section>
 
+        <section className="cl-tail cl-midcta" aria-labelledby="cl-midcta-title">
+          <h2 className="cl-tail-title" id="cl-midcta-title">Be there on day one</h2>
+          <p className="cl-tail-lead">
+            Join the founding list and we&rsquo;ll let you know the moment On Tour Live opens in your city.
+          </p>
+          <div className="cl-tail-actions">
+            <button type="button" className="cl-ghost" onClick={() => joinAs("artist")}>
+              Join as an artist
+            </button>
+            <button type="button" className="cl-ghost" onClick={() => joinAs("venue")}>
+              Join as a venue
+            </button>
+          </div>
+        </section>
+
+
+
         <section className="cl-preview" aria-labelledby="cl-preview-title">
           <div className="cl-rule" />
           <p className="cl-eyebrow cl-pine">A first look</p>
@@ -920,6 +937,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
   color:var(--sand-ink);margin:10px 0 0;max-width:42ch;
 }
+.cl-midcta{margin-top:clamp(28px,4vh,40px)}
 .cl-tail-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
 
 
@@ -1030,7 +1048,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-benefits,.cl-faq,.cl-tail,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-benefits,.cl-faq,.cl-tail:not(.cl-midcta),.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
