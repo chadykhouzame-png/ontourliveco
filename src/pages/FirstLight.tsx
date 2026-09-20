@@ -434,7 +434,7 @@ export default function FirstLight() {
               href={socialLinks.facebook.url}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={socialLinks.facebook.label}
+              aria-label={`${socialLinks.facebook.label} — opens in a new tab`}
             >
               <Facebook aria-hidden="true" />
               <span>Facebook</span>
