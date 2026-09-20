@@ -197,13 +197,17 @@ export default function FirstLight() {
       if (data?.position) {
         setPosition(data.position as number);
         setConfirmed({ email: value, role, name: role === "artist" ? artist : venue });
+        trackEvent("waitlist_signup", { role, position: data.position as number });
+        trackEvent("sign_up", { method: "waitlist", role });
       } else if (data?.error === "rate_limited") {
         setHint("Too many attempts — try again in an hour.");
         setHintTone("ox");
+        trackEvent("waitlist_signup_failed", { role, reason: "rate_limited" });
       } else if (data?.error === "duplicate" || data?.error === "already_registered") {
         setErrors((prev) => ({ ...prev, email: "This email is already on the list — you're all set." }));
         setHint("You're already on the list with that email.");
         setHintTone("ox");
+        trackEvent("waitlist_signup_failed", { role, reason: "duplicate" });
       } else {
         throw new Error(data?.error ?? "signup_failed");
       }
@@ -211,6 +215,7 @@ export default function FirstLight() {
       console.error(err);
       setHint("Something went wrong. Try again in a moment.");
       setHintTone("ox");
+      trackEvent("waitlist_signup_failed", { role, reason: "error" });
     } finally {
       setSubmitting(false);
     }
