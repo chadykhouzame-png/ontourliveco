@@ -145,6 +145,39 @@ export type Database = {
         }
         Relationships: []
       }
+      booking_enquiries: {
+        Row: {
+          created_at: string
+          email: string
+          enquiry_type: string
+          handled: boolean
+          id: string
+          message: string
+          name: string
+          organisation: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          enquiry_type?: string
+          handled?: boolean
+          id?: string
+          message: string
+          name: string
+          organisation?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          enquiry_type?: string
+          handled?: boolean
+          id?: string
+          message?: string
+          name?: string
+          organisation?: string | null
+        }
+        Relationships: []
+      }
       booking_negotiations: {
         Row: {
           action_type: string
