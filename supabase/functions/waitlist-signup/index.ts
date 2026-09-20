@@ -127,9 +127,12 @@ serve(async (req) => {
 
   const { email, role, firstName, lastName, artistName, venueName, company, elapsedMs } = parsed;
 
-  // Honeypot + submit-speed trap: pretend it worked, store nothing.
-  if ((company ?? "").trim().length > 0 || (elapsedMs !== undefined && elapsedMs < MIN_FILL_MS)) {
-    console.warn("waitlist-signup: bot submission blocked", { ip, honeypot: Boolean(company) });
+  // Honeypot + submit-speed trap: pretend it worked, store nothing they typed.
+  const honeypotHit = (company ?? "").trim().length > 0;
+  const tooFast = elapsedMs !== undefined && elapsedMs < MIN_FILL_MS;
+  if (honeypotHit || tooFast) {
+    console.warn("waitlist-signup: bot submission blocked", { honeypot: honeypotHit });
+    await logBlocked(honeypotHit ? "honeypot" : "too_fast", ip, userAgent, role);
     return new Response(JSON.stringify({ position: 1 }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
