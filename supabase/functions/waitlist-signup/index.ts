@@ -23,6 +23,9 @@ function throttled(ip: string): boolean {
   return e.count > MAX;
 }
 
+// Bots fill every field, including ones humans never see, and submit instantly.
+const MIN_FILL_MS = 1500;
+
 const BodySchema = z.object({
   email: z.string().trim().email().max(255),
   role: z.enum(["artist", "venue"]),
@@ -30,6 +33,8 @@ const BodySchema = z.object({
   lastName: z.string().trim().min(1).max(100),
   artistName: z.string().trim().max(100).optional().or(z.literal("")),
   venueName: z.string().trim().max(100).optional().or(z.literal("")),
+  company: z.string().max(200).optional(),
+  elapsedMs: z.number().nonnegative().optional(),
 });
 
 serve(async (req) => {
