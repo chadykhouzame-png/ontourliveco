@@ -876,7 +876,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 @media (prefers-reduced-motion: no-preference){
-  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-contact{
+  .cl-mark,.cl-wordmark,.cl-aside,.cl-descriptor,.cl-form,.cl-held,.fl-countdown,.cl-how,.cl-preview,.cl-tools,.cl-quotes,.cl-contact{
     opacity:0;transform:translateY(8px);animation:cl-rise .7s ease-out forwards
   }
   .cl-mark{animation-delay:.05s}
