@@ -1130,6 +1130,33 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_blocked_attempts: {
+        Row: {
+          client_kind: string | null
+          created_at: string
+          id: string
+          ip_hash: string | null
+          reason: string
+          role: string | null
+        }
+        Insert: {
+          client_kind?: string | null
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          reason: string
+          role?: string | null
+        }
+        Update: {
+          client_kind?: string | null
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          reason?: string
+          role?: string | null
+        }
+        Relationships: []
+      }
       waitlist_rate_limits: {
         Row: {
           attempted_at: string

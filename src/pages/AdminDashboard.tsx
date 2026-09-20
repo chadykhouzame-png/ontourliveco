@@ -17,6 +17,7 @@ import PrePublishChecklist from '@/components/admin/PrePublishChecklist';
 import AdminDomainChecklist from '@/components/admin/AdminDomainChecklist';
 import AdminSiteMode from '@/components/admin/AdminSiteMode';
 import AdminWaitlist from '@/components/admin/AdminWaitlist';
+import AdminBlockedAttempts from '@/components/admin/AdminBlockedAttempts';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -101,8 +102,9 @@ const AdminDashboard = () => {
             <AdminUserManagement />
           </TabsContent>
 
-          <TabsContent value="waitlist" className="mt-6">
+          <TabsContent value="waitlist" className="mt-6 space-y-6">
             <AdminWaitlist />
+            <AdminBlockedAttempts />
           </TabsContent>
 
           <TabsContent value="disputes" className="mt-6">
