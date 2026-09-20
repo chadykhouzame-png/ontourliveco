@@ -16,7 +16,12 @@ export default defineTool({
       process.env.SUPABASE_URL!,
       process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.SUPABASE_ANON_KEY!,
     );
-    let q = supabase.from("venues").select("*").limit(limit);
+    let q = supabase
+      .from("venues")
+      .select(
+        "id, venue_name, city, venue_type, capacity_min, capacity_max, description, music_preferences, booking_nights, profile_image_url, instagram_url",
+      )
+      .limit(limit);
     if (city) q = q.ilike("city", `%${city}%`);
     const { data, error } = await q;
     if (error) return { content: [{ type: "text", text: `Error: ${error.message}` }], isError: true };
