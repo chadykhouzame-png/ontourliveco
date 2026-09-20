@@ -98,19 +98,30 @@ serve(async (req) => {
   }
 
   try {
-    const body = (await req.json()) as AlertBody;
-    if (!body?.source || !body?.stage || !body?.error_message) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const body = (await req.json()) as AlertBody & { ping?: boolean };
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
       { auth: { persistSession: false } },
     );
+
+    // Health check: report whether alerting can deliver, without sending an email
+    if (body?.ping) {
+      const recipients = await resolveAdminEmails(supabase);
+      const ready = recipients.length > 0 && !!Deno.env.get("RESEND_API_KEY");
+      return new Response(JSON.stringify({ ready, recipients: recipients.length }), {
+        status: ready ? 200 : 503,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (!body?.source || !body?.stage || !body?.error_message) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const to = await resolveAdminEmails(supabase);
     if (!to.length) {
