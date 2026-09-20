@@ -22,15 +22,6 @@ export default function FirstLight() {
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
 
-  const [enqOpen, setEnqOpen] = useState(false);
-  const [enqName, setEnqName] = useState("");
-  const [enqEmail, setEnqEmail] = useState("");
-  const [enqOrg, setEnqOrg] = useState("");
-  const [enqMessage, setEnqMessage] = useState("");
-  const [enqSubmitting, setEnqSubmitting] = useState(false);
-  const [enqSent, setEnqSent] = useState(false);
-  const [enqHint, setEnqHint] = useState("");
-  const [enqTone, setEnqTone] = useState<"muted" | "ox">("muted");
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -98,43 +89,6 @@ export default function FirstLight() {
     }
   }
 
-  async function onEnquirySubmit(e: FormEvent) {
-    e.preventDefault();
-    const name = enqName.trim();
-    const mail = enqEmail.trim();
-    const org = enqOrg.trim();
-    const msg = enqMessage.trim();
-
-    if (!name || !msg || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) {
-      setEnqHint("Please add your name, a valid email and a short message.");
-      setEnqTone("ox");
-      return;
-    }
-    if (msg.length > 1000) {
-      setEnqHint("Please keep your message under 1000 characters.");
-      setEnqTone("ox");
-      return;
-    }
-
-    setEnqSubmitting(true);
-    try {
-      const { error } = await supabase.from("booking_enquiries").insert({
-        name: name.slice(0, 100),
-        email: mail.slice(0, 255),
-        organisation: org ? org.slice(0, 120) : null,
-        enquiry_type: role,
-        message: msg,
-      });
-      if (error) throw error;
-      setEnqSent(true);
-    } catch (err) {
-      console.error(err);
-      setEnqHint("Something went wrong. Try again, or email hello@ontour.live.");
-      setEnqTone("ox");
-    } finally {
-      setEnqSubmitting(false);
-    }
-  }
 
   const location = useLocation();
   const seoPath = location.pathname === "/waitlist" ? "/waitlist" : "/";
@@ -292,77 +246,18 @@ export default function FirstLight() {
           <div className="cl-rule" />
           <p className="cl-contact-lead">Ready to book now?</p>
 
-          {enqSent ? (
-            <p className="cl-contact-note" aria-live="polite">
-              Thank you — your enquiry is with us. We&rsquo;ll reply to {enqEmail.trim()} shortly.
-            </p>
-          ) : !enqOpen ? (
-            <>
-              <button
-                type="button"
-                className="cl-ghost cl-contact-cta"
-                onClick={() => setEnqOpen(true)}
-              >
-                Talk to us about a booking
-              </button>
-              <p className="cl-contact-note">
-                Or email{" "}
-                <a href="mailto:hello@ontour.live" className="cl-link">
-                  hello@ontour.live
-                </a>
-              </p>
-            </>
-          ) : (
-            <form className="cl-enq" onSubmit={onEnquirySubmit} noValidate>
-              <div className="cl-fields">
-                <input
-                  className="cl-input"
-                  type="text"
-                  value={enqName}
-                  onChange={(e) => setEnqName(e.target.value)}
-                  placeholder="Your name"
-                  autoComplete="name"
-                  aria-label="Your name"
-                  required
-                />
-                <input
-                  className="cl-input"
-                  type="email"
-                  value={enqEmail}
-                  onChange={(e) => setEnqEmail(e.target.value)}
-                  placeholder="your@email.com"
-                  autoComplete="email"
-                  aria-label="Your email"
-                  required
-                />
-                <input
-                  className="cl-input"
-                  type="text"
-                  value={enqOrg}
-                  onChange={(e) => setEnqOrg(e.target.value)}
-                  placeholder="Act or venue (optional)"
-                  autoComplete="organization"
-                  aria-label="Act or venue"
-                />
-                <textarea
-                  className="cl-input cl-textarea"
-                  value={enqMessage}
-                  onChange={(e) => setEnqMessage(e.target.value)}
-                  placeholder="Dates, city, what you have in mind…"
-                  aria-label="Your message"
-                  maxLength={1000}
-                  rows={4}
-                  required
-                />
-              </div>
-              <button className="cl-cta" type="submit" disabled={enqSubmitting}>
-                {enqSubmitting ? "Sending…" : "Send enquiry"}
-              </button>
-              <p className="cl-hint" data-tone={enqTone}>
-                {enqHint || "We reply by email, usually within a day."}
-              </p>
-            </form>
-          )}
+          <a
+            className="cl-ghost cl-contact-cta"
+            href="mailto:hello@ontour.live?subject=Booking%20enquiry%20%E2%80%94%20On%20Tour%20Live"
+          >
+            Talk to us about a booking
+          </a>
+          <p className="cl-contact-note">
+            Or email{" "}
+            <a href="mailto:hello@ontour.live" className="cl-link">
+              hello@ontour.live
+            </a>
+          </p>
         </section>
       </main>
 
