@@ -462,7 +462,7 @@ export default function FirstLight() {
 
       <footer className="cl-footer">
         <span className="cl-eyebrow">
-          <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-footer-link">@ontour.live</a>
+          <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-footer-link">@ontour.live<span className="cl-sr"> on Instagram (opens in a new tab)</span></a>
         </span>
         <span className="cl-eyebrow">The Founding List — MMXXVI</span>
       </footer>
