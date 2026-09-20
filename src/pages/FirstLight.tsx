@@ -232,7 +232,7 @@ export default function FirstLight() {
               App launches September 2026 · Sydney first.
               <br />
               Watch{" "}
-              <a href="https://instagram.com/ontourlive" className="cl-link">
+              <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-link">
                 @ontourlive
               </a>
               .
@@ -291,7 +291,7 @@ export default function FirstLight() {
 
       <footer className="cl-footer">
         <span className="cl-eyebrow">
-          <a href="https://instagram.com/ontourlive" className="cl-footer-link">@ontourlive</a>
+          <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-footer-link">@ontour.live</a>
         </span>
         <span className="cl-eyebrow">The Founding List — MMXXVI</span>
       </footer>
