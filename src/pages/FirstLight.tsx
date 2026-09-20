@@ -99,6 +99,7 @@ export default function FirstLight() {
         description="The booking app for artists and venues. Launching September 2026, Sydney first. Join the founding list and take your place."
         path={seoPath}
       />
+      <LocalBusinessSchema />
       <style>{styles}</style>
 
 
