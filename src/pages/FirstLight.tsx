@@ -848,6 +848,21 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 
 
+.cl-tail{
+  margin-top:clamp(40px,6vh,64px);width:min(520px,100%);
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+}
+.cl-tail .cl-rule{margin-bottom:20px}
+.cl-tail-title{
+  font-family:var(--font-display);font-weight:400;font-size:clamp(22px,3vw,28px);
+  color:var(--pine-deep);margin:0;
+}
+.cl-tail-lead{
+  font-family:var(--font-body);font-weight:500;font-size:13px;line-height:1.7;
+  color:var(--sand-ink);margin:10px 0 0;max-width:42ch;
+}
+.cl-tail-actions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:18px}
+
 
 .cl-contact{
   margin-top:clamp(40px,6vh,64px);display:flex;flex-direction:column;align-items:center;
