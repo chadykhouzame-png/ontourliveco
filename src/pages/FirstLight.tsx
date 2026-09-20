@@ -346,7 +346,7 @@ export default function FirstLight() {
           <p className="cl-eyebrow cl-pine">How it works</p>
           <h2 id="cl-steps-title" className="cl-how-title">Three steps, either side of the stage</h2>
           <ol className="cl-how-list">
-            <li>
+            <li className="cl-how-item">
               <span className="cl-how-num">I</span>
               <div>
                 <h3>Set up your page</h3>
