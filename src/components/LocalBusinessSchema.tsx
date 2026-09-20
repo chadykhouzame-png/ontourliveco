@@ -13,7 +13,7 @@ export default function LocalBusinessSchema() {
           "@context": "https://schema.org",
           "@type": "LocalBusiness",
           name: "On Tour Live",
-          url: "https://app.ontourlive.co",
+          url: "https://ontourlive.co",
           description:
             "Booking platform connecting artists and venues. Sydney first, launching September 2026.",
           email: "hello@ontour.live",
