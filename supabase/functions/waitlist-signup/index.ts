@@ -75,7 +75,15 @@ serve(async (req) => {
     });
   }
 
-  const { email, role, firstName, lastName, artistName, venueName } = parsed;
+  const { email, role, firstName, lastName, artistName, venueName, company, elapsedMs } = parsed;
+
+  // Honeypot + submit-speed trap: pretend it worked, store nothing.
+  if ((company ?? "").trim().length > 0 || (elapsedMs !== undefined && elapsedMs < MIN_FILL_MS)) {
+    console.warn("waitlist-signup: bot submission blocked", { ip, honeypot: Boolean(company) });
+    return new Response(JSON.stringify({ position: 0 }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   if (role === "artist" && (!artistName || artistName.length < 1)) {
     return new Response(JSON.stringify({ error: "invalid_artist_name" }), {
