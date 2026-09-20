@@ -162,6 +162,13 @@ export default function FirstLight() {
           : "Please fix the highlighted field.",
       );
       setHintTone("ox");
+      trackEvent("waitlist_validation_error", {
+        role,
+        stage: "submit",
+        field: firstInvalid,
+        error_count: Object.keys(nextErrors).length,
+        fields: Object.keys(nextErrors).join(","),
+      });
       formRef.current?.querySelector<HTMLInputElement>(`#cl-f-${firstInvalid}`)?.focus();
       return;
     }
