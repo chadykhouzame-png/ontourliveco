@@ -95,7 +95,10 @@ serve(async (req) => {
     req.headers.get("cf-connecting-ip") ||
     "unknown";
 
+  const userAgent = req.headers.get("user-agent");
+
   if (throttled(ip)) {
+    await logBlocked("rate_limited", ip, userAgent);
     return new Response(JSON.stringify({ error: "rate_limited" }), {
       status: 429,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
