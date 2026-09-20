@@ -114,6 +114,9 @@ export default function FirstLight() {
     setTouched((prev) => ({ ...prev, [name]: true }));
     const message = validate(name, values[name]);
     setErrors((prev) => ({ ...prev, [name]: message || undefined }));
+    if (message) {
+      trackEvent("waitlist_validation_error", { role, field: name, stage: "blur" });
+    }
   }
 
   function chooseRole(next: "artist" | "venue") {
