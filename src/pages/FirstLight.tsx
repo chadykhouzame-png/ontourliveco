@@ -1076,7 +1076,25 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-how-item{gap:12px;padding:16px 0}
   .cl-how-num{min-width:20px;font-size:14px}
   .cl-how-item h3{letter-spacing:.2em}
+  .cl-preview{margin-top:34px}
+  .cl-preview-figure{margin-top:20px}
+  .cl-preview-scroll{
+    overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+    scroll-snap-type:x mandatory;
+    border:1px solid hsl(0 0% 9% / .14);background:var(--bone-lift);
+  }
+  .cl-preview-scroll img{
+    width:auto;height:auto;min-width:560px;max-width:none;
+    border:0;border-radius:0;scroll-snap-align:center;
+  }
+  .cl-preview-hint{
+    display:block;font-family:var(--font-body);font-weight:600;
+    font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--sand-ink);margin:10px 0 0;
+  }
+  .cl-preview-figure figcaption{margin-top:8px;font-size:12px}
   .cl-tools{margin-top:34px}
+
   .cl-quotes{margin-top:34px}
   .cl-benefits{margin-top:34px}
   .cl-faq{margin-top:34px}
