@@ -33,6 +33,8 @@ export default function FirstLight() {
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const heldRef = useRef<HTMLDivElement | null>(null);
+  const honeypotRef = useRef<HTMLInputElement | null>(null);
+  const startedAtRef = useRef<number>(Date.now());
 
   useEffect(() => {
     if (position === null) return;
@@ -156,6 +158,8 @@ export default function FirstLight() {
           lastName: last,
           artistName: role === "artist" ? artist : "",
           venueName: role === "venue" ? venue : "",
+          company: honeypotRef.current?.value ?? "",
+          elapsedMs: Date.now() - startedAtRef.current,
         },
       });
       if (error) throw error;
@@ -250,6 +254,17 @@ export default function FirstLight() {
               >
                 Venue
               </button>
+            </div>
+            <div className="cl-hp" aria-hidden="true">
+              <label htmlFor="cl-f-company">Company (leave blank)</label>
+              <input
+                id="cl-f-company"
+                name="company"
+                type="text"
+                ref={honeypotRef}
+                tabIndex={-1}
+                autoComplete="off"
+              />
             </div>
             <div className="cl-fields">
               {activeFields.map((name) => {
@@ -855,6 +870,7 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 .cl-form input.cl-input::placeholder{color:var(--sand-ink)}
 .cl-form input.cl-input:focus{border-color:var(--pine);outline:none}
 .cl-field{display:flex;flex-direction:column;gap:6px}
+.cl-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .cl-label{
   font-family:var(--font-body);font-weight:600;font-size:10px;
   letter-spacing:.24em;text-transform:uppercase;color:var(--sand-ink);

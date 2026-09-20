@@ -23,6 +23,9 @@ function throttled(ip: string): boolean {
   return e.count > MAX;
 }
 
+// Bots fill every field, including ones humans never see, and submit instantly.
+const MIN_FILL_MS = 1500;
+
 const BodySchema = z.object({
   email: z.string().trim().email().max(255),
   role: z.enum(["artist", "venue"]),
@@ -30,6 +33,8 @@ const BodySchema = z.object({
   lastName: z.string().trim().min(1).max(100),
   artistName: z.string().trim().max(100).optional().or(z.literal("")),
   venueName: z.string().trim().max(100).optional().or(z.literal("")),
+  company: z.string().max(200).optional(),
+  elapsedMs: z.number().nonnegative().optional(),
 });
 
 serve(async (req) => {
@@ -70,7 +75,15 @@ serve(async (req) => {
     });
   }
 
-  const { email, role, firstName, lastName, artistName, venueName } = parsed;
+  const { email, role, firstName, lastName, artistName, venueName, company, elapsedMs } = parsed;
+
+  // Honeypot + submit-speed trap: pretend it worked, store nothing.
+  if ((company ?? "").trim().length > 0 || (elapsedMs !== undefined && elapsedMs < MIN_FILL_MS)) {
+    console.warn("waitlist-signup: bot submission blocked", { ip, honeypot: Boolean(company) });
+    return new Response(JSON.stringify({ position: 1 }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
 
   if (role === "artist" && (!artistName || artistName.length < 1)) {
     return new Response(JSON.stringify({ error: "invalid_artist_name" }), {
