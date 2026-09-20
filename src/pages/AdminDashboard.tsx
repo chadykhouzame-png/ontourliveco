@@ -117,8 +117,9 @@ const AdminDashboard = () => {
             </WebhookTestProvider>
           </TabsContent>
 
-          <TabsContent value="prepublish" className="mt-6">
+          <TabsContent value="prepublish" className="mt-6 space-y-6">
             <PrePublishChecklist />
+            <AdminDomainChecklist />
           </TabsContent>
 
           <TabsContent value="site" className="mt-6">
