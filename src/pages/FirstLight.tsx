@@ -250,7 +250,7 @@ export default function FirstLight() {
               <br />
               Watch{" "}
               <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-link">
-                @ontourlive
+                @ontourlive<span className="cl-sr"> (opens in a new tab)</span>
               </a>
               .
             </p>
