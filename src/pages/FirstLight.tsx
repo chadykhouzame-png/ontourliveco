@@ -1187,7 +1187,8 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-fields{gap:14px}
   .cl-field{gap:5px}
   .cl-form input.cl-input{padding:15px 18px;font-size:16px}
-  .cl-error{font-size:13px;line-height:1.4;padding:0 4px}
+  .cl-error{font-size:13.5px;line-height:1.45;padding:0 4px}
+  .cl-label{font-size:10.5px;letter-spacing:.2em}
   .cl-cta{padding:18px 0;letter-spacing:.2em;margin-top:18px}
   .cl-hint{margin-top:12px}
   .cl-privacy{font-size:12px;line-height:1.65;padding:0 2px;margin-top:12px}
