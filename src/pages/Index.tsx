@@ -14,6 +14,7 @@ import EventHighlights from "@/components/EventHighlights";
 import PhotoGallery from "@/components/PhotoGallery";
 import FAQ from "@/components/FAQ";
 import SiteFooter from "@/components/SiteFooter";
+import PageSeo from "@/components/PageSeo";
 
 
 const Index = () => {
