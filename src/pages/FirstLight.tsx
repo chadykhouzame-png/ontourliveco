@@ -386,18 +386,22 @@ export default function FirstLight() {
           <p className="cl-eyebrow cl-pine">A first look</p>
           <h2 id="cl-preview-title" className="cl-how-title">What you&rsquo;ll be using</h2>
           <figure className="cl-preview-figure">
-            <img
-              src={appPreview}
-              alt="Two phone screens from the On Tour Live app: a list of open slots at Australian venues, and an artist profile with genre tags and an availability calendar."
-              width={1408}
-              height={1024}
-              loading="lazy"
-            />
+            <div className="cl-preview-scroll" tabIndex={0} role="group" aria-label="App preview, scrollable on small screens">
+              <img
+                src={appPreview}
+                alt="Two phone screens from the On Tour Live app: a list of open slots at Australian venues, and an artist profile with genre tags and an availability calendar."
+                width={1408}
+                height={1024}
+                loading="lazy"
+              />
+            </div>
+            <p className="cl-preview-hint" aria-hidden="true">Swipe to see both screens</p>
             <figcaption>
               Open slots across the country on one side, a living artist profile with real
               availability on the other. Design in progress — final app may differ.
             </figcaption>
           </figure>
+
         </section>
 
         <section className="cl-tail cl-midcta" aria-labelledby="cl-previewcta-title">
@@ -868,14 +872,18 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
 }
 .cl-preview .cl-rule{margin-bottom:20px}
 .cl-preview-figure{margin:24px 0 0;width:100%}
+.cl-preview-scroll{width:100%;border-radius:14px}
+.cl-preview-scroll:focus-visible{outline:3px solid var(--pine);outline-offset:3px}
 .cl-preview-figure img{
   display:block;width:100%;height:auto;
   border:1px solid hsl(0 0% 9% / .14);border-radius:14px;background:var(--bone-lift);
 }
+.cl-preview-hint{display:none}
 .cl-preview-figure figcaption{
   font-family:var(--font-body);font-weight:500;font-size:12.5px;line-height:1.7;
   color:var(--ink);opacity:.68;margin-top:12px;
 }
+
 
 .cl-tools{
   margin-top:clamp(40px,6vh,64px);width:min(560px,100%);
@@ -1068,7 +1076,25 @@ button:focus-visible{outline:3px solid var(--pine);outline-offset:3px;border-rad
   .cl-how-item{gap:12px;padding:16px 0}
   .cl-how-num{min-width:20px;font-size:14px}
   .cl-how-item h3{letter-spacing:.2em}
+  .cl-preview{margin-top:34px}
+  .cl-preview-figure{margin-top:20px}
+  .cl-preview-scroll{
+    overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;
+    scroll-snap-type:x mandatory;
+    border:1px solid hsl(0 0% 9% / .14);background:var(--bone-lift);
+  }
+  .cl-preview-scroll img{
+    width:auto;height:auto;min-width:560px;max-width:none;
+    border:0;border-radius:0;scroll-snap-align:center;
+  }
+  .cl-preview-hint{
+    display:block;font-family:var(--font-body);font-weight:600;
+    font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--sand-ink);margin:10px 0 0;
+  }
+  .cl-preview-figure figcaption{margin-top:8px;font-size:12px}
   .cl-tools{margin-top:34px}
+
   .cl-quotes{margin-top:34px}
   .cl-benefits{margin-top:34px}
   .cl-faq{margin-top:34px}
