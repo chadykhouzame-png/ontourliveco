@@ -550,6 +550,8 @@ const styles = `
   padding:14px 26px;cursor:pointer;transition:background .2s,color .2s;
 }
 .cl-ghost:hover{background:var(--pine);color:var(--bone)}
+.cl-how-cta{align-self:center;margin-top:22px}
+
 
 .cl-how{
   margin-top:clamp(44px,7vh,72px);width:min(560px,100%);
