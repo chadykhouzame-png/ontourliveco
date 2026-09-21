@@ -1,6 +1,8 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.57.2";
 import { z } from "npm:zod@3.22.4";
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -185,7 +187,25 @@ serve(async (req) => {
     });
   }
 
+  // Confirmation email — never let a send failure break the signup response.
+  try {
+    await sendTemplateEmail(
+      role === "artist" ? "waitlist-artist-confirmation" : "waitlist-venue-confirmation",
+      email,
+      {
+        templateData:
+          role === "artist"
+            ? { firstName, artistName }
+            : { firstName, venueName },
+        idempotencyKey: `waitlist-confirm-${role}-${email.toLowerCase()}`,
+      },
+    );
+  } catch (err) {
+    console.error("waitlist-signup: confirmation email failed", err);
+  }
+
   return new Response(JSON.stringify({ position: data }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
+

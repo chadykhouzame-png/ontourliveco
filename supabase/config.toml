@@ -35,3 +35,5 @@ project_id = "wjyyfqxblicvrbaycoaq"
     verify_jwt = false
   [functions.waitlist-signup]
     verify_jwt = false
+  [functions.preview-transactional-email]
+    verify_jwt = false
