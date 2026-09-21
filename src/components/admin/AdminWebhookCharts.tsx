@@ -33,8 +33,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, LineChart as LineChartIcon, RefreshCw } from 'lucide-react';
+import { CalendarIcon, CheckCircle2, LineChart as LineChartIcon, RefreshCw, XCircle } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 
 type EventRow = {
