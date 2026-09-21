@@ -1167,6 +1167,7 @@ export type Database = {
           role: string | null
           status: string
           template: string
+          trigger_source: string
         }
         Insert: {
           created_at?: string
@@ -1177,6 +1178,7 @@ export type Database = {
           role?: string | null
           status: string
           template: string
+          trigger_source?: string
         }
         Update: {
           created_at?: string
@@ -1187,6 +1189,7 @@ export type Database = {
           role?: string | null
           status?: string
           template?: string
+          trigger_source?: string
         }
         Relationships: []
       }
