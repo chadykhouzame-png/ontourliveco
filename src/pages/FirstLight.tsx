@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, FormEvent } from "react";
-import { Instagram, Facebook, Music2 } from "lucide-react";
+import { Instagram, Facebook } from "lucide-react";
 import { socialLinks } from "@/config/social";
 import { useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
