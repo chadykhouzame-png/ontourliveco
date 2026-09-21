@@ -124,6 +124,7 @@ const AdminWebhookEvents = () => {
   const [pendingRetryEvent, setPendingRetryEvent] = useState<WebhookEvent | null>(null);
   const [retryHistory, setRetryHistory] = useState<Record<string, RetryAttempt[]>>({});
   const [historyLoading, setHistoryLoading] = useState<Record<string, boolean>>({});
+  const [rawIds, setRawIds] = useState<Record<string, boolean>>({});
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
