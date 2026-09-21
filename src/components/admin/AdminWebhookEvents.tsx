@@ -563,7 +563,28 @@ const AdminWebhookEvents = () => {
                 <>
                   <TableRow key={event.id} className="cursor-pointer" onClick={() => toggleExpanded(event.id)}>
                     <TableCell className="font-mono text-xs">{event.event_type}</TableCell>
-                    <TableCell className="font-mono text-xs max-w-[180px] truncate">{event.event_id}</TableCell>
+                    <TableCell>
+                      <Badge variant={modeOf(event) === 'Live' ? 'default' : 'outline'}>
+                        {modeOf(event)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono max-w-[160px] truncate">{event.event_id}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          aria-label="Copy event ID"
+                          onClick={() => {
+                            navigator.clipboard.writeText(event.event_id);
+                            toast({ title: 'Event ID copied' });
+                          }}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={statusVariant(event.status)}>{event.status}</Badge>
                     </TableCell>
