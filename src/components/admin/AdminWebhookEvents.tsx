@@ -561,6 +561,17 @@ const AdminWebhookEvents = () => {
             </Button>
           )}
 
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={exportCsv}
+            disabled={loading || filteredEvents.length === 0}
+            className="h-9"
+          >
+            <Download className="h-4 w-4 mr-1" />
+            Export CSV
+          </Button>
+
           <div className="ml-auto text-xs text-muted-foreground self-center">
             {loading ? 'Loading…' : `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'}`}
           </div>
