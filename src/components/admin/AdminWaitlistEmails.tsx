@@ -179,6 +179,26 @@ export default function AdminWaitlistEmails() {
                     </TableCell>
                     <TableCell className="max-w-[320px] text-sm text-muted-foreground">
                       {friendlyReason(r)}
+                      {r.trigger_source && r.trigger_source !== "signup" && (
+                        <span className="ml-2 text-xs">
+                          ({r.trigger_source === "admin_resend" ? "resent by admin" : "resent by user"})
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => resend(r.email)}
+                        disabled={resendingEmail === r.email}
+                      >
+                        {resendingEmail === r.email ? (
+                          <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Send className="mr-2 h-3.5 w-3.5" />
+                        )}
+                        Resend
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
