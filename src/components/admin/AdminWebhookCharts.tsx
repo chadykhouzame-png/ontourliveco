@@ -55,6 +55,25 @@ type Point = {
   avgSeconds: number | null;
 };
 
+type DrillStatus = 'all' | 'processed' | 'pending' | 'failed';
+
+type DetailRow = {
+  id: string;
+  event_id: string;
+  event_type: string;
+  status: string;
+  error_message: string | null;
+  created_at: string;
+  processed_at: string | null;
+};
+
+const STATUS_LABEL: Record<DrillStatus, string> = {
+  all: 'All events',
+  processed: 'Processed events',
+  pending: 'Pending events',
+  failed: 'Failed events',
+};
+
 const RANGES = [7, 14, 30] as const;
 type Range = (typeof RANGES)[number];
 
