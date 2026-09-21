@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { redactPayload, diagnosticSummary } from '@/lib/redactPayload';
+import { Eye, EyeOff } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import {
   RefreshCw,
@@ -124,6 +126,7 @@ const AdminWebhookEvents = () => {
   const [pendingRetryEvent, setPendingRetryEvent] = useState<WebhookEvent | null>(null);
   const [retryHistory, setRetryHistory] = useState<Record<string, RetryAttempt[]>>({});
   const [historyLoading, setHistoryLoading] = useState<Record<string, boolean>>({});
+  const [rawIds, setRawIds] = useState<Record<string, boolean>>({});
 
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -255,21 +258,27 @@ const AdminWebhookEvents = () => {
     }
   };
 
-  const copyPayload = async (event: WebhookEvent) => {
+  const payloadFor = (event: WebhookEvent, raw: boolean) =>
+    raw ? event.payload : redactPayload(event.payload).value;
+
+  const copyPayload = async (event: WebhookEvent, raw = false) => {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(event.payload, null, 2));
-      toast({ title: 'Payload copied', description: `${event.event_type} · ${event.event_id}` });
+      await navigator.clipboard.writeText(JSON.stringify(payloadFor(event, raw), null, 2));
+      toast({
+        title: raw ? 'Full payload copied' : 'Redacted payload copied',
+        description: `${event.event_type} · ${event.event_id}`,
+      });
     } catch (err: any) {
       toast({ title: 'Copy failed', description: err?.message || 'Clipboard unavailable', variant: 'destructive' });
     }
   };
 
-  const downloadPayload = (event: WebhookEvent) => {
-    const blob = new Blob([JSON.stringify(event.payload, null, 2)], { type: 'application/json' });
+  const downloadPayload = (event: WebhookEvent, raw = false) => {
+    const blob = new Blob([JSON.stringify(payloadFor(event, raw), null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${event.event_type}_${event.event_id}.json`;
+    a.download = `${event.event_type}_${event.event_id}${raw ? '' : '_redacted'}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -769,15 +778,65 @@ const AdminWebhookEvents = () => {
                               )
                             )}
                           </div>
+                          {diagnosticSummary(event.payload).length > 0 && (
+                            <div className="rounded-lg border bg-background/60 p-3">
+                              <div className="text-xs font-semibold mb-2">Key details</div>
+                              <dl className="grid gap-x-4 gap-y-1 sm:grid-cols-2">
+                                {diagnosticSummary(event.payload).map((row) => (
+                                  <div key={row.label} className="flex gap-2 text-xs">
+                                    <dt className="text-muted-foreground shrink-0">{row.label}:</dt>
+                                    <dd className="font-mono break-all">{row.value}</dd>
+                                  </div>
+                                ))}
+                              </dl>
+                            </div>
+                          )}
                           <div>
-                            <div className="flex items-center justify-between mb-1 gap-2">
-                              <span className="text-xs font-semibold">Payload:</span>
+                            <div className="flex flex-wrap items-center justify-between mb-1 gap-2">
+                              <span className="text-xs font-semibold flex items-center gap-1.5">
+                                {rawIds[event.id] ? (
+                                  <>
+                                    <EyeOff className="h-3.5 w-3.5 text-destructive" />
+                                    Full payload (contains personal data)
+                                  </>
+                                ) : (
+                                  <>
+                                    <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                                    Redacted payload
+                                    {redactPayload(event.payload).redactedCount > 0 && (
+                                      <Badge variant="outline" className="ml-1">
+                                        {redactPayload(event.payload).redactedCount} fields hidden
+                                      </Badge>
+                                    )}
+                                  </>
+                                )}
+                              </span>
                               <div className="flex gap-1">
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="h-7 px-2 text-xs"
-                                  onClick={() => copyPayload(event)}
+                                  onClick={() =>
+                                    setRawIds((prev) => ({ ...prev, [event.id]: !prev[event.id] }))
+                                  }
+                                >
+                                  {rawIds[event.id] ? (
+                                    <>
+                                      <Eye className="h-3 w-3 mr-1" />
+                                      Hide sensitive data
+                                    </>
+                                  ) : (
+                                    <>
+                                      <EyeOff className="h-3 w-3 mr-1" />
+                                      Reveal full payload
+                                    </>
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() => copyPayload(event, !!rawIds[event.id])}
                                 >
                                   <Copy className="h-3 w-3 mr-1" />
                                   Copy
@@ -786,15 +845,28 @@ const AdminWebhookEvents = () => {
                                   variant="ghost"
                                   size="sm"
                                   className="h-7 px-2 text-xs"
-                                  onClick={() => downloadPayload(event)}
+                                  onClick={() => downloadPayload(event, !!rawIds[event.id])}
                                 >
                                   <Download className="h-3 w-3 mr-1" />
                                   Download JSON
                                 </Button>
                               </div>
                             </div>
-                            <pre className="text-xs bg-background rounded-lg p-3 overflow-auto max-h-48 border">
-                              {JSON.stringify(event.payload, null, 2)}
+                            {!rawIds[event.id] && (
+                              <p className="text-xs text-muted-foreground mb-1">
+                                Emails, names, addresses, card details and secrets are hidden. Ids,
+                                amounts, statuses and error codes are kept so you can diagnose the
+                                failure.
+                              </p>
+                            )}
+                            <pre
+                              className={`text-xs rounded-lg p-3 overflow-auto max-h-48 border ${
+                                rawIds[event.id]
+                                  ? 'bg-destructive/5 border-destructive/30 sentry-mask'
+                                  : 'bg-background'
+                              }`}
+                            >
+                              {JSON.stringify(payloadFor(event, !!rawIds[event.id]), null, 2)}
                             </pre>
                           </div>
                         </div>
