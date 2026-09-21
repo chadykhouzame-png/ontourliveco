@@ -204,13 +204,16 @@ serve(async (req) => {
 
     if (sendErr) {
       console.error("Resend error:", sendErr);
+      await recordAttempt(false);
       return new Response(JSON.stringify({ error: sendErr.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ sent: true, recipients: to.length }), {
+    await recordAttempt(true);
+
+    return new Response(JSON.stringify({ sent: true, recipients: to.length, burst, repeated: burst >= REPEAT_THRESHOLD }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
