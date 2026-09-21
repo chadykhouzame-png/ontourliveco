@@ -255,21 +255,27 @@ const AdminWebhookEvents = () => {
     }
   };
 
-  const copyPayload = async (event: WebhookEvent) => {
+  const payloadFor = (event: WebhookEvent, raw: boolean) =>
+    raw ? event.payload : redactPayload(event.payload).value;
+
+  const copyPayload = async (event: WebhookEvent, raw = false) => {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(event.payload, null, 2));
-      toast({ title: 'Payload copied', description: `${event.event_type} · ${event.event_id}` });
+      await navigator.clipboard.writeText(JSON.stringify(payloadFor(event, raw), null, 2));
+      toast({
+        title: raw ? 'Full payload copied' : 'Redacted payload copied',
+        description: `${event.event_type} · ${event.event_id}`,
+      });
     } catch (err: any) {
       toast({ title: 'Copy failed', description: err?.message || 'Clipboard unavailable', variant: 'destructive' });
     }
   };
 
-  const downloadPayload = (event: WebhookEvent) => {
-    const blob = new Blob([JSON.stringify(event.payload, null, 2)], { type: 'application/json' });
+  const downloadPayload = (event: WebhookEvent, raw = false) => {
+    const blob = new Blob([JSON.stringify(payloadFor(event, raw), null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${event.event_type}_${event.event_id}.json`;
+    a.download = `${event.event_type}_${event.event_id}${raw ? '' : '_redacted'}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
