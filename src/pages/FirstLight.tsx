@@ -31,6 +31,8 @@ export default function FirstLight() {
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendHint, setResendHint] = useState("");
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const heldRef = useRef<HTMLDivElement | null>(null);
