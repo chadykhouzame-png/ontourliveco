@@ -12,6 +12,7 @@ import AdminWebhookEvents from '@/components/admin/AdminWebhookEvents';
 import AdminWebhookHealth from '@/components/admin/AdminWebhookHealth';
 import AdminPaymentReconciliation from '@/components/admin/AdminPaymentReconciliation';
 import AdminAlertHistory from '@/components/admin/AdminAlertHistory';
+import AdminAlertRules from '@/components/admin/AdminAlertRules';
 import AdminWebhookCharts from '@/components/admin/AdminWebhookCharts';
 import WebhookTestingGuide from '@/components/admin/WebhookTestingGuide';
 import RunStripeTestCheckout from '@/components/admin/RunStripeTestCheckout';
