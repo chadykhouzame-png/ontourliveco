@@ -603,7 +603,31 @@ export default function AdminWebhookCharts() {
           ) : !drillRows?.length ? (
             <p className="text-sm text-muted-foreground">No events for this day and status.</p>
           ) : (
-            <div className="max-h-[60vh] overflow-y-auto space-y-2">
+            <div className="space-y-3">
+              {drillRows.some((r) => r.status === 'failed') && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                  <p className="text-xs text-muted-foreground">
+                    {drillRows.filter((r) => r.status === 'failed').length} failed event
+                    {drillRows.filter((r) => r.status === 'failed').length === 1 ? '' : 's'} can be
+                    resent.
+                    {bulkProgress
+                      ? ` Retrying ${bulkProgress.done + 1} of ${bulkProgress.total}…`
+                      : ''}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkRetrying || !!retryingId}
+                    onClick={retryAllFailed}
+                  >
+                    <RefreshCw
+                      className={cn('h-3.5 w-3.5 mr-1', bulkRetrying && 'animate-spin')}
+                    />
+                    {bulkRetrying ? 'Retrying…' : 'Retry all failed'}
+                  </Button>
+                </div>
+              )}
+              <div className="max-h-[55vh] overflow-y-auto space-y-2">
               {drillRows.map((e) => (
                 <div key={e.id} className="rounded-md border p-3 text-sm space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -622,10 +646,42 @@ export default function AdminWebhookCharts() {
                     <span className="text-xs text-muted-foreground">
                       {drillTimeFormat.format(new Date(e.created_at))}
                     </span>
+                    {e.status === 'failed' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="ml-auto h-7 px-2 text-xs"
+                        disabled={bulkRetrying || !!retryingId}
+                        onClick={() => retryOne(e)}
+                      >
+                        <RefreshCw
+                          className={cn(
+                            'h-3.5 w-3.5 mr-1',
+                            retryingId === e.id && 'animate-spin',
+                          )}
+                        />
+                        {retryingId === e.id ? 'Retrying…' : 'Retry'}
+                      </Button>
+                    )}
                   </div>
                   <p className="font-mono text-xs text-muted-foreground break-all">{e.event_id}</p>
                   {e.error_message && (
                     <p className="text-xs text-destructive break-words">{e.error_message}</p>
+                  )}
+                  {retryResults[e.id] && (
+                    <p
+                      className={cn(
+                        'flex items-center gap-1 text-xs',
+                        retryResults[e.id].success ? 'text-muted-foreground' : 'text-destructive',
+                      )}
+                    >
+                      {retryResults[e.id].success ? (
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5" />
+                      )}
+                      {retryResults[e.id].message}
+                    </p>
                   )}
                 </div>
               ))}
