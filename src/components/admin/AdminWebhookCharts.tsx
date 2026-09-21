@@ -35,7 +35,16 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, CheckCircle2, LineChart as LineChartIcon, RefreshCw, XCircle } from 'lucide-react';
+import { redactPayload, diagnosticSummary } from '@/lib/redactPayload';
+import {
+  CalendarIcon,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  LineChart as LineChartIcon,
+  RefreshCw,
+  XCircle,
+} from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 
 type EventRow = {
@@ -66,7 +75,23 @@ type DetailRow = {
   error_message: string | null;
   created_at: string;
   processed_at: string | null;
+  payload: unknown;
 };
+
+type AttemptRow = {
+  id: string;
+  success: boolean;
+  http_status: number | null;
+  duration_ms: number | null;
+  retry_event_id: string | null;
+  response_body: string | null;
+  error_message: string | null;
+  admin_email: string | null;
+  created_at: string;
+};
+
+const DETAIL_COLUMNS =
+  'id, event_id, event_type, status, error_message, created_at, processed_at, payload';
 
 const STATUS_LABEL: Record<DrillStatus, string> = {
   all: 'All events',
@@ -122,7 +147,35 @@ export default function AdminWebhookCharts() {
   const [bulkRetrying, setBulkRetrying] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
   const [retryResults, setRetryResults] = useState<Record<string, { success: boolean; message?: string }>>({});
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState<Record<string, AttemptRow[]>>({});
+  const [attemptsLoading, setAttemptsLoading] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const loadAttempts = useCallback(async (eventId: string) => {
+    setAttemptsLoading(eventId);
+    const { data } = await supabase
+      .from('webhook_retry_attempts')
+      .select(
+        'id, success, http_status, duration_ms, retry_event_id, response_body, error_message, admin_email, created_at',
+      )
+      .eq('webhook_event_id', eventId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    setAttempts((prev) => ({ ...prev, [eventId]: (data ?? []) as AttemptRow[] }));
+    setAttemptsLoading(null);
+  }, []);
+
+  const toggleExpanded = useCallback(
+    (eventId: string) => {
+      setExpandedId((prev) => {
+        const next = prev === eventId ? null : eventId;
+        if (next) loadAttempts(next);
+        return next;
+      });
+    },
+    [loadAttempts],
+  );
 
   // Day keys (in the selected timezone) that make up the chart x-axis.
   const dayKeys = useMemo(() => {
@@ -254,7 +307,7 @@ export default function AdminWebhookCharts() {
 
       const { data } = await supabase
         .from('webhook_events')
-        .select('id, event_id, event_type, status, error_message, created_at, processed_at')
+        .select(DETAIL_COLUMNS)
         .in('id', ids.slice(0, 200))
         .order('created_at', { ascending: false });
       setDrillRows((data ?? []) as DetailRow[]);
@@ -266,7 +319,7 @@ export default function AdminWebhookCharts() {
   const refreshDrillRow = useCallback(async (id: string) => {
     const { data } = await supabase
       .from('webhook_events')
-      .select('id, event_id, event_type, status, error_message, created_at, processed_at')
+      .select(DETAIL_COLUMNS)
       .eq('id', id)
       .maybeSingle();
     if (data) {
@@ -294,6 +347,7 @@ export default function AdminWebhookCharts() {
           },
         }));
         await refreshDrillRow(event.id);
+        await loadAttempts(event.id);
         return !!result?.success;
       } catch (err) {
         const msg = (err as Error)?.message || 'Retry failed';
@@ -301,7 +355,7 @@ export default function AdminWebhookCharts() {
         return false;
       }
     },
-    [refreshDrillRow],
+    [loadAttempts, refreshDrillRow],
   );
 
   const retryOne = useCallback(
@@ -682,6 +736,98 @@ export default function AdminWebhookCharts() {
                       )}
                       {retryResults[e.id].message}
                     </p>
+                  )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => toggleExpanded(e.id)}
+                  >
+                    {expandedId === e.id ? (
+                      <ChevronUp className="h-3.5 w-3.5 mr-1" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5 mr-1" />
+                    )}
+                    {expandedId === e.id ? 'Hide details' : 'View details'}
+                  </Button>
+
+                  {expandedId === e.id && (
+                    <div className="mt-2 space-y-3 border-t pt-3">
+                      <div>
+                        <p className="text-xs font-semibold mb-1">Key details</p>
+                        {diagnosticSummary(e.payload).length ? (
+                          <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            {diagnosticSummary(e.payload).map((row) => (
+                              <div key={row.label} className="contents">
+                                <dt className="text-muted-foreground">{row.label}</dt>
+                                <dd className="font-mono break-all">{row.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">
+                            No stored request payload for this event.
+                          </p>
+                        )}
+                      </div>
+
+                      {e.payload != null && (
+                        <div>
+                          <p className="text-xs font-semibold mb-1">
+                            Request payload (sensitive values hidden)
+                          </p>
+                          <pre className="sentry-mask max-h-56 overflow-auto rounded-md bg-muted p-2 text-[11px] leading-relaxed">
+                            {JSON.stringify(redactPayload(e.payload).value, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+
+                      <div>
+                        <p className="text-xs font-semibold mb-1">Delivery attempts</p>
+                        {attemptsLoading === e.id ? (
+                          <p className="text-xs text-muted-foreground">Loading attempts…</p>
+                        ) : !attempts[e.id]?.length ? (
+                          <p className="text-xs text-muted-foreground">
+                            No resend attempts recorded for this event.
+                          </p>
+                        ) : (
+                          <ul className="space-y-2">
+                            {attempts[e.id].map((a) => (
+                              <li key={a.id} className="rounded-md border p-2 text-xs space-y-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Badge variant={a.success ? 'secondary' : 'destructive'}>
+                                    {a.success ? 'delivered' : 'failed'}
+                                  </Badge>
+                                  <span className="text-muted-foreground">
+                                    {drillTimeFormat.format(new Date(a.created_at))}
+                                  </span>
+                                  {a.http_status !== null && <span>HTTP {a.http_status}</span>}
+                                  {a.duration_ms !== null && <span>{a.duration_ms}ms</span>}
+                                </div>
+                                {a.admin_email && (
+                                  <p className="text-muted-foreground sentry-mask">
+                                    Resent by {a.admin_email}
+                                  </p>
+                                )}
+                                {a.retry_event_id && (
+                                  <p className="font-mono break-all text-muted-foreground">
+                                    Replay event: {a.retry_event_id}
+                                  </p>
+                                )}
+                                {a.response_body && (
+                                  <p className="font-mono break-all">
+                                    Response: {a.response_body.slice(0, 500)}
+                                  </p>
+                                )}
+                                {a.error_message && (
+                                  <p className="text-destructive break-words">{a.error_message}</p>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
               ))}
