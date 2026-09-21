@@ -98,6 +98,21 @@ const statusVariant = (status: string) => {
   }
 };
 
+const modeOf = (event: WebhookEvent): 'Live' | 'Test' | 'Unknown' => {
+  const live = event.payload?.livemode;
+  if (live === true) return 'Live';
+  if (live === false) return 'Test';
+  if (typeof event.event_id === 'string' && event.event_id.startsWith('evt_test_')) return 'Test';
+  return 'Unknown';
+};
+
+const timelineFor = (event: WebhookEvent) => {
+  const received = new Date(event.created_at);
+  const finished = event.processed_at ? new Date(event.processed_at) : null;
+  const durationMs = finished ? finished.getTime() - received.getTime() : null;
+  return { received, finished, durationMs };
+};
+
 const AdminWebhookEvents = () => {
   const [events, setEvents] = useState<WebhookEvent[]>([]);
   const [loading, setLoading] = useState(true);
