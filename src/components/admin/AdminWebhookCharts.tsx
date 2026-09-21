@@ -15,8 +15,16 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -45,6 +53,25 @@ type Point = {
   total: number;
   failureRate: number;
   avgSeconds: number | null;
+};
+
+type DrillStatus = 'all' | 'processed' | 'pending' | 'failed';
+
+type DetailRow = {
+  id: string;
+  event_id: string;
+  event_type: string;
+  status: string;
+  error_message: string | null;
+  created_at: string;
+  processed_at: string | null;
+};
+
+const STATUS_LABEL: Record<DrillStatus, string> = {
+  all: 'All events',
+  processed: 'Processed events',
+  pending: 'Pending events',
+  failed: 'Failed events',
 };
 
 const RANGES = [7, 14, 30] as const;
@@ -87,6 +114,9 @@ export default function AdminWebhookCharts() {
   const [range, setRange] = useState<DateRange | undefined>();
   const [timeZone, setTimeZone] = useState<string>(BROWSER_TZ);
   const [loading, setLoading] = useState(true);
+  const [drill, setDrill] = useState<{ day: string; status: DrillStatus } | null>(null);
+  const [drillRows, setDrillRows] = useState<DetailRow[] | null>(null);
+  const [drillLoading, setDrillLoading] = useState(false);
 
   // Day keys (in the selected timezone) that make up the chart x-axis.
   const dayKeys = useMemo(() => {
@@ -191,6 +221,59 @@ export default function AdminWebhookCharts() {
           : null,
     };
   }, [points]);
+
+  // Drill-down: open the events behind a clicked chart point.
+  const openDrill = useCallback(
+    async (day: string | undefined, status: DrillStatus) => {
+      if (!day) return;
+      setDrill({ day, status });
+      setDrillRows(null);
+      setDrillLoading(true);
+
+      const ids = rows
+        .filter((r) => dayKeyIn(new Date(r.created_at), timeZone) === day)
+        .filter((r) => {
+          if (status === 'all') return true;
+          if (status === 'processed') return r.status === 'processed';
+          if (status === 'failed') return r.status === 'failed';
+          return r.status !== 'processed' && r.status !== 'failed';
+        })
+        .map((r) => r.id);
+
+      if (ids.length === 0) {
+        setDrillRows([]);
+        setDrillLoading(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from('webhook_events')
+        .select('id, event_id, event_type, status, error_message, created_at, processed_at')
+        .in('id', ids.slice(0, 200))
+        .order('created_at', { ascending: false });
+      setDrillRows((data ?? []) as DetailRow[]);
+      setDrillLoading(false);
+    },
+    [rows, timeZone],
+  );
+
+  const pointForLabel = useCallback(
+    (label?: string) => points.find((p) => p.label === label),
+    [points],
+  );
+
+  const drillTimeFormat = useMemo(
+    () =>
+      new Intl.DateTimeFormat('en-AU', {
+        timeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }),
+    [timeZone],
+  );
+
 
   const rangeLabel = days
     ? `the last ${days} days`
@@ -297,25 +380,38 @@ export default function AdminWebhookCharts() {
           <>
             <div>
               <p className="text-sm font-medium mb-2">Events per day</p>
+              <p className="text-xs text-muted-foreground mb-2">
+                Tap any bar, point or day to see the events behind it.
+              </p>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={points}>
+                  <BarChart
+                    data={points}
+                    onClick={(state: { activeLabel?: string }) =>
+                      openDrill(pointForLabel(state?.activeLabel)?.day, 'all')
+                    }
+                    style={{ cursor: 'pointer' }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="label" {...axis} />
                     <YAxis allowDecimals={false} {...axis} />
-                    <Tooltip contentStyle={tooltipStyle} />
+                    <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }} />
                     <Bar
                       dataKey="processed"
                       stackId="a"
                       name="Processed"
                       fill="hsl(var(--primary))"
                       radius={[0, 0, 0, 0]}
+                      cursor="pointer"
+                      onClick={(d: { payload?: Point }) => openDrill(d?.payload?.day, 'processed')}
                     />
                     <Bar
                       dataKey="pending"
                       stackId="a"
                       name="Pending"
                       fill="hsl(var(--muted-foreground))"
+                      cursor="pointer"
+                      onClick={(d: { payload?: Point }) => openDrill(d?.payload?.day, 'pending')}
                     />
                     <Bar
                       dataKey="failed"
@@ -323,6 +419,8 @@ export default function AdminWebhookCharts() {
                       name="Failed"
                       fill="hsl(var(--destructive))"
                       radius={[4, 4, 0, 0]}
+                      cursor="pointer"
+                      onClick={(d: { payload?: Point }) => openDrill(d?.payload?.day, 'failed')}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -333,7 +431,13 @@ export default function AdminWebhookCharts() {
               <p className="text-sm font-medium mb-2">Failure rate (%)</p>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={points}>
+                  <AreaChart
+                    data={points}
+                    onClick={(state: { activeLabel?: string }) =>
+                      openDrill(pointForLabel(state?.activeLabel)?.day, 'failed')
+                    }
+                    style={{ cursor: 'pointer' }}
+                  >
                     <defs>
                       <linearGradient id="failRate" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.35} />
@@ -354,6 +458,7 @@ export default function AdminWebhookCharts() {
                       stroke="hsl(var(--destructive))"
                       strokeWidth={2}
                       fill="url(#failRate)"
+                      activeDot={{ r: 6, cursor: 'pointer' }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -364,7 +469,13 @@ export default function AdminWebhookCharts() {
               <p className="text-sm font-medium mb-2">Average processing time (seconds)</p>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={points}>
+                  <LineChart
+                    data={points}
+                    onClick={(state: { activeLabel?: string }) =>
+                      openDrill(pointForLabel(state?.activeLabel)?.day, 'processed')
+                    }
+                    style={{ cursor: 'pointer' }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="label" {...axis} />
                     <YAxis {...axis} />
@@ -380,14 +491,70 @@ export default function AdminWebhookCharts() {
                       strokeWidth={2}
                       dot={false}
                       connectNulls
+                      activeDot={{ r: 6, cursor: 'pointer' }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
+
           </>
         )}
       </CardContent>
+
+      <Dialog open={drill !== null} onOpenChange={(o) => !o && setDrill(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>
+              {drill ? `${STATUS_LABEL[drill.status]} · ${labelFor(drill.day)}` : ''}
+            </DialogTitle>
+            <DialogDescription>
+              {drill
+                ? `Events received on ${labelFor(drill.day)} (${timeZone.replace('_', ' ')}).`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+
+          {drillLoading ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : !drillRows?.length ? (
+            <p className="text-sm text-muted-foreground">No events for this day and status.</p>
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto space-y-2">
+              {drillRows.map((e) => (
+                <div key={e.id} className="rounded-md border p-3 text-sm space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={
+                        e.status === 'processed'
+                          ? 'secondary'
+                          : e.status === 'failed'
+                            ? 'destructive'
+                            : 'outline'
+                      }
+                    >
+                      {e.status}
+                    </Badge>
+                    <span className="font-medium">{e.event_type}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {drillTimeFormat.format(new Date(e.created_at))}
+                    </span>
+                  </div>
+                  <p className="font-mono text-xs text-muted-foreground break-all">{e.event_id}</p>
+                  {e.error_message && (
+                    <p className="text-xs text-destructive break-words">{e.error_message}</p>
+                  )}
+                </div>
+              ))}
+              {drillRows.length >= 200 && (
+                <p className="text-xs text-muted-foreground">
+                  Showing the first 200 events for this day.
+                </p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
