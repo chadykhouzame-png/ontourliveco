@@ -89,6 +89,15 @@ const AdminWebhookHealth = () => {
       lastFailure: ((lastFail ?? [])[0] as EventRow) ?? null,
       recent: rows.slice(0, 8),
     });
+
+    const { data: alertRows } = await supabase
+      .from('webhook_failure_alerts')
+      .select('id, source, stage, event_type, error_message, burst_count, notified, created_at')
+      .gte('created_at', since24h)
+      .order('created_at', { ascending: false })
+      .limit(100);
+    setAlerts((alertRows ?? []) as AlertRow[]);
+
     setLoading(false);
   }, []);
 
