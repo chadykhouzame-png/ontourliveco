@@ -17,6 +17,20 @@ type EventRow = {
   processed_at: string | null;
 };
 
+type AlertRow = {
+  id: string;
+  source: string;
+  stage: string;
+  event_type: string | null;
+  error_message: string;
+  burst_count: number;
+  notified: boolean;
+  created_at: string;
+};
+
+const BURST_WINDOW_MINUTES = 15;
+const REPEAT_THRESHOLD = 3;
+
 type Health = {
   total24h: number;
   total7d: number;
