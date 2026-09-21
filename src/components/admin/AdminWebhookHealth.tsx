@@ -49,6 +49,7 @@ const AdminWebhookHealth = () => {
   const [health, setHealth] = useState<Health | null>(null);
   const [loading, setLoading] = useState(true);
   const [alertsConfigured, setAlertsConfigured] = useState<boolean | null>(null);
+  const [alerts, setAlerts] = useState<AlertRow[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
