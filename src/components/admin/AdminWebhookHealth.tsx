@@ -123,6 +123,11 @@ const AdminWebhookHealth = () => {
       ? Math.round(((health.total7d - health.failed7d) / health.total7d) * 100)
       : null;
 
+  const windowStart = Date.now() - BURST_WINDOW_MINUTES * 60 * 1000;
+  const burstNow = alerts.filter((a) => new Date(a.created_at).getTime() >= windowStart);
+  const repeatedNow = burstNow.length >= REPEAT_THRESHOLD;
+  const emailsSent24h = alerts.filter((a) => a.notified).length;
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-4">
