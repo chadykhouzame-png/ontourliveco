@@ -95,6 +95,9 @@ export default function AdminWebhookCharts() {
   const [range, setRange] = useState<DateRange | undefined>();
   const [timeZone, setTimeZone] = useState<string>(BROWSER_TZ);
   const [loading, setLoading] = useState(true);
+  const [drill, setDrill] = useState<{ day: string; status: DrillStatus } | null>(null);
+  const [drillRows, setDrillRows] = useState<DetailRow[] | null>(null);
+  const [drillLoading, setDrillLoading] = useState(false);
 
   // Day keys (in the selected timezone) that make up the chart x-axis.
   const dayKeys = useMemo(() => {
