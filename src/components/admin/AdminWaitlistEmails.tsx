@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Mail, RefreshCw, Send } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2, Mail, RefreshCw, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Row = {
@@ -40,11 +40,22 @@ function friendlyReason(row: Row): string {
   return row.reason || row.error_code || "—";
 }
 
+function sourceLabel(source: string | null): string {
+  if (source === "admin_resend") return "Resent by admin";
+  if (source === "resend") return "Resent by user";
+  return "Sign-up";
+}
+
+function statusLabel(status: Row["status"]): string {
+  return status === "sent" ? "Delivered" : status === "failed" ? "Failed" : "Blocked";
+}
+
 export default function AdminWaitlistEmails() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
   const [resendingEmail, setResendingEmail] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -144,6 +155,7 @@ export default function AdminWaitlistEmails() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-8" />
                   <TableHead>When</TableHead>
                   <TableHead>Recipient</TableHead>
                   <TableHead>Joined as</TableHead>
@@ -153,8 +165,31 @@ export default function AdminWaitlistEmails() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visible.map((r) => (
-                  <TableRow key={r.id}>
+                {visible.map((r) => {
+                  const history = rows.filter(
+                    (h) => h.email.toLowerCase() === r.email.toLowerCase(),
+                  );
+                  const attempts = history.filter((h) => h.trigger_source !== "signup");
+                  const isOpen = expanded === r.id;
+                  return (
+                  <Fragment key={r.id}>
+                  <TableRow>
+                    <TableCell className="align-top">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        aria-expanded={isOpen}
+                        aria-label={isOpen ? "Hide attempt history" : "Show attempt history"}
+                        onClick={() => setExpanded(isOpen ? null : r.id)}
+                      >
+                        {isOpen ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TableCell>
                     <TableCell className="whitespace-nowrap text-sm">
                       {new Date(r.created_at).toLocaleString("en-AU")}
                     </TableCell>
@@ -170,11 +205,7 @@ export default function AdminWaitlistEmails() {
                               : "outline"
                         }
                       >
-                        {r.status === "sent"
-                          ? "Delivered"
-                          : r.status === "failed"
-                            ? "Failed"
-                            : "Blocked"}
+                        {statusLabel(r.status)}
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-[320px] text-sm text-muted-foreground">
@@ -182,6 +213,11 @@ export default function AdminWaitlistEmails() {
                       {r.trigger_source && r.trigger_source !== "signup" && (
                         <span className="ml-2 text-xs">
                           ({r.trigger_source === "admin_resend" ? "resent by admin" : "resent by user"})
+                        </span>
+                      )}
+                      {attempts.length > 0 && (
+                        <span className="ml-2 text-xs">
+                          · {attempts.length} resend{attempts.length === 1 ? "" : "s"}
                         </span>
                       )}
                     </TableCell>
@@ -201,7 +237,45 @@ export default function AdminWaitlistEmails() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  {isOpen && (
+                    <TableRow className="bg-muted/30 hover:bg-muted/30">
+                      <TableCell />
+                      <TableCell colSpan={6} className="py-3">
+                        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Attempt history for this recipient
+                        </p>
+                        <ol className="space-y-2">
+                          {history.map((h) => (
+                            <li key={h.id} className="flex flex-wrap items-center gap-2 text-sm">
+                              <span className="whitespace-nowrap text-muted-foreground">
+                                {new Date(h.created_at).toLocaleString("en-AU")}
+                              </span>
+                              <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                                {sourceLabel(h.trigger_source)}
+                              </span>
+                              <Badge
+                                variant={
+                                  h.status === "sent"
+                                    ? "default"
+                                    : h.status === "failed"
+                                      ? "destructive"
+                                      : "outline"
+                                }
+                              >
+                                {statusLabel(h.status)}
+                              </Badge>
+                              {h.status !== "sent" && (
+                                <span className="text-muted-foreground">{friendlyReason(h)}</span>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  </Fragment>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
