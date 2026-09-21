@@ -172,8 +172,8 @@ export default function AdminWaitlistEmails() {
                   const attempts = history.filter((h) => h.trigger_source !== "signup");
                   const isOpen = expanded === r.id;
                   return (
-                  <>
-                  <TableRow key={r.id}>
+                  <Fragment key={r.id}>
+                  <TableRow>
                     <TableCell className="align-top">
                       <Button
                         size="icon"
