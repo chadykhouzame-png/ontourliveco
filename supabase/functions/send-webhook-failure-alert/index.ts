@@ -28,9 +28,17 @@ interface AlertBody {
   occurred_at?: string;
 }
 
-function renderEmail(a: AlertBody): { subject: string; html: string } {
+// Repeated-failure policy
+const WINDOW_MINUTES = 15; // burst window
+const REPEAT_THRESHOLD = 3; // failures in the window that count as "repeated"
+const RENOTIFY_EVERY = 10; // after escalation, re-alert every N further failures
+
+function renderEmail(a: AlertBody, burst: number): { subject: string; html: string } {
   const when = a.occurred_at ?? new Date().toISOString();
-  const subject = `⚠️ Webhook failure: ${a.source} (${a.stage})`;
+  const repeated = burst >= REPEAT_THRESHOLD;
+  const subject = repeated
+    ? `🚨 ${burst} webhook failures in ${WINDOW_MINUTES} min: ${a.source} (${a.stage})`
+    : `⚠️ Webhook failure: ${a.source} (${a.stage})`;
   const row = (label: string, value: string) => `
     <tr>
       <td style="padding:8px 12px;color:${brand.muted};font-size:12px;text-transform:uppercase;letter-spacing:.08em;width:130px;vertical-align:top;">${label}</td>
@@ -43,10 +51,18 @@ function renderEmail(a: AlertBody): { subject: string; html: string } {
     <div style="background:${brand.cardBg};border:1px solid ${brand.cardBorder};border-radius:20px;overflow:hidden;">
       <div style="padding:28px 36px;border-bottom:1px solid ${brand.cardBorder};">
         <div style="font-size:11px;letter-spacing:.2em;color:${brand.danger};text-transform:uppercase;margin-bottom:4px;">Webhook Alert</div>
-        <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;">Delivery failed</div>
+        <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;">${
+          repeated ? `${burst} failures in ${WINDOW_MINUTES} minutes` : "Delivery failed"
+        }</div>
       </div>
       <div style="padding:24px 36px;">
+        ${
+          repeated
+            ? `<p style="color:${brand.danger};font-size:14px;margin:0 0 16px;line-height:1.6;">Repeated failures detected — payments may be succeeding at Stripe while bookings stay unconfirmed. Investigate now.</p>`
+            : ""
+        }
         <table style="width:100%;border-collapse:collapse;background:#111114;border:1px solid ${brand.cardBorder};border-radius:12px;overflow:hidden;">
+          ${row("Failures in window", String(burst))}
           ${row("Source", escapeHtml(a.source))}
           ${row("Stage", escapeHtml(a.stage))}
           ${row("Event type", escapeHtml(a.event_type ?? "—"))}
@@ -123,9 +139,53 @@ serve(async (req) => {
       });
     }
 
+    // Count failures for this source inside the burst window (this one included)
+    const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
+    const { count: priorInWindow } = await supabase
+      .from("webhook_failure_alerts")
+      .select("id", { count: "exact", head: true })
+      .eq("source", body.source)
+      .gte("created_at", windowStart);
+    const burst = (priorInWindow ?? 0) + 1;
+
+    const { count: notifiedInWindow } = await supabase
+      .from("webhook_failure_alerts")
+      .select("id", { count: "exact", head: true })
+      .eq("source", body.source)
+      .eq("notified", true)
+      .gte("created_at", windowStart);
+
+    // Alert on: the first failure in a window, the moment it becomes "repeated",
+    // and then only every RENOTIFY_EVERY further failures — so one incident is not
+    // a mailbox full of identical messages.
+    const shouldSend =
+      (notifiedInWindow ?? 0) === 0 ||
+      burst === REPEAT_THRESHOLD ||
+      (burst > REPEAT_THRESHOLD && (burst - REPEAT_THRESHOLD) % RENOTIFY_EVERY === 0);
+
+    const recordAttempt = async (notified: boolean) => {
+      await supabase.from("webhook_failure_alerts").insert({
+        source: body.source,
+        stage: body.stage,
+        event_id: body.event_id ?? null,
+        event_type: body.event_type ?? null,
+        error_message: body.error_message,
+        burst_count: burst,
+        notified,
+      });
+    };
+
+    if (!shouldSend) {
+      await recordAttempt(false);
+      return new Response(JSON.stringify({ sent: false, reason: "throttled", burst }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const to = await resolveAdminEmails(supabase);
     if (!to.length) {
       console.warn("No admin recipient resolved for webhook alert");
+      await recordAttempt(false);
       return new Response(JSON.stringify({ skipped: true, reason: "no_admin_email" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -133,7 +193,7 @@ serve(async (req) => {
     }
 
     const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
-    const { subject, html } = renderEmail(body);
+    const { subject, html } = renderEmail(body, burst);
 
     const { error: sendErr } = await resend.emails.send({
       from: "On Tour Alerts <alerts@ontourlive.co>",
@@ -144,13 +204,16 @@ serve(async (req) => {
 
     if (sendErr) {
       console.error("Resend error:", sendErr);
+      await recordAttempt(false);
       return new Response(JSON.stringify({ error: sendErr.message }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    return new Response(JSON.stringify({ sent: true, recipients: to.length }), {
+    await recordAttempt(true);
+
+    return new Response(JSON.stringify({ sent: true, recipients: to.length, burst, repeated: burst >= REPEAT_THRESHOLD }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {

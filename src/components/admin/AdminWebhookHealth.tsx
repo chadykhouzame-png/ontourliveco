@@ -17,6 +17,20 @@ type EventRow = {
   processed_at: string | null;
 };
 
+type AlertRow = {
+  id: string;
+  source: string;
+  stage: string;
+  event_type: string | null;
+  error_message: string;
+  burst_count: number;
+  notified: boolean;
+  created_at: string;
+};
+
+const BURST_WINDOW_MINUTES = 15;
+const REPEAT_THRESHOLD = 3;
+
 type Health = {
   total24h: number;
   total7d: number;
@@ -35,6 +49,7 @@ const AdminWebhookHealth = () => {
   const [health, setHealth] = useState<Health | null>(null);
   const [loading, setLoading] = useState(true);
   const [alertsConfigured, setAlertsConfigured] = useState<boolean | null>(null);
+  const [alerts, setAlerts] = useState<AlertRow[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -74,6 +89,15 @@ const AdminWebhookHealth = () => {
       lastFailure: ((lastFail ?? [])[0] as EventRow) ?? null,
       recent: rows.slice(0, 8),
     });
+
+    const { data: alertRows } = await supabase
+      .from('webhook_failure_alerts')
+      .select('id, source, stage, event_type, error_message, burst_count, notified, created_at')
+      .gte('created_at', since24h)
+      .order('created_at', { ascending: false })
+      .limit(100);
+    setAlerts((alertRows ?? []) as AlertRow[]);
+
     setLoading(false);
   }, []);
 
@@ -98,6 +122,11 @@ const AdminWebhookHealth = () => {
     health && health.total7d > 0
       ? Math.round(((health.total7d - health.failed7d) / health.total7d) * 100)
       : null;
+
+  const windowStart = Date.now() - BURST_WINDOW_MINUTES * 60 * 1000;
+  const burstNow = alerts.filter((a) => new Date(a.created_at).getTime() >= windowStart);
+  const repeatedNow = burstNow.length >= REPEAT_THRESHOLD;
+  const emailsSent24h = alerts.filter((a) => a.notified).length;
 
   return (
     <Card>
@@ -170,6 +199,63 @@ const AdminWebhookHealth = () => {
                       : 'Alerting unavailable — check email settings'}
                 </p>
               </div>
+            </div>
+
+            {repeatedNow && (
+              <div className="rounded-lg border border-destructive bg-destructive/10 p-4">
+                <p className="text-sm font-semibold flex items-center gap-2 text-destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  {burstNow.length} failures in the last {BURST_WINDOW_MINUTES} minutes
+                </p>
+                <p className="text-sm mt-1">
+                  Payments may be going through at Stripe while bookings stay unconfirmed. An email
+                  alert has been sent to admins — investigate and retry the failed events below.
+                </p>
+                <p className="text-sm text-muted-foreground mt-1 break-words">
+                  Latest reason: {burstNow[0]?.error_message}
+                </p>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Failure alerts (last 24 hours)</p>
+              {alerts.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No failures recorded in the last 24 hours.
+                </p>
+              ) : (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    {alerts.length} failure{alerts.length === 1 ? '' : 's'} recorded ·{' '}
+                    {emailsSent24h} email alert{emailsSent24h === 1 ? '' : 's'} sent. Repeated
+                    failures ({REPEAT_THRESHOLD}+ in {BURST_WINDOW_MINUTES} minutes) escalate
+                    immediately; the rest are grouped so one incident is one email.
+                  </p>
+                  <ul className="divide-y rounded-lg border">
+                    {alerts.slice(0, 8).map((a) => (
+                      <li key={a.id} className="px-4 py-2 text-sm">
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="truncate">
+                            {a.source} · {a.stage}
+                            {a.event_type ? ` · ${a.event_type}` : ''}
+                          </span>
+                          <span className="flex items-center gap-3 shrink-0">
+                            <span className="text-muted-foreground">
+                              {formatDistanceToNow(new Date(a.created_at), { addSuffix: true })}
+                            </span>
+                            <Badge variant={a.notified ? 'destructive' : 'outline'}>
+                              {a.notified ? 'emailed' : 'grouped'}
+                            </Badge>
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-1 break-words">
+                          {a.error_message}
+                        </p>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </div>
 
             {health.lastFailure && (
