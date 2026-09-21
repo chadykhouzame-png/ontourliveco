@@ -60,7 +60,9 @@ serve(async (req) => {
 
   const email = parsed.data.email.toLowerCase();
 
-  if (ipThrottled(ip)) return json({ error: "rate_limited" }, 429);
+  if (ipThrottled(ip)) {
+    return json({ error: "rate_limited", retry_after: IP_WINDOW_MS / 1000 }, 429);
+  }
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
