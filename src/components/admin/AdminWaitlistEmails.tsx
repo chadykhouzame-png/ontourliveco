@@ -55,6 +55,7 @@ export default function AdminWaitlistEmails() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
   const [resendingEmail, setResendingEmail] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
