@@ -118,6 +118,11 @@ export default function AdminWebhookCharts() {
   const [drill, setDrill] = useState<{ day: string; status: DrillStatus } | null>(null);
   const [drillRows, setDrillRows] = useState<DetailRow[] | null>(null);
   const [drillLoading, setDrillLoading] = useState(false);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [bulkRetrying, setBulkRetrying] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const [retryResults, setRetryResults] = useState<Record<string, { success: boolean; message?: string }>>({});
+  const { toast } = useToast();
 
   // Day keys (in the selected timezone) that make up the chart x-axis.
   const dayKeys = useMemo(() => {
