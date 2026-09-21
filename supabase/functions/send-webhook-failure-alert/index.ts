@@ -51,10 +51,18 @@ function renderEmail(a: AlertBody, burst: number): { subject: string; html: stri
     <div style="background:${brand.cardBg};border:1px solid ${brand.cardBorder};border-radius:20px;overflow:hidden;">
       <div style="padding:28px 36px;border-bottom:1px solid ${brand.cardBorder};">
         <div style="font-size:11px;letter-spacing:.2em;color:${brand.danger};text-transform:uppercase;margin-bottom:4px;">Webhook Alert</div>
-        <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;">Delivery failed</div>
+        <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-.02em;">${
+          repeated ? `${burst} failures in ${WINDOW_MINUTES} minutes` : "Delivery failed"
+        }</div>
       </div>
       <div style="padding:24px 36px;">
+        ${
+          repeated
+            ? `<p style="color:${brand.danger};font-size:14px;margin:0 0 16px;line-height:1.6;">Repeated failures detected — payments may be succeeding at Stripe while bookings stay unconfirmed. Investigate now.</p>`
+            : ""
+        }
         <table style="width:100%;border-collapse:collapse;background:#111114;border:1px solid ${brand.cardBorder};border-radius:12px;overflow:hidden;">
+          ${row("Failures in window", String(burst))}
           ${row("Source", escapeHtml(a.source))}
           ${row("Stage", escapeHtml(a.stage))}
           ${row("Event type", escapeHtml(a.event_type ?? "—"))}
