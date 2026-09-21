@@ -360,6 +360,52 @@ const AdminWebhookEvents = () => {
     [statusFilter, typeFilter, dateFrom, dateTo, searchQuery, showFailedOnly],
   );
 
+  const exportCsv = () => {
+    if (!filteredEvents.length) return;
+    const esc = (v: unknown) => {
+      const s = v === null || v === undefined ? '' : String(v);
+      return `"${s.replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`;
+    };
+    const header = [
+      'Event ID',
+      'Event type',
+      'Status',
+      'Mode',
+      'Received at',
+      'Processed at',
+      'Duration (seconds)',
+      'Failure reason',
+    ];
+    const lines = filteredEvents.map((event) => {
+      const received = new Date(event.created_at);
+      const processed = event.processed_at ? new Date(event.processed_at) : null;
+      const duration = processed
+        ? ((processed.getTime() - received.getTime()) / 1000).toFixed(2)
+        : '';
+      return [
+        esc(event.event_id),
+        esc(event.event_type),
+        esc(event.status),
+        esc(modeOf(event)),
+        esc(received.toISOString()),
+        esc(processed ? processed.toISOString() : ''),
+        esc(duration),
+        esc(event.status === 'failed' ? event.error_message ?? '' : ''),
+      ].join(',');
+    });
+    const csv = [header.map(esc).join(','), ...lines].join('\r\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `webhook-events-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({
+      title: 'Export started',
+      description: `${filteredEvents.length} event${filteredEvents.length === 1 ? '' : 's'} exported to CSV.`,
+    });
+  };
+
   const clearFilters = () => {
     setShowFailedOnly(false);
     setStatusFilter('all');
