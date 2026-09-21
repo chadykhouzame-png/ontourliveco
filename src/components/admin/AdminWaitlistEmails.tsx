@@ -273,7 +273,7 @@ export default function AdminWaitlistEmails() {
                       </TableCell>
                     </TableRow>
                   )}
-                  </>
+                  </Fragment>
                   );
                 })}
               </TableBody>
