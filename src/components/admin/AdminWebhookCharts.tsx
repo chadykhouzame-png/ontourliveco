@@ -138,7 +138,35 @@ export default function AdminWebhookCharts() {
   const [bulkRetrying, setBulkRetrying] = useState(false);
   const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
   const [retryResults, setRetryResults] = useState<Record<string, { success: boolean; message?: string }>>({});
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [attempts, setAttempts] = useState<Record<string, AttemptRow[]>>({});
+  const [attemptsLoading, setAttemptsLoading] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const loadAttempts = useCallback(async (eventId: string) => {
+    setAttemptsLoading(eventId);
+    const { data } = await supabase
+      .from('webhook_retry_attempts')
+      .select(
+        'id, success, http_status, duration_ms, retry_event_id, response_body, error_message, admin_email, created_at',
+      )
+      .eq('webhook_event_id', eventId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    setAttempts((prev) => ({ ...prev, [eventId]: (data ?? []) as AttemptRow[] }));
+    setAttemptsLoading(null);
+  }, []);
+
+  const toggleExpanded = useCallback(
+    (eventId: string) => {
+      setExpandedId((prev) => {
+        const next = prev === eventId ? null : eventId;
+        if (next) loadAttempts(next);
+        return next;
+      });
+    },
+    [loadAttempts],
+  );
 
   // Day keys (in the selected timezone) that make up the chart x-axis.
   const dayKeys = useMemo(() => {
