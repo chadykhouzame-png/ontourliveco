@@ -74,7 +74,7 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       <PageSeo
         title="On Tour Live — Book artists and venues"
-        description="On Tour Live connects artists and venues: discover talent, send offers, manage bookings and payments in one place. Sydney first, launching September 2026."
+        description="On Tour Live connects artists and venues: discover talent, send offers, manage bookings and payments in one place. Sydney first, launching soon."
         path="/"
       />
       
