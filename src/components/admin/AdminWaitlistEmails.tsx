@@ -155,6 +155,7 @@ export default function AdminWaitlistEmails() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-8" />
                   <TableHead>When</TableHead>
                   <TableHead>Recipient</TableHead>
                   <TableHead>Joined as</TableHead>
@@ -164,8 +165,31 @@ export default function AdminWaitlistEmails() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {visible.map((r) => (
+                {visible.map((r) => {
+                  const history = rows.filter(
+                    (h) => h.email.toLowerCase() === r.email.toLowerCase(),
+                  );
+                  const attempts = history.filter((h) => h.trigger_source !== "signup");
+                  const isOpen = expanded === r.id;
+                  return (
+                  <>
                   <TableRow key={r.id}>
+                    <TableCell className="align-top">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-7 w-7"
+                        aria-expanded={isOpen}
+                        aria-label={isOpen ? "Hide attempt history" : "Show attempt history"}
+                        onClick={() => setExpanded(isOpen ? null : r.id)}
+                      >
+                        {isOpen ? (
+                          <ChevronDown className="h-4 w-4" />
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </TableCell>
                     <TableCell className="whitespace-nowrap text-sm">
                       {new Date(r.created_at).toLocaleString("en-AU")}
                     </TableCell>
@@ -181,11 +205,7 @@ export default function AdminWaitlistEmails() {
                               : "outline"
                         }
                       >
-                        {r.status === "sent"
-                          ? "Delivered"
-                          : r.status === "failed"
-                            ? "Failed"
-                            : "Blocked"}
+                        {statusLabel(r.status)}
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-[320px] text-sm text-muted-foreground">
@@ -193,6 +213,11 @@ export default function AdminWaitlistEmails() {
                       {r.trigger_source && r.trigger_source !== "signup" && (
                         <span className="ml-2 text-xs">
                           ({r.trigger_source === "admin_resend" ? "resent by admin" : "resent by user"})
+                        </span>
+                      )}
+                      {attempts.length > 0 && (
+                        <span className="ml-2 text-xs">
+                          · {attempts.length} resend{attempts.length === 1 ? "" : "s"}
                         </span>
                       )}
                     </TableCell>
@@ -212,7 +237,45 @@ export default function AdminWaitlistEmails() {
                       </Button>
                     </TableCell>
                   </TableRow>
-                ))}
+                  {isOpen && (
+                    <TableRow key={`${r.id}-history`} className="bg-muted/30 hover:bg-muted/30">
+                      <TableCell />
+                      <TableCell colSpan={6} className="py-3">
+                        <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Attempt history for this recipient
+                        </p>
+                        <ol className="space-y-2">
+                          {history.map((h) => (
+                            <li key={h.id} className="flex flex-wrap items-center gap-2 text-sm">
+                              <span className="whitespace-nowrap text-muted-foreground">
+                                {new Date(h.created_at).toLocaleString("en-AU")}
+                              </span>
+                              <span className="text-xs uppercase tracking-wide text-muted-foreground">
+                                {sourceLabel(h.trigger_source)}
+                              </span>
+                              <Badge
+                                variant={
+                                  h.status === "sent"
+                                    ? "default"
+                                    : h.status === "failed"
+                                      ? "destructive"
+                                      : "outline"
+                                }
+                              >
+                                {statusLabel(h.status)}
+                              </Badge>
+                              {h.status !== "sent" && (
+                                <span className="text-muted-foreground">{friendlyReason(h)}</span>
+                              )}
+                            </li>
+                          ))}
+                        </ol>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                  </>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
