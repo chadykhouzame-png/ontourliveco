@@ -33,6 +33,7 @@ export default function FirstLight() {
   const [shareHint, setShareHint] = useState("");
   const [resending, setResending] = useState(false);
   const [resendHint, setResendHint] = useState("");
+  const [cooldown, setCooldown] = useState(0);
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const heldRef = useRef<HTMLDivElement | null>(null);
@@ -40,6 +41,12 @@ export default function FirstLight() {
   const startedAtRef = useRef<number>(Date.now());
 
   const viewTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = window.setInterval(() => setCooldown((s) => (s <= 1 ? 0 : s - 1)), 1000);
+    return () => window.clearInterval(id);
+  }, [cooldown]);
 
   useEffect(() => {
     const form = formRef.current;
@@ -242,8 +249,14 @@ export default function FirstLight() {
     }
   }
 
+  function waitLabel(seconds: number) {
+    if (seconds <= 90) return `${Math.max(5, Math.ceil(seconds / 5) * 5)} seconds`;
+    const mins = Math.ceil(seconds / 60);
+    return `${mins} minute${mins === 1 ? "" : "s"}`;
+  }
+
   async function onResend() {
-    if (!confirmed?.email || resending) return;
+    if (!confirmed?.email || resending || cooldown > 0) return;
     setResending(true);
     setResendHint("");
     try {
@@ -251,10 +264,30 @@ export default function FirstLight() {
         body: { email: confirmed.email },
       });
       if (error) {
-        setResendHint(
-          "We couldn't send it just now. Try again shortly or email hello@ontour.live.",
-        );
+        let code = "";
+        let retryAfter = 60;
+        try {
+          const ctx = (error as { context?: Response }).context;
+          const body = ctx ? await ctx.json() : null;
+          code = body?.error ?? "";
+          if (typeof body?.retry_after === "number") retryAfter = body.retry_after;
+        } catch {
+          /* non-JSON error body */
+        }
+        if (code === "cooldown" || code === "rate_limited") {
+          setCooldown(retryAfter);
+          setResendHint(
+            code === "cooldown"
+              ? `Just sent — give it ${waitLabel(retryAfter)} before trying again.`
+              : `You've requested this a few times. You can try again in ${waitLabel(retryAfter)}, or email hello@ontour.live.`,
+          );
+        } else {
+          setResendHint(
+            "We couldn't send it just now. Try again shortly or email hello@ontour.live.",
+          );
+        }
       } else {
+        setCooldown(60);
         setResendHint(
           "Sent. Check your inbox — and your spam folder — in the next few minutes.",
         );
@@ -409,8 +442,16 @@ export default function FirstLight() {
               Move up the list — share your invite
             </button>
             <p className="cl-hint">{shareHint}</p>
-            <button className="cl-ghost" onClick={onResend} disabled={resending}>
-              {resending ? "Sending…" : "Didn't get the email? Send it again"}
+            <button
+              className="cl-ghost"
+              onClick={onResend}
+              disabled={resending || cooldown > 0}
+            >
+              {resending
+                ? "Sending…"
+                : cooldown > 0
+                  ? `Send it again in ${cooldown}s`
+                  : "Didn't get the email? Send it again"}
             </button>
             <p className="cl-hint" role="status" aria-live="polite">{resendHint}</p>
           </div>

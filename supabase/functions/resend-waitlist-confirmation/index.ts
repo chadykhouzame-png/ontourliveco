@@ -28,9 +28,10 @@ function ipThrottled(ip: string): boolean {
   return e.count > IP_MAX;
 }
 
-// Per-address cap: 3 resends per hour.
+// Per-address caps: one resend per minute, 3 per hour.
 const RESEND_WINDOW_MINUTES = 60;
 const RESEND_MAX = 3;
+const RESEND_COOLDOWN_SECONDS = 60;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -59,7 +60,9 @@ serve(async (req) => {
 
   const email = parsed.data.email.toLowerCase();
 
-  if (ipThrottled(ip)) return json({ error: "rate_limited" }, 429);
+  if (ipThrottled(ip)) {
+    return json({ error: "rate_limited", retry_after: IP_WINDOW_MS / 1000 }, 429);
+  }
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL")!,
@@ -84,13 +87,39 @@ serve(async (req) => {
 
   const since = new Date(Date.now() - RESEND_WINDOW_MINUTES * 60_000).toISOString();
   if (!isAdmin) {
-    const { count } = await supabase
+    const { data: recent } = await supabase
       .from("waitlist_email_log")
-      .select("id", { count: "exact", head: true })
+      .select("created_at")
       .eq("email", email)
       .eq("trigger_source", "resend")
-      .gte("created_at", since);
-    if ((count ?? 0) >= RESEND_MAX) return json({ error: "rate_limited" }, 429);
+      .gte("created_at", since)
+      .order("created_at", { ascending: false });
+
+    const stamps = (recent ?? []).map((r) => new Date(r.created_at as string).getTime());
+
+    // Short cooldown between consecutive resends.
+    if (stamps.length > 0) {
+      const elapsed = (Date.now() - stamps[0]) / 1000;
+      if (elapsed < RESEND_COOLDOWN_SECONDS) {
+        return json(
+          {
+            error: "cooldown",
+            retry_after: Math.max(1, Math.ceil(RESEND_COOLDOWN_SECONDS - elapsed)),
+          },
+          429,
+        );
+      }
+    }
+
+    // Hourly cap: next slot frees up an hour after the oldest counted resend.
+    if (stamps.length >= RESEND_MAX) {
+      const oldest = stamps[stamps.length - 1];
+      const retryAfter = Math.max(
+        1,
+        Math.ceil((oldest + RESEND_WINDOW_MINUTES * 60_000 - Date.now()) / 1000),
+      );
+      return json({ error: "rate_limited", retry_after: retryAfter }, 429);
+    }
   }
 
   const { data: entry } = await supabase
