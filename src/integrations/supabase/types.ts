@@ -1157,6 +1157,39 @@ export type Database = {
         }
         Relationships: []
       }
+      waitlist_email_log: {
+        Row: {
+          created_at: string
+          email: string
+          error_code: string | null
+          id: string
+          reason: string | null
+          role: string | null
+          status: string
+          template: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          error_code?: string | null
+          id?: string
+          reason?: string | null
+          role?: string | null
+          status: string
+          template: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          error_code?: string | null
+          id?: string
+          reason?: string | null
+          role?: string | null
+          status?: string
+          template?: string
+        }
+        Relationships: []
+      }
       waitlist_rate_limits: {
         Row: {
           attempted_at: string

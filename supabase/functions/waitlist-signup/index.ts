@@ -188,20 +188,54 @@ serve(async (req) => {
   }
 
   // Confirmation email — never let a send failure break the signup response.
+  const template =
+    role === "artist" ? "waitlist-artist-confirmation" : "waitlist-venue-confirmation";
+  let logRow: {
+    email: string;
+    role: string;
+    template: string;
+    status: "sent" | "suppressed" | "failed";
+    reason: string | null;
+    error_code: string | null;
+  } = {
+    email: email.toLowerCase(),
+    role,
+    template,
+    status: "failed",
+    reason: null,
+    error_code: null,
+  };
+
   try {
-    await sendTemplateEmail(
-      role === "artist" ? "waitlist-artist-confirmation" : "waitlist-venue-confirmation",
-      email,
-      {
-        templateData:
-          role === "artist"
-            ? { firstName, artistName }
-            : { firstName, venueName },
-        idempotencyKey: `waitlist-confirm-${role}-${email.toLowerCase()}`,
-      },
-    );
+    const result = await sendTemplateEmail(template, email, {
+      templateData:
+        role === "artist" ? { firstName, artistName } : { firstName, venueName },
+      idempotencyKey: `waitlist-confirm-${role}-${email.toLowerCase()}`,
+    });
+    if (result?.sent) {
+      logRow = { ...logRow, status: "sent" };
+    } else {
+      logRow = {
+        ...logRow,
+        status: "suppressed",
+        reason: (result as { reason?: string })?.reason ?? "not_sent",
+      };
+    }
   } catch (err) {
     console.error("waitlist-signup: confirmation email failed", err);
+    const e = err as { code?: string; message?: string };
+    logRow = {
+      ...logRow,
+      status: "failed",
+      reason: e?.message ? String(e.message).slice(0, 300) : "unknown_error",
+      error_code: e?.code ?? null,
+    };
+  }
+
+  try {
+    await supabase.from("waitlist_email_log").insert(logRow);
+  } catch (err) {
+    console.error("waitlist-signup: could not record email outcome", err);
   }
 
   return new Response(JSON.stringify({ position: data }), {
