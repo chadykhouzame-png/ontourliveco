@@ -501,6 +501,60 @@ export default function AdminWebhookCharts() {
           </>
         )}
       </CardContent>
+
+      <Dialog open={drill !== null} onOpenChange={(o) => !o && setDrill(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>
+              {drill ? `${STATUS_LABEL[drill.status]} · ${labelFor(drill.day)}` : ''}
+            </DialogTitle>
+            <DialogDescription>
+              {drill
+                ? `Events received on ${labelFor(drill.day)} (${timeZone.replace('_', ' ')}).`
+                : ''}
+            </DialogDescription>
+          </DialogHeader>
+
+          {drillLoading ? (
+            <p className="text-sm text-muted-foreground">Loading…</p>
+          ) : !drillRows?.length ? (
+            <p className="text-sm text-muted-foreground">No events for this day and status.</p>
+          ) : (
+            <div className="max-h-[60vh] overflow-y-auto space-y-2">
+              {drillRows.map((e) => (
+                <div key={e.id} className="rounded-md border p-3 text-sm space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={
+                        e.status === 'processed'
+                          ? 'secondary'
+                          : e.status === 'failed'
+                            ? 'destructive'
+                            : 'outline'
+                      }
+                    >
+                      {e.status}
+                    </Badge>
+                    <span className="font-medium">{e.event_type}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {drillTimeFormat.format(new Date(e.created_at))}
+                    </span>
+                  </div>
+                  <p className="font-mono text-xs text-muted-foreground break-all">{e.event_id}</p>
+                  {e.error_message && (
+                    <p className="text-xs text-destructive break-words">{e.error_message}</p>
+                  )}
+                </div>
+              ))}
+              {drillRows.length >= 200 && (
+                <p className="text-xs text-muted-foreground">
+                  Showing the first 200 events for this day.
+                </p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
