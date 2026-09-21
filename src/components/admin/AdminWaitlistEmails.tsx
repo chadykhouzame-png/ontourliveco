@@ -149,6 +149,7 @@ export default function AdminWaitlistEmails() {
                   <TableHead>Joined as</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Detail</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
