@@ -270,7 +270,7 @@ export default function AdminWebhookCharts() {
 
       const { data } = await supabase
         .from('webhook_events')
-        .select('id, event_id, event_type, status, error_message, created_at, processed_at')
+        .select(DETAIL_COLUMNS)
         .in('id', ids.slice(0, 200))
         .order('created_at', { ascending: false });
       setDrillRows((data ?? []) as DetailRow[]);
@@ -282,7 +282,7 @@ export default function AdminWebhookCharts() {
   const refreshDrillRow = useCallback(async (id: string) => {
     const { data } = await supabase
       .from('webhook_events')
-      .select('id, event_id, event_type, status, error_message, created_at, processed_at')
+      .select(DETAIL_COLUMNS)
       .eq('id', id)
       .maybeSingle();
     if (data) {
