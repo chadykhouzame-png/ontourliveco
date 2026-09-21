@@ -15,8 +15,19 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
-import { LineChart as LineChartIcon, RefreshCw } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { CalendarIcon, LineChart as LineChartIcon, RefreshCw } from 'lucide-react';
+import type { DateRange } from 'react-day-picker';
 
 type EventRow = {
   id: string;
@@ -39,41 +50,104 @@ type Point = {
 const RANGES = [7, 14, 30] as const;
 type Range = (typeof RANGES)[number];
 
+const BROWSER_TZ =
+  Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+
+const TIMEZONES = Array.from(
+  new Set([
+    BROWSER_TZ,
+    'UTC',
+    'Australia/Sydney',
+    'Europe/London',
+    'America/New_York',
+    'America/Los_Angeles',
+  ]),
+);
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function dayKeyIn(date: Date, timeZone: string) {
+  // en-CA gives YYYY-MM-DD
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(date);
+}
+
+function labelFor(dayKey: string) {
+  const [y, m, d] = dayKey.split('-').map(Number);
+  return format(new Date(y, m - 1, d), 'd MMM');
+}
+
 export default function AdminWebhookCharts() {
   const [rows, setRows] = useState<EventRow[]>([]);
-  const [days, setDays] = useState<Range>(14);
+  const [days, setDays] = useState<Range | null>(14);
+  const [range, setRange] = useState<DateRange | undefined>();
+  const [timeZone, setTimeZone] = useState<string>(BROWSER_TZ);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async (range: Range) => {
+  // Day keys (in the selected timezone) that make up the chart x-axis.
+  const dayKeys = useMemo(() => {
+    const keys: string[] = [];
+    if (days) {
+      for (let i = days - 1; i >= 0; i--) {
+        keys.push(dayKeyIn(new Date(Date.now() - i * DAY_MS), timeZone));
+      }
+      return keys;
+    }
+    if (range?.from) {
+      const end = range.to ?? range.from;
+      const cursor = new Date(range.from);
+      cursor.setHours(12, 0, 0, 0);
+      const stop = new Date(end);
+      stop.setHours(12, 0, 0, 0);
+      let guard = 0;
+      while (cursor.getTime() <= stop.getTime() && guard < 400) {
+        keys.push(dayKeyIn(cursor, timeZone));
+        cursor.setTime(cursor.getTime() + DAY_MS);
+        guard++;
+      }
+    }
+    return Array.from(new Set(keys));
+  }, [days, range, timeZone]);
+
+  const load = useCallback(async () => {
+    if (dayKeys.length === 0) {
+      setRows([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
-    const since = new Date(Date.now() - range * 24 * 60 * 60 * 1000).toISOString();
+    // Pad by a day either side so timezone shifts are covered, then filter by day key.
+    const first = new Date(`${dayKeys[0]}T00:00:00Z`).getTime() - DAY_MS;
+    const last = new Date(`${dayKeys[dayKeys.length - 1]}T00:00:00Z`).getTime() + 2 * DAY_MS;
     const { data } = await supabase
       .from('webhook_events')
       .select('id, status, created_at, processed_at')
-      .gte('created_at', since)
+      .gte('created_at', new Date(first).toISOString())
+      .lte('created_at', new Date(last).toISOString())
       .order('created_at', { ascending: true })
       .limit(5000);
     setRows((data ?? []) as EventRow[]);
     setLoading(false);
-  }, []);
+  }, [dayKeys]);
 
   useEffect(() => {
-    load(days);
-  }, [load, days]);
+    load();
+  }, [load]);
 
   const points = useMemo<Point[]>(() => {
-    const buckets = new Map<string, { processed: number; failed: number; pending: number; durations: number[] }>();
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
-      buckets.set(format(d, 'yyyy-MM-dd'), {
-        processed: 0,
-        failed: 0,
-        pending: 0,
-        durations: [],
-      });
+    const buckets = new Map<
+      string,
+      { processed: number; failed: number; pending: number; durations: number[] }
+    >();
+    for (const key of dayKeys) {
+      buckets.set(key, { processed: 0, failed: 0, pending: 0, durations: [] });
     }
     for (const r of rows) {
-      const key = format(new Date(r.created_at), 'yyyy-MM-dd');
+      const key = dayKeyIn(new Date(r.created_at), timeZone);
       const b = buckets.get(key);
       if (!b) continue;
       if (r.status === 'processed') b.processed += 1;
@@ -88,7 +162,7 @@ export default function AdminWebhookCharts() {
       const total = b.processed + b.failed + b.pending;
       return {
         day,
-        label: format(new Date(day), 'd MMM'),
+        label: labelFor(day),
         processed: b.processed,
         failed: b.failed,
         pending: b.pending,
@@ -100,7 +174,7 @@ export default function AdminWebhookCharts() {
             : null,
       };
     });
-  }, [rows, days]);
+  }, [rows, dayKeys, timeZone]);
 
   const totals = useMemo(() => {
     const total = points.reduce((s, p) => s + p.total, 0);
@@ -118,6 +192,12 @@ export default function AdminWebhookCharts() {
     };
   }, [points]);
 
+  const rangeLabel = days
+    ? `the last ${days} days`
+    : range?.from
+      ? `${format(range.from, 'd MMM yyyy')} – ${format(range.to ?? range.from, 'd MMM yyyy')}`
+      : 'the selected dates';
+
   const axis = { stroke: 'hsl(var(--muted-foreground))', fontSize: 12 };
   const tooltipStyle = {
     background: 'hsl(var(--popover))',
@@ -129,37 +209,89 @@ export default function AdminWebhookCharts() {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-start justify-between gap-4">
-        <div>
-          <CardTitle className="flex items-center gap-2">
-            <LineChartIcon className="h-5 w-5" /> Health trends
-          </CardTitle>
-          <CardDescription>
-            {totals.total} payment event{totals.total === 1 ? '' : 's'} in the last {days} days ·{' '}
-            {totals.failureRate}% failed
-            {totals.avgSeconds !== null && ` · ${totals.avgSeconds}s average processing time`}.
-          </CardDescription>
+      <CardHeader className="space-y-4">
+        <div className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <LineChartIcon className="h-5 w-5" /> Health trends
+            </CardTitle>
+            <CardDescription>
+              {totals.total} payment event{totals.total === 1 ? '' : 's'} in {rangeLabel} ·{' '}
+              {totals.failureRate}% failed
+              {totals.avgSeconds !== null && ` · ${totals.avgSeconds}s average processing time`}.
+              Days are grouped in {timeZone.replace('_', ' ')}.
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => load()} disabled={loading}>
+            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex flex-wrap items-center gap-2">
           {RANGES.map((r) => (
             <Button
               key={r}
               size="sm"
               variant={days === r ? 'default' : 'outline'}
-              onClick={() => setDays(r)}
+              onClick={() => {
+                setDays(r);
+                setRange(undefined);
+              }}
             >
               {r}d
             </Button>
           ))}
-          <Button variant="outline" size="sm" onClick={() => load(days)} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          </Button>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                size="sm"
+                variant={days === null ? 'default' : 'outline'}
+                className={cn('justify-start text-left font-normal')}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {days === null && range?.from
+                  ? `${format(range.from, 'd MMM')} – ${format(range.to ?? range.from, 'd MMM')}`
+                  : 'Custom range'}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                numberOfMonths={2}
+                selected={range}
+                defaultMonth={range?.from}
+                disabled={{ after: new Date() }}
+                onSelect={(r) => {
+                  setRange(r);
+                  if (r?.from) setDays(null);
+                }}
+                initialFocus
+                className={cn('p-3 pointer-events-auto')}
+              />
+            </PopoverContent>
+          </Popover>
+
+          <Select value={timeZone} onValueChange={setTimeZone}>
+            <SelectTrigger className="h-9 w-[220px]">
+              <SelectValue placeholder="Timezone" />
+            </SelectTrigger>
+            <SelectContent>
+              {TIMEZONES.map((tz) => (
+                <SelectItem key={tz} value={tz}>
+                  {tz === BROWSER_TZ ? `${tz.replace('_', ' ')} (yours)` : tz.replace('_', ' ')}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </CardHeader>
       <CardContent className="space-y-8">
-        {totals.total === 0 ? (
+        {dayKeys.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Pick a start and end date to see trends.</p>
+        ) : totals.total === 0 ? (
           <p className="text-sm text-muted-foreground">
-            {loading ? 'Loading…' : `No payment events in the last ${days} days.`}
+            {loading ? 'Loading…' : `No payment events in ${rangeLabel}.`}
           </p>
         ) : (
           <>
