@@ -242,8 +242,14 @@ export default function FirstLight() {
     }
   }
 
+  function waitLabel(seconds: number) {
+    if (seconds <= 90) return `${Math.max(5, Math.ceil(seconds / 5) * 5)} seconds`;
+    const mins = Math.ceil(seconds / 60);
+    return `${mins} minute${mins === 1 ? "" : "s"}`;
+  }
+
   async function onResend() {
-    if (!confirmed?.email || resending) return;
+    if (!confirmed?.email || resending || cooldown > 0) return;
     setResending(true);
     setResendHint("");
     try {
@@ -251,10 +257,30 @@ export default function FirstLight() {
         body: { email: confirmed.email },
       });
       if (error) {
-        setResendHint(
-          "We couldn't send it just now. Try again shortly or email hello@ontour.live.",
-        );
+        let code = "";
+        let retryAfter = 60;
+        try {
+          const ctx = (error as { context?: Response }).context;
+          const body = ctx ? await ctx.json() : null;
+          code = body?.error ?? "";
+          if (typeof body?.retry_after === "number") retryAfter = body.retry_after;
+        } catch {
+          /* non-JSON error body */
+        }
+        if (code === "cooldown" || code === "rate_limited") {
+          setCooldown(retryAfter);
+          setResendHint(
+            code === "cooldown"
+              ? `Just sent — give it ${waitLabel(retryAfter)} before trying again.`
+              : `You've requested this a few times. You can try again in ${waitLabel(retryAfter)}, or email hello@ontour.live.`,
+          );
+        } else {
+          setResendHint(
+            "We couldn't send it just now. Try again shortly or email hello@ontour.live.",
+          );
+        }
       } else {
+        setCooldown(60);
         setResendHint(
           "Sent. Check your inbox — and your spam folder — in the next few minutes.",
         );
