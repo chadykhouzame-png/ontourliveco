@@ -1235,6 +1235,42 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_failure_alerts: {
+        Row: {
+          burst_count: number
+          created_at: string
+          error_message: string
+          event_id: string | null
+          event_type: string | null
+          id: string
+          notified: boolean
+          source: string
+          stage: string
+        }
+        Insert: {
+          burst_count?: number
+          created_at?: string
+          error_message: string
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          notified?: boolean
+          source: string
+          stage: string
+        }
+        Update: {
+          burst_count?: number
+          created_at?: string
+          error_message?: string
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          notified?: boolean
+          source?: string
+          stage?: string
+        }
+        Relationships: []
+      }
       webhook_retry_attempts: {
         Row: {
           admin_email: string | null
