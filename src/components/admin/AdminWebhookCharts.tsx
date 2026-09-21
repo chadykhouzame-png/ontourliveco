@@ -66,7 +66,23 @@ type DetailRow = {
   error_message: string | null;
   created_at: string;
   processed_at: string | null;
+  payload: unknown;
 };
+
+type AttemptRow = {
+  id: string;
+  success: boolean;
+  http_status: number | null;
+  duration_ms: number | null;
+  retry_event_id: string | null;
+  response_body: string | null;
+  error_message: string | null;
+  admin_email: string | null;
+  created_at: string;
+};
+
+const DETAIL_COLUMNS =
+  'id, event_id, event_type, status, error_message, created_at, processed_at, payload';
 
 const STATUS_LABEL: Record<DrillStatus, string> = {
   all: 'All events',
