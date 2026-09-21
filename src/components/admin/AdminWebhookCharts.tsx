@@ -338,6 +338,7 @@ export default function AdminWebhookCharts() {
           },
         }));
         await refreshDrillRow(event.id);
+        await loadAttempts(event.id);
         return !!result?.success;
       } catch (err) {
         const msg = (err as Error)?.message || 'Retry failed';
