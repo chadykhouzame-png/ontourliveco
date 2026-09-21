@@ -33,8 +33,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, LineChart as LineChartIcon, RefreshCw } from 'lucide-react';
+import { CalendarIcon, CheckCircle2, LineChart as LineChartIcon, RefreshCw, XCircle } from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 
 type EventRow = {
@@ -117,6 +118,11 @@ export default function AdminWebhookCharts() {
   const [drill, setDrill] = useState<{ day: string; status: DrillStatus } | null>(null);
   const [drillRows, setDrillRows] = useState<DetailRow[] | null>(null);
   const [drillLoading, setDrillLoading] = useState(false);
+  const [retryingId, setRetryingId] = useState<string | null>(null);
+  const [bulkRetrying, setBulkRetrying] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number } | null>(null);
+  const [retryResults, setRetryResults] = useState<Record<string, { success: boolean; message?: string }>>({});
+  const { toast } = useToast();
 
   // Day keys (in the selected timezone) that make up the chart x-axis.
   const dayKeys = useMemo(() => {
@@ -256,6 +262,83 @@ export default function AdminWebhookCharts() {
     },
     [rows, timeZone],
   );
+
+  const refreshDrillRow = useCallback(async (id: string) => {
+    const { data } = await supabase
+      .from('webhook_events')
+      .select('id, event_id, event_type, status, error_message, created_at, processed_at')
+      .eq('id', id)
+      .maybeSingle();
+    if (data) {
+      setDrillRows((prev) =>
+        prev ? prev.map((r) => (r.id === id ? (data as DetailRow) : r)) : prev,
+      );
+    }
+  }, []);
+
+  const runRetry = useCallback(
+    async (event: DetailRow) => {
+      try {
+        const { data, error } = await supabase.functions.invoke('retry-webhook-event', {
+          body: { webhook_event_id: event.id },
+        });
+        if (error) throw error;
+        const result = data as { success?: boolean; error?: string; status?: number };
+        setRetryResults((prev) => ({
+          ...prev,
+          [event.id]: {
+            success: !!result?.success,
+            message: result?.success
+              ? `Replayed (HTTP ${result?.status ?? 200})`
+              : result?.error || 'Retry failed',
+          },
+        }));
+        await refreshDrillRow(event.id);
+        return !!result?.success;
+      } catch (err) {
+        const msg = (err as Error)?.message || 'Retry failed';
+        setRetryResults((prev) => ({ ...prev, [event.id]: { success: false, message: msg } }));
+        return false;
+      }
+    },
+    [refreshDrillRow],
+  );
+
+  const retryOne = useCallback(
+    async (event: DetailRow) => {
+      if (retryingId || bulkRetrying) return;
+      setRetryingId(event.id);
+      const ok = await runRetry(event);
+      setRetryingId(null);
+      toast({
+        title: ok ? 'Retry succeeded' : 'Retry failed',
+        description: ok
+          ? `${event.event_type} was replayed successfully.`
+          : retryResults[event.id]?.message || 'The event could not be replayed.',
+        variant: ok ? undefined : 'destructive',
+      });
+    },
+    [bulkRetrying, retryResults, retryingId, runRetry, toast],
+  );
+
+  const retryAllFailed = useCallback(async () => {
+    const failed = (drillRows ?? []).filter((r) => r.status === 'failed');
+    if (!failed.length || bulkRetrying || retryingId) return;
+    setBulkRetrying(true);
+    let succeeded = 0;
+    for (let i = 0; i < failed.length; i++) {
+      setBulkProgress({ done: i, total: failed.length });
+      const ok = await runRetry(failed[i]);
+      if (ok) succeeded++;
+    }
+    setBulkProgress(null);
+    setBulkRetrying(false);
+    toast({
+      title: 'Bulk retry finished',
+      description: `${succeeded} of ${failed.length} event${failed.length === 1 ? '' : 's'} replayed successfully.`,
+      variant: succeeded === failed.length ? undefined : 'destructive',
+    });
+  }, [bulkRetrying, drillRows, retryingId, runRetry, toast]);
 
   const pointForLabel = useCallback(
     (label?: string) => points.find((p) => p.label === label),
@@ -520,7 +603,31 @@ export default function AdminWebhookCharts() {
           ) : !drillRows?.length ? (
             <p className="text-sm text-muted-foreground">No events for this day and status.</p>
           ) : (
-            <div className="max-h-[60vh] overflow-y-auto space-y-2">
+            <div className="space-y-3">
+              {drillRows.some((r) => r.status === 'failed') && (
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                  <p className="text-xs text-muted-foreground">
+                    {drillRows.filter((r) => r.status === 'failed').length} failed event
+                    {drillRows.filter((r) => r.status === 'failed').length === 1 ? '' : 's'} can be
+                    resent.
+                    {bulkProgress
+                      ? ` Retrying ${bulkProgress.done + 1} of ${bulkProgress.total}…`
+                      : ''}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={bulkRetrying || !!retryingId}
+                    onClick={retryAllFailed}
+                  >
+                    <RefreshCw
+                      className={cn('h-3.5 w-3.5 mr-1', bulkRetrying && 'animate-spin')}
+                    />
+                    {bulkRetrying ? 'Retrying…' : 'Retry all failed'}
+                  </Button>
+                </div>
+              )}
+              <div className="max-h-[55vh] overflow-y-auto space-y-2">
               {drillRows.map((e) => (
                 <div key={e.id} className="rounded-md border p-3 text-sm space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -539,10 +646,42 @@ export default function AdminWebhookCharts() {
                     <span className="text-xs text-muted-foreground">
                       {drillTimeFormat.format(new Date(e.created_at))}
                     </span>
+                    {e.status === 'failed' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="ml-auto h-7 px-2 text-xs"
+                        disabled={bulkRetrying || !!retryingId}
+                        onClick={() => retryOne(e)}
+                      >
+                        <RefreshCw
+                          className={cn(
+                            'h-3.5 w-3.5 mr-1',
+                            retryingId === e.id && 'animate-spin',
+                          )}
+                        />
+                        {retryingId === e.id ? 'Retrying…' : 'Retry'}
+                      </Button>
+                    )}
                   </div>
                   <p className="font-mono text-xs text-muted-foreground break-all">{e.event_id}</p>
                   {e.error_message && (
                     <p className="text-xs text-destructive break-words">{e.error_message}</p>
+                  )}
+                  {retryResults[e.id] && (
+                    <p
+                      className={cn(
+                        'flex items-center gap-1 text-xs',
+                        retryResults[e.id].success ? 'text-muted-foreground' : 'text-destructive',
+                      )}
+                    >
+                      {retryResults[e.id].success ? (
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      ) : (
+                        <XCircle className="h-3.5 w-3.5" />
+                      )}
+                      {retryResults[e.id].message}
+                    </p>
                   )}
                 </div>
               ))}
@@ -551,6 +690,7 @@ export default function AdminWebhookCharts() {
                   Showing the first 200 events for this day.
                 </p>
               )}
+              </div>
             </div>
           )}
         </DialogContent>
