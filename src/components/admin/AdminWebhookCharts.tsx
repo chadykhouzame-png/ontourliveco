@@ -728,6 +728,98 @@ export default function AdminWebhookCharts() {
                       {retryResults[e.id].message}
                     </p>
                   )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2 text-xs"
+                    onClick={() => toggleExpanded(e.id)}
+                  >
+                    {expandedId === e.id ? (
+                      <ChevronUp className="h-3.5 w-3.5 mr-1" />
+                    ) : (
+                      <ChevronDown className="h-3.5 w-3.5 mr-1" />
+                    )}
+                    {expandedId === e.id ? 'Hide details' : 'View details'}
+                  </Button>
+
+                  {expandedId === e.id && (
+                    <div className="mt-2 space-y-3 border-t pt-3">
+                      <div>
+                        <p className="text-xs font-semibold mb-1">Key details</p>
+                        {diagnosticSummary(e.payload).length ? (
+                          <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+                            {diagnosticSummary(e.payload).map((row) => (
+                              <div key={row.label} className="contents">
+                                <dt className="text-muted-foreground">{row.label}</dt>
+                                <dd className="font-mono break-all">{row.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : (
+                          <p className="text-xs text-muted-foreground">
+                            No stored request payload for this event.
+                          </p>
+                        )}
+                      </div>
+
+                      {e.payload != null && (
+                        <div>
+                          <p className="text-xs font-semibold mb-1">
+                            Request payload (sensitive values hidden)
+                          </p>
+                          <pre className="sentry-mask max-h-56 overflow-auto rounded-md bg-muted p-2 text-[11px] leading-relaxed">
+                            {JSON.stringify(redactPayload(e.payload).value, null, 2)}
+                          </pre>
+                        </div>
+                      )}
+
+                      <div>
+                        <p className="text-xs font-semibold mb-1">Delivery attempts</p>
+                        {attemptsLoading === e.id ? (
+                          <p className="text-xs text-muted-foreground">Loading attempts…</p>
+                        ) : !attempts[e.id]?.length ? (
+                          <p className="text-xs text-muted-foreground">
+                            No resend attempts recorded for this event.
+                          </p>
+                        ) : (
+                          <ul className="space-y-2">
+                            {attempts[e.id].map((a) => (
+                              <li key={a.id} className="rounded-md border p-2 text-xs space-y-1">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <Badge variant={a.success ? 'secondary' : 'destructive'}>
+                                    {a.success ? 'delivered' : 'failed'}
+                                  </Badge>
+                                  <span className="text-muted-foreground">
+                                    {drillTimeFormat.format(new Date(a.created_at))}
+                                  </span>
+                                  {a.http_status !== null && <span>HTTP {a.http_status}</span>}
+                                  {a.duration_ms !== null && <span>{a.duration_ms}ms</span>}
+                                </div>
+                                {a.admin_email && (
+                                  <p className="text-muted-foreground sentry-mask">
+                                    Resent by {a.admin_email}
+                                  </p>
+                                )}
+                                {a.retry_event_id && (
+                                  <p className="font-mono break-all text-muted-foreground">
+                                    Replay event: {a.retry_event_id}
+                                  </p>
+                                )}
+                                {a.response_body && (
+                                  <p className="font-mono break-all">
+                                    Response: {a.response_body.slice(0, 500)}
+                                  </p>
+                                )}
+                                {a.error_message && (
+                                  <p className="text-destructive break-words">{a.error_message}</p>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
               {drillRows.length >= 200 && (
