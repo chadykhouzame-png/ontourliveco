@@ -35,7 +35,16 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
-import { CalendarIcon, CheckCircle2, LineChart as LineChartIcon, RefreshCw, XCircle } from 'lucide-react';
+import { redactPayload, diagnosticSummary } from '@/lib/redactPayload';
+import {
+  CalendarIcon,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  LineChart as LineChartIcon,
+  RefreshCw,
+  XCircle,
+} from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 
 type EventRow = {
