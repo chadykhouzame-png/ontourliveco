@@ -44,16 +44,47 @@ export default function AdminWaitlistEmails() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
+  const [resendingEmail, setResendingEmail] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const load = async () => {
     setLoading(true);
     const { data } = await supabase
       .from("waitlist_email_log")
-      .select("id, email, role, template, status, reason, error_code, created_at")
+      .select("id, email, role, template, status, reason, error_code, trigger_source, created_at")
       .order("created_at", { ascending: false })
       .limit(300);
     setRows((data as Row[]) ?? []);
     setLoading(false);
+  };
+
+  const resend = async (email: string) => {
+    setResendingEmail(email);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "resend-waitlist-confirmation",
+        { body: { email } },
+      );
+      const status = (data as { status?: string; reason?: string } | null)?.status;
+      if (error || status === "failed") {
+        toast({
+          title: "Could not resend",
+          description:
+            (data as { reason?: string } | null)?.reason ?? "The email service refused the send.",
+          variant: "destructive",
+        });
+      } else if (status === "suppressed") {
+        toast({
+          title: "Blocked",
+          description: "This recipient has opted out or previously bounced.",
+        });
+      } else {
+        toast({ title: "Confirmation resent", description: email });
+      }
+      await load();
+    } finally {
+      setResendingEmail(null);
+    }
   };
 
   useEffect(() => {
