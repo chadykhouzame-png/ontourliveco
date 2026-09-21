@@ -28,9 +28,17 @@ interface AlertBody {
   occurred_at?: string;
 }
 
-function renderEmail(a: AlertBody): { subject: string; html: string } {
+// Repeated-failure policy
+const WINDOW_MINUTES = 15; // burst window
+const REPEAT_THRESHOLD = 3; // failures in the window that count as "repeated"
+const RENOTIFY_EVERY = 10; // after escalation, re-alert every N further failures
+
+function renderEmail(a: AlertBody, burst: number): { subject: string; html: string } {
   const when = a.occurred_at ?? new Date().toISOString();
-  const subject = `⚠️ Webhook failure: ${a.source} (${a.stage})`;
+  const repeated = burst >= REPEAT_THRESHOLD;
+  const subject = repeated
+    ? `🚨 ${burst} webhook failures in ${WINDOW_MINUTES} min: ${a.source} (${a.stage})`
+    : `⚠️ Webhook failure: ${a.source} (${a.stage})`;
   const row = (label: string, value: string) => `
     <tr>
       <td style="padding:8px 12px;color:${brand.muted};font-size:12px;text-transform:uppercase;letter-spacing:.08em;width:130px;vertical-align:top;">${label}</td>
