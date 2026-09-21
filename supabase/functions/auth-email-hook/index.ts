@@ -17,12 +17,12 @@ const corsHeaders = {
 }
 
 const EMAIL_SUBJECTS: Record<string, string> = {
-  signup: 'Confirm your email',
-  invite: "You've been invited",
-  magiclink: 'Your login link',
-  recovery: 'Reset your password',
-  email_change: 'Confirm your new email',
-  reauthentication: 'Your verification code',
+  signup: 'Confirm your email — On Tour Live',
+  invite: "You've been invited to On Tour Live",
+  magiclink: 'Your On Tour Live sign-in link',
+  recovery: 'Reset your On Tour Live password',
+  email_change: 'Confirm your new email — On Tour Live',
+  reauthentication: 'Your On Tour Live verification code',
 }
 
 // Template mapping
@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "On Tour Landing Page"
+const SITE_NAME = "On Tour Live"
 const SENDER_DOMAIN = "notify.ontourlive.co"
 const ROOT_DOMAIN = "ontourlive.co"
 const FROM_DOMAIN = "ontourlive.co" // Domain shown in From address (may be root or sender subdomain)
