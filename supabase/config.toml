@@ -1,49 +1,37 @@
 project_id = "wjyyfqxblicvrbaycoaq"
 
-[functions.notify-artists]
-verify_jwt = true
-
-[functions.send-booking-notification]
-verify_jwt = true
-
-[functions.send-password-reset]
-verify_jwt = false
-
-[functions.send-welcome-email]
-verify_jwt = true
-
-[functions.log-error]
-verify_jwt = false
-
-[functions.generate-artist-bio]
-verify_jwt = false
-
-[functions.send-dispute-notification]
-verify_jwt = false
-
-[functions.create-connect-account]
-verify_jwt = false
-
-[functions.check-connect-status]
-verify_jwt = false
-
-[functions.create-booking-payment]
-verify_jwt = false
-
-[functions.stripe-webhook]
-verify_jwt = false
-
-[functions.stripe-connect-dashboard]
-verify_jwt = false
-
-[functions.test-stripe-webhook]
-verify_jwt = false
-
-[functions.waitlist-signup]
-verify_jwt = false
-
-[functions.reconcile-payments]
-verify_jwt = false
-
-[functions.evaluate-webhook-alerts]
-verify_jwt = false
+[functions]
+  [functions.auth-email-hook]
+    verify_jwt = false
+  [functions.check-connect-status]
+    verify_jwt = false
+  [functions.create-booking-payment]
+    verify_jwt = false
+  [functions.create-connect-account]
+    verify_jwt = false
+  [functions.evaluate-webhook-alerts]
+    verify_jwt = false
+  [functions.generate-artist-bio]
+    verify_jwt = false
+  [functions.log-error]
+    verify_jwt = false
+  [functions.notify-artists]
+    verify_jwt = true
+  [functions.reconcile-payments]
+    verify_jwt = false
+  [functions.send-booking-notification]
+    verify_jwt = true
+  [functions.send-dispute-notification]
+    verify_jwt = false
+  [functions.send-password-reset]
+    verify_jwt = false
+  [functions.send-welcome-email]
+    verify_jwt = true
+  [functions.stripe-connect-dashboard]
+    verify_jwt = false
+  [functions.stripe-webhook]
+    verify_jwt = false
+  [functions.test-stripe-webhook]
+    verify_jwt = false
+  [functions.waitlist-signup]
+    verify_jwt = false
