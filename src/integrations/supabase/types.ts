@@ -1237,6 +1237,8 @@ export type Database = {
       }
       webhook_failure_alerts: {
         Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
           burst_count: number
           created_at: string
           error_message: string
@@ -1244,10 +1246,15 @@ export type Database = {
           event_type: string | null
           id: string
           notified: boolean
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
           source: string
           stage: string
         }
         Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
           burst_count?: number
           created_at?: string
           error_message: string
@@ -1255,10 +1262,15 @@ export type Database = {
           event_type?: string | null
           id?: string
           notified?: boolean
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
           source: string
           stage: string
         }
         Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
           burst_count?: number
           created_at?: string
           error_message?: string
@@ -1266,6 +1278,9 @@ export type Database = {
           event_type?: string | null
           id?: string
           notified?: boolean
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
           source?: string
           stage?: string
         }
