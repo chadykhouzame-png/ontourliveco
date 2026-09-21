@@ -222,6 +222,59 @@ export default function AdminWebhookCharts() {
     };
   }, [points]);
 
+  // Drill-down: open the events behind a clicked chart point.
+  const openDrill = useCallback(
+    async (day: string | undefined, status: DrillStatus) => {
+      if (!day) return;
+      setDrill({ day, status });
+      setDrillRows(null);
+      setDrillLoading(true);
+
+      const ids = rows
+        .filter((r) => dayKeyIn(new Date(r.created_at), timeZone) === day)
+        .filter((r) => {
+          if (status === 'all') return true;
+          if (status === 'processed') return r.status === 'processed';
+          if (status === 'failed') return r.status === 'failed';
+          return r.status !== 'processed' && r.status !== 'failed';
+        })
+        .map((r) => r.id);
+
+      if (ids.length === 0) {
+        setDrillRows([]);
+        setDrillLoading(false);
+        return;
+      }
+
+      const { data } = await supabase
+        .from('webhook_events')
+        .select('id, event_id, event_type, status, error_message, created_at, processed_at')
+        .in('id', ids.slice(0, 200))
+        .order('created_at', { ascending: false });
+      setDrillRows((data ?? []) as DetailRow[]);
+      setDrillLoading(false);
+    },
+    [rows, timeZone],
+  );
+
+  const pointForLabel = useCallback(
+    (label?: string) => points.find((p) => p.label === label),
+    [points],
+  );
+
+  const drillTimeFormat = useMemo(
+    () =>
+      new Intl.DateTimeFormat('en-AU', {
+        timeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }),
+    [timeZone],
+  );
+
+
   const rangeLabel = days
     ? `the last ${days} days`
     : range?.from
