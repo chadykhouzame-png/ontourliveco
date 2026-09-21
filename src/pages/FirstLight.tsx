@@ -242,6 +242,30 @@ export default function FirstLight() {
     }
   }
 
+  async function onResend() {
+    if (!confirmed?.email || resending) return;
+    setResending(true);
+    setResendHint("");
+    try {
+      const { error } = await supabase.functions.invoke("resend-waitlist-confirmation", {
+        body: { email: confirmed.email },
+      });
+      if (error) {
+        setResendHint(
+          "We couldn't send it just now. Try again shortly or email hello@ontour.live.",
+        );
+      } else {
+        setResendHint(
+          "Sent. Check your inbox — and your spam folder — in the next few minutes.",
+        );
+      }
+    } catch {
+      setResendHint("We couldn't send it just now. Email hello@ontour.live and we'll help.");
+    } finally {
+      setResending(false);
+    }
+  }
+
 
   const location = useLocation();
   const seoPath = location.pathname === "/waitlist" ? "/waitlist" : "/";
