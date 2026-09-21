@@ -43,6 +43,12 @@ export default function FirstLight() {
   const viewTrackedRef = useRef(false);
 
   useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = window.setInterval(() => setCooldown((s) => (s <= 1 ? 0 : s - 1)), 1000);
+    return () => window.clearInterval(id);
+  }, [cooldown]);
+
+  useEffect(() => {
     const form = formRef.current;
     if (!form || viewTrackedRef.current) return;
     const observer = new IntersectionObserver(
