@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Mail, RefreshCw, Send } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2, Mail, RefreshCw, Send } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Row = {
