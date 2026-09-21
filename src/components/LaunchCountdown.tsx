@@ -17,8 +17,11 @@ export default function LaunchCountdown() {
   if (loading || !iso) return null;
 
   const target = new Date(iso).getTime();
-  const diff = Math.max(0, target - now);
-  const isLive = diff === 0;
+  const diff = target - now;
+
+  // Once the target date has passed, show nothing rather than a stale
+  // "we're live" line that contradicts the rest of the holding page.
+  if (diff <= 0) return null;
 
   const seconds = Math.floor(diff / 1000);
   const days = Math.floor(seconds / 86400);
@@ -30,9 +33,8 @@ export default function LaunchCountdown() {
 
   return (
     <div className="fl-countdown" aria-live="polite" aria-label="Time until launch">
-      {isLive ? (
-        <p className="fl-live">The stage is lit. We&rsquo;re live.</p>
-      ) : (
+      <>
+
         <>
           <div className="fl-cd-grid" role="timer">
             <Unit value={pad(days, days > 999 ? 4 : 3)} label="Days" />
