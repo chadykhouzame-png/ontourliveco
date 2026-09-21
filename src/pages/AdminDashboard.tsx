@@ -117,6 +117,7 @@ const AdminDashboard = () => {
           <TabsContent value="webhooks" className="mt-6 space-y-6">
             <WebhookTestProvider>
               <AdminWebhookHealth />
+              <AdminAlertRules />
               <AdminWebhookCharts />
               <AdminAlertHistory />
               <AdminPaymentReconciliation />
