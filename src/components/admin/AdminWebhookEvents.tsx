@@ -550,6 +550,7 @@ const AdminWebhookEvents = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Event Type</TableHead>
+                <TableHead>Mode</TableHead>
                 <TableHead>Event ID</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Received</TableHead>
