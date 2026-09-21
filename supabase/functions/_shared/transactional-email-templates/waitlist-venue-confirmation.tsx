@@ -22,40 +22,46 @@ interface Props {
 const Email = ({ firstName, venueName }: Props) => (
   <Html lang="en" dir="ltr">
     <Head />
-    <Preview>Your venue is on the On Tour Live founding list.</Preview>
+    <Preview>Your venue is on the founding list — early access to the artist roster.</Preview>
     <Body style={main}>
       <Container style={container}>
+        <Section style={crest}>
+          <Text style={wordmark}>ON TOUR LIVE</Text>
+          <Text style={crestSub}>The booking app for artists &amp; venues</Text>
+        </Section>
+
         <Section style={card}>
-          <Text style={eyebrow}>ON TOUR LIVE</Text>
+          <Text style={badge}>FOUNDING VENUE</Text>
           <Heading style={h1}>You're on the list</Heading>
           <Text style={lede}>
-            {firstName ? `${firstName}, thanks` : 'Thanks'} for joining as a venue
-            {venueName ? ` — we've noted ${venueName}.` : '.'}
+            {firstName ? `${firstName}, you're in.` : "You're in."} We've saved a founding place
+            for {venueName || 'your venue'}.
           </Text>
 
           <Hr style={rule} />
 
           <Text style={label}>WHAT HAPPENS NEXT</Text>
           <Text style={step}>
-            <span style={num}>I.</span> We'll email you the moment On Tour Live opens in your city.
+            <span style={num}>I.</span> We'll write the moment On Tour Live opens in your city.
           </Text>
           <Text style={step}>
-            <span style={num}>II.</span> Founding venues get early access to the artist roster
-            before it opens publicly.
+            <span style={num}>II.</span> You'll see the artist roster before it opens publicly.
           </Text>
           <Text style={step}>
-            <span style={num}>III.</span> At launch you'll post a night, see who's genuinely
-            available, and agree the fee in one thread.
+            <span style={num}>III.</span> Post a night, see who's genuinely available, and agree
+            the fee in one thread.
           </Text>
 
           <Hr style={rule} />
 
           <Text style={small}>
-            Nothing to do for now — just keep an eye on your inbox. Questions? Reply here or write
-            to <Link href="mailto:hello@ontour.live" style={link}>hello@ontour.live</Link>.
+            Nothing to do for now. Questions? Just reply, or write to{' '}
+            <Link href="mailto:hello@ontour.live" style={link}>hello@ontour.live</Link>.
           </Text>
           <Text style={sign}>— The On Tour Live team</Text>
         </Section>
+
+        <Text style={foot}>Launching soon · Sydney first · ontourlive.co</Text>
       </Container>
     </Body>
   </Html>
@@ -81,12 +87,36 @@ const card = {
   borderRadius: '14px',
   padding: '36px 32px',
 }
-const eyebrow = {
-  color: '#5C5445',
+const crest = { padding: '0 0 20px', textAlign: 'center' as const }
+const wordmark = {
+  color: '#21402C',
+  fontFamily: 'Arial, Helvetica, sans-serif',
+  fontSize: '13px',
+  fontWeight: 700,
+  letterSpacing: '4px',
+  margin: '0 0 6px',
+}
+const crestSub = {
+  color: '#8E8570',
+  fontSize: '13px',
+  fontStyle: 'italic' as const,
+  margin: 0,
+}
+const badge = {
+  color: '#21402C',
+  fontFamily: 'Arial, Helvetica, sans-serif',
+  fontSize: '10px',
+  fontWeight: 700,
+  letterSpacing: '2px',
+  margin: '0 0 16px',
+}
+const foot = {
+  color: '#8E8570',
   fontFamily: 'Arial, Helvetica, sans-serif',
   fontSize: '11px',
-  letterSpacing: '2px',
-  margin: '0 0 18px',
+  letterSpacing: '1px',
+  margin: '18px 0 0',
+  textAlign: 'center' as const,
 }
 const h1 = { color: '#171512', fontSize: '30px', lineHeight: '36px', margin: '0 0 12px' }
 const lede = { color: '#5C5445', fontSize: '16px', lineHeight: '25px', margin: '0' }
