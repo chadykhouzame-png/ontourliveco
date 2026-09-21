@@ -33,6 +33,7 @@ export default function FirstLight() {
   const [shareHint, setShareHint] = useState("");
   const [resending, setResending] = useState(false);
   const [resendHint, setResendHint] = useState("");
+  const [cooldown, setCooldown] = useState(0);
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const heldRef = useRef<HTMLDivElement | null>(null);
