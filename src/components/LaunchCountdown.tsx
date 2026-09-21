@@ -33,23 +33,19 @@ export default function LaunchCountdown() {
 
   return (
     <div className="fl-countdown" aria-live="polite" aria-label="Time until launch">
-      <>
-
-        <>
-          <div className="fl-cd-grid" role="timer">
-            <Unit value={pad(days, days > 999 ? 4 : 3)} label="Days" />
-            <Sep />
-            <Unit value={pad(hours)} label="Hrs" />
-            <Sep />
-            <Unit value={pad(minutes)} label="Min" />
-            <Sep />
-            <Unit value={pad(secs)} label="Sec" />
-          </div>
-          <p className="fl-cd-cap">Until first light</p>
-        </>
-      )}
+      <div className="fl-cd-grid" role="timer">
+        <Unit value={pad(days, days > 999 ? 4 : 3)} label="Days" />
+        <Sep />
+        <Unit value={pad(hours)} label="Hrs" />
+        <Sep />
+        <Unit value={pad(minutes)} label="Min" />
+        <Sep />
+        <Unit value={pad(secs)} label="Sec" />
+      </div>
+      <p className="fl-cd-cap">Until first light</p>
     </div>
   );
+
 }
 
 const Unit = ({ value, label }: { value: string; label: string }) => (
