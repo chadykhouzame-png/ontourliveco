@@ -1202,6 +1202,54 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_alert_rules: {
+        Row: {
+          cooldown_minutes: number
+          created_at: string
+          enabled: boolean
+          id: string
+          last_checked_at: string | null
+          last_triggered_at: string | null
+          last_value: number | null
+          metric: string
+          min_events: number
+          notify_email: boolean
+          threshold: number
+          updated_at: string
+          window_minutes: number
+        }
+        Insert: {
+          cooldown_minutes?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_checked_at?: string | null
+          last_triggered_at?: string | null
+          last_value?: number | null
+          metric: string
+          min_events?: number
+          notify_email?: boolean
+          threshold: number
+          updated_at?: string
+          window_minutes?: number
+        }
+        Update: {
+          cooldown_minutes?: number
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          last_checked_at?: string | null
+          last_triggered_at?: string | null
+          last_value?: number | null
+          metric?: string
+          min_events?: number
+          notify_email?: boolean
+          threshold?: number
+          updated_at?: string
+          window_minutes?: number
+        }
+        Relationships: []
+      }
       webhook_events: {
         Row: {
           created_at: string
