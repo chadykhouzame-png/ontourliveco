@@ -753,16 +753,8 @@ export default function FirstLight() {
               <Facebook aria-hidden="true" />
               <span>Facebook</span>
             </a>
-            <a
-              className="cl-social-link"
-              href={socialLinks.tiktok.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${socialLinks.tiktok.label} — opens in a new tab`}
-            >
-              <Music2 aria-hidden="true" />
-              <span>TikTok</span>
-            </a>
+            {/* TikTok button removed until the correct handle is confirmed. */}
+
           </div>
           <p className="cl-contact-note">
             Questions?{" "}
