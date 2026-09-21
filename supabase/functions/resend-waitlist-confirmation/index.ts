@@ -28,9 +28,10 @@ function ipThrottled(ip: string): boolean {
   return e.count > IP_MAX;
 }
 
-// Per-address cap: 3 resends per hour.
+// Per-address caps: one resend per minute, 3 per hour.
 const RESEND_WINDOW_MINUTES = 60;
 const RESEND_MAX = 3;
+const RESEND_COOLDOWN_SECONDS = 60;
 
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
