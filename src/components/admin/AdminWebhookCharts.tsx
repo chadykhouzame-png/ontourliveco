@@ -690,6 +690,7 @@ export default function AdminWebhookCharts() {
                   Showing the first 200 events for this day.
                 </p>
               )}
+              </div>
             </div>
           )}
         </DialogContent>
