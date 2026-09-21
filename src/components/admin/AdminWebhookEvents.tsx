@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { redactPayload, diagnosticSummary } from '@/lib/redactPayload';
+import { Eye, EyeOff } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import {
   RefreshCw,
