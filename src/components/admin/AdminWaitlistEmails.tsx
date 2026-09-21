@@ -238,7 +238,7 @@ export default function AdminWaitlistEmails() {
                     </TableCell>
                   </TableRow>
                   {isOpen && (
-                    <TableRow key={`${r.id}-history`} className="bg-muted/30 hover:bg-muted/30">
+                    <TableRow className="bg-muted/30 hover:bg-muted/30">
                       <TableCell />
                       <TableCell colSpan={6} className="py-3">
                         <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
