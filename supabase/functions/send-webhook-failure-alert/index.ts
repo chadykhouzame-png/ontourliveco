@@ -139,9 +139,53 @@ serve(async (req) => {
       });
     }
 
+    // Count failures for this source inside the burst window (this one included)
+    const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000).toISOString();
+    const { count: priorInWindow } = await supabase
+      .from("webhook_failure_alerts")
+      .select("id", { count: "exact", head: true })
+      .eq("source", body.source)
+      .gte("created_at", windowStart);
+    const burst = (priorInWindow ?? 0) + 1;
+
+    const { count: notifiedInWindow } = await supabase
+      .from("webhook_failure_alerts")
+      .select("id", { count: "exact", head: true })
+      .eq("source", body.source)
+      .eq("notified", true)
+      .gte("created_at", windowStart);
+
+    // Alert on: the first failure in a window, the moment it becomes "repeated",
+    // and then only every RENOTIFY_EVERY further failures — so one incident is not
+    // a mailbox full of identical messages.
+    const shouldSend =
+      (notifiedInWindow ?? 0) === 0 ||
+      burst === REPEAT_THRESHOLD ||
+      (burst > REPEAT_THRESHOLD && (burst - REPEAT_THRESHOLD) % RENOTIFY_EVERY === 0);
+
+    const recordAttempt = async (notified: boolean) => {
+      await supabase.from("webhook_failure_alerts").insert({
+        source: body.source,
+        stage: body.stage,
+        event_id: body.event_id ?? null,
+        event_type: body.event_type ?? null,
+        error_message: body.error_message,
+        burst_count: burst,
+        notified,
+      });
+    };
+
+    if (!shouldSend) {
+      await recordAttempt(false);
+      return new Response(JSON.stringify({ sent: false, reason: "throttled", burst }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const to = await resolveAdminEmails(supabase);
     if (!to.length) {
       console.warn("No admin recipient resolved for webhook alert");
+      await recordAttempt(false);
       return new Response(JSON.stringify({ skipped: true, reason: "no_admin_email" }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -149,7 +193,7 @@ serve(async (req) => {
     }
 
     const resend = new Resend(Deno.env.get("RESEND_API_KEY")!);
-    const { subject, html } = renderEmail(body);
+    const { subject, html } = renderEmail(body, burst);
 
     const { error: sendErr } = await resend.emails.send({
       from: "On Tour Alerts <alerts@ontourlive.co>",
