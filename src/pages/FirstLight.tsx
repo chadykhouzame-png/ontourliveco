@@ -31,6 +31,8 @@ export default function FirstLight() {
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
+  const [resending, setResending] = useState(false);
+  const [resendHint, setResendHint] = useState("");
   const [confirmed, setConfirmed] = useState<{ email: string; role: "artist" | "venue"; name: string } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
   const heldRef = useRef<HTMLDivElement | null>(null);
@@ -240,6 +242,30 @@ export default function FirstLight() {
     }
   }
 
+  async function onResend() {
+    if (!confirmed?.email || resending) return;
+    setResending(true);
+    setResendHint("");
+    try {
+      const { error } = await supabase.functions.invoke("resend-waitlist-confirmation", {
+        body: { email: confirmed.email },
+      });
+      if (error) {
+        setResendHint(
+          "We couldn't send it just now. Try again shortly or email hello@ontour.live.",
+        );
+      } else {
+        setResendHint(
+          "Sent. Check your inbox — and your spam folder — in the next few minutes.",
+        );
+      }
+    } catch {
+      setResendHint("We couldn't send it just now. Email hello@ontour.live and we'll help.");
+    } finally {
+      setResending(false);
+    }
+  }
+
 
   const location = useLocation();
   const seoPath = location.pathname === "/waitlist" ? "/waitlist" : "/";
@@ -383,6 +409,10 @@ export default function FirstLight() {
               Move up the list — share your invite
             </button>
             <p className="cl-hint">{shareHint}</p>
+            <button className="cl-ghost" onClick={onResend} disabled={resending}>
+              {resending ? "Sending…" : "Didn't get the email? Send it again"}
+            </button>
+            <p className="cl-hint" role="status" aria-live="polite">{resendHint}</p>
           </div>
         )}
 

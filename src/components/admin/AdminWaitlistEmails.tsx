@@ -11,7 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Mail, RefreshCw } from "lucide-react";
+import { Loader2, Mail, RefreshCw, Send } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type Row = {
   id: string;
@@ -21,6 +22,7 @@ type Row = {
   status: "sent" | "suppressed" | "failed";
   reason: string | null;
   error_code: string | null;
+  trigger_source: string | null;
   created_at: string;
 };
 
@@ -42,16 +44,47 @@ export default function AdminWaitlistEmails() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<Filter>("all");
+  const [resendingEmail, setResendingEmail] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const load = async () => {
     setLoading(true);
     const { data } = await supabase
       .from("waitlist_email_log")
-      .select("id, email, role, template, status, reason, error_code, created_at")
+      .select("id, email, role, template, status, reason, error_code, trigger_source, created_at")
       .order("created_at", { ascending: false })
       .limit(300);
     setRows((data as Row[]) ?? []);
     setLoading(false);
+  };
+
+  const resend = async (email: string) => {
+    setResendingEmail(email);
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        "resend-waitlist-confirmation",
+        { body: { email } },
+      );
+      const status = (data as { status?: string; reason?: string } | null)?.status;
+      if (error || status === "failed") {
+        toast({
+          title: "Could not resend",
+          description:
+            (data as { reason?: string } | null)?.reason ?? "The email service refused the send.",
+          variant: "destructive",
+        });
+      } else if (status === "suppressed") {
+        toast({
+          title: "Blocked",
+          description: "This recipient has opted out or previously bounced.",
+        });
+      } else {
+        toast({ title: "Confirmation resent", description: email });
+      }
+      await load();
+    } finally {
+      setResendingEmail(null);
+    }
   };
 
   useEffect(() => {
@@ -116,6 +149,7 @@ export default function AdminWaitlistEmails() {
                   <TableHead>Joined as</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Detail</TableHead>
+                  <TableHead className="text-right">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -145,6 +179,26 @@ export default function AdminWaitlistEmails() {
                     </TableCell>
                     <TableCell className="max-w-[320px] text-sm text-muted-foreground">
                       {friendlyReason(r)}
+                      {r.trigger_source && r.trigger_source !== "signup" && (
+                        <span className="ml-2 text-xs">
+                          ({r.trigger_source === "admin_resend" ? "resent by admin" : "resent by user"})
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => resend(r.email)}
+                        disabled={resendingEmail === r.email}
+                      >
+                        {resendingEmail === r.email ? (
+                          <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Send className="mr-2 h-3.5 w-3.5" />
+                        )}
+                        Resend
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
