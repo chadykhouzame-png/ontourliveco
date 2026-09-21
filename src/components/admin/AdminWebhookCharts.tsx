@@ -346,7 +346,7 @@ export default function AdminWebhookCharts() {
         return false;
       }
     },
-    [refreshDrillRow],
+    [loadAttempts, refreshDrillRow],
   );
 
   const retryOne = useCallback(
