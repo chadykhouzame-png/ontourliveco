@@ -442,8 +442,16 @@ export default function FirstLight() {
               Move up the list — share your invite
             </button>
             <p className="cl-hint">{shareHint}</p>
-            <button className="cl-ghost" onClick={onResend} disabled={resending}>
-              {resending ? "Sending…" : "Didn't get the email? Send it again"}
+            <button
+              className="cl-ghost"
+              onClick={onResend}
+              disabled={resending || cooldown > 0}
+            >
+              {resending
+                ? "Sending…"
+                : cooldown > 0
+                  ? `Send it again in ${cooldown}s`
+                  : "Didn't get the email? Send it again"}
             </button>
             <p className="cl-hint" role="status" aria-live="polite">{resendHint}</p>
           </div>
