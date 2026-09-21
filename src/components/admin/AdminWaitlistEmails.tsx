@@ -40,6 +40,16 @@ function friendlyReason(row: Row): string {
   return row.reason || row.error_code || "—";
 }
 
+function sourceLabel(source: string | null): string {
+  if (source === "admin_resend") return "Resent by admin";
+  if (source === "resend") return "Resent by user";
+  return "Sign-up";
+}
+
+function statusLabel(status: Row["status"]): string {
+  return status === "sent" ? "Delivered" : status === "failed" ? "Failed" : "Blocked";
+}
+
 export default function AdminWaitlistEmails() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
