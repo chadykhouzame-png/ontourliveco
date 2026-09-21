@@ -22,6 +22,7 @@ type Row = {
   status: "sent" | "suppressed" | "failed";
   reason: string | null;
   error_code: string | null;
+  trigger_source: string | null;
   created_at: string;
 };
 
