@@ -98,6 +98,21 @@ const statusVariant = (status: string) => {
   }
 };
 
+const modeOf = (event: WebhookEvent): 'Live' | 'Test' | 'Unknown' => {
+  const live = event.payload?.livemode;
+  if (live === true) return 'Live';
+  if (live === false) return 'Test';
+  if (typeof event.event_id === 'string' && event.event_id.startsWith('evt_test_')) return 'Test';
+  return 'Unknown';
+};
+
+const timelineFor = (event: WebhookEvent) => {
+  const received = new Date(event.created_at);
+  const finished = event.processed_at ? new Date(event.processed_at) : null;
+  const durationMs = finished ? finished.getTime() - received.getTime() : null;
+  return { received, finished, durationMs };
+};
+
 const AdminWebhookEvents = () => {
   const [events, setEvents] = useState<WebhookEvent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -535,6 +550,7 @@ const AdminWebhookEvents = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Event Type</TableHead>
+                <TableHead>Mode</TableHead>
                 <TableHead>Event ID</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Received</TableHead>
@@ -547,7 +563,28 @@ const AdminWebhookEvents = () => {
                 <>
                   <TableRow key={event.id} className="cursor-pointer" onClick={() => toggleExpanded(event.id)}>
                     <TableCell className="font-mono text-xs">{event.event_type}</TableCell>
-                    <TableCell className="font-mono text-xs max-w-[180px] truncate">{event.event_id}</TableCell>
+                    <TableCell>
+                      <Badge variant={modeOf(event) === 'Live' ? 'default' : 'outline'}>
+                        {modeOf(event)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono max-w-[160px] truncate">{event.event_id}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          aria-label="Copy event ID"
+                          onClick={() => {
+                            navigator.clipboard.writeText(event.event_id);
+                            toast({ title: 'Event ID copied' });
+                          }}
+                        >
+                          <Copy className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge variant={statusVariant(event.status)}>{event.status}</Badge>
                     </TableCell>
@@ -578,9 +615,60 @@ const AdminWebhookEvents = () => {
                   </TableRow>
                   {expandedId === event.id && (
                     <TableRow key={`${event.id}-detail`}>
-                      <TableCell colSpan={6} className="bg-muted/30">
+                      <TableCell colSpan={7} className="bg-muted/30">
                         <div className="space-y-2 py-2">
-                          {event.error_message && (
+                          <div className="rounded-lg border bg-background/60 p-3">
+                            <div className="text-xs font-semibold mb-2">Processing timeline</div>
+                            <ol className="space-y-1.5">
+                              <li className="flex items-center gap-2 text-xs">
+                                <Zap className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                <span className="font-medium">Received from Stripe</span>
+                                <span className="text-muted-foreground">
+                                  {format(timelineFor(event).received, 'MMM d, yyyy HH:mm:ss')}
+                                </span>
+                                <Badge variant={modeOf(event) === 'Live' ? 'default' : 'outline'} className="ml-auto">
+                                  {modeOf(event)} mode
+                                </Badge>
+                              </li>
+                              {event.status === 'processed' || event.status === 'failed' ? (
+                                <li className="flex items-center gap-2 text-xs">
+                                  {event.status === 'processed' ? (
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-success shrink-0" />
+                                  ) : (
+                                    <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" />
+                                  )}
+                                  <span className="font-medium">
+                                    {event.status === 'processed' ? 'Processed successfully' : 'Processing failed'}
+                                  </span>
+                                  <span className="text-muted-foreground">
+                                    {timelineFor(event).finished
+                                      ? format(timelineFor(event).finished!, 'MMM d, yyyy HH:mm:ss')
+                                      : 'time not recorded'}
+                                  </span>
+                                  {timelineFor(event).durationMs !== null && (
+                                    <span className="text-muted-foreground ml-auto">
+                                      took {timelineFor(event).durationMs}ms
+                                    </span>
+                                  )}
+                                </li>
+                              ) : (
+                                <li className="flex items-center gap-2 text-xs">
+                                  <AlertTriangle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                  <span className="font-medium">Still {event.status}</span>
+                                  <span className="text-muted-foreground">no completion recorded yet</span>
+                                </li>
+                              )}
+                            </ol>
+                          </div>
+                          {event.status === 'failed' && (
+                            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3">
+                              <div className="text-xs font-semibold text-destructive mb-0.5">Failure reason</div>
+                              <p className="text-xs text-destructive break-words">
+                                {event.error_message || 'No reason was recorded by the payment listener.'}
+                              </p>
+                            </div>
+                          )}
+                          {event.status !== 'failed' && event.error_message && (
                             <div>
                               <span className="text-xs font-semibold text-destructive">Error: </span>
                               <span className="text-xs text-destructive">{event.error_message}</span>
