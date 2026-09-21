@@ -380,25 +380,38 @@ export default function AdminWebhookCharts() {
           <>
             <div>
               <p className="text-sm font-medium mb-2">Events per day</p>
+              <p className="text-xs text-muted-foreground mb-2">
+                Tap any bar, point or day to see the events behind it.
+              </p>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={points}>
+                  <BarChart
+                    data={points}
+                    onClick={(state: { activeLabel?: string }) =>
+                      openDrill(pointForLabel(state?.activeLabel)?.day, 'all')
+                    }
+                    style={{ cursor: 'pointer' }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="label" {...axis} />
                     <YAxis allowDecimals={false} {...axis} />
-                    <Tooltip contentStyle={tooltipStyle} />
+                    <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }} />
                     <Bar
                       dataKey="processed"
                       stackId="a"
                       name="Processed"
                       fill="hsl(var(--primary))"
                       radius={[0, 0, 0, 0]}
+                      cursor="pointer"
+                      onClick={(d: { payload?: Point }) => openDrill(d?.payload?.day, 'processed')}
                     />
                     <Bar
                       dataKey="pending"
                       stackId="a"
                       name="Pending"
                       fill="hsl(var(--muted-foreground))"
+                      cursor="pointer"
+                      onClick={(d: { payload?: Point }) => openDrill(d?.payload?.day, 'pending')}
                     />
                     <Bar
                       dataKey="failed"
@@ -406,6 +419,8 @@ export default function AdminWebhookCharts() {
                       name="Failed"
                       fill="hsl(var(--destructive))"
                       radius={[4, 4, 0, 0]}
+                      cursor="pointer"
+                      onClick={(d: { payload?: Point }) => openDrill(d?.payload?.day, 'failed')}
                     />
                   </BarChart>
                 </ResponsiveContainer>
@@ -416,7 +431,13 @@ export default function AdminWebhookCharts() {
               <p className="text-sm font-medium mb-2">Failure rate (%)</p>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={points}>
+                  <AreaChart
+                    data={points}
+                    onClick={(state: { activeLabel?: string }) =>
+                      openDrill(pointForLabel(state?.activeLabel)?.day, 'failed')
+                    }
+                    style={{ cursor: 'pointer' }}
+                  >
                     <defs>
                       <linearGradient id="failRate" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="hsl(var(--destructive))" stopOpacity={0.35} />
@@ -437,6 +458,7 @@ export default function AdminWebhookCharts() {
                       stroke="hsl(var(--destructive))"
                       strokeWidth={2}
                       fill="url(#failRate)"
+                      activeDot={{ r: 6, cursor: 'pointer' }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -447,7 +469,13 @@ export default function AdminWebhookCharts() {
               <p className="text-sm font-medium mb-2">Average processing time (seconds)</p>
               <div className="h-56">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={points}>
+                  <LineChart
+                    data={points}
+                    onClick={(state: { activeLabel?: string }) =>
+                      openDrill(pointForLabel(state?.activeLabel)?.day, 'processed')
+                    }
+                    style={{ cursor: 'pointer' }}
+                  >
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="label" {...axis} />
                     <YAxis {...axis} />
@@ -463,11 +491,13 @@ export default function AdminWebhookCharts() {
                       strokeWidth={2}
                       dot={false}
                       connectNulls
+                      activeDot={{ r: 6, cursor: 'pointer' }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
             </div>
+
           </>
         )}
       </CardContent>
