@@ -187,7 +187,25 @@ serve(async (req) => {
     });
   }
 
+  // Confirmation email — never let a send failure break the signup response.
+  try {
+    await sendTemplateEmail(
+      role === "artist" ? "waitlist-artist-confirmation" : "waitlist-venue-confirmation",
+      email,
+      {
+        templateData:
+          role === "artist"
+            ? { firstName, artistName }
+            : { firstName, venueName },
+        idempotencyKey: `waitlist-confirm-${role}-${email.toLowerCase()}`,
+      },
+    );
+  } catch (err) {
+    console.error("waitlist-signup: confirmation email failed", err);
+  }
+
   return new Response(JSON.stringify({ position: data }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
+
