@@ -22,6 +22,7 @@ import AdminDomainChecklist from '@/components/admin/AdminDomainChecklist';
 import AdminSiteMode from '@/components/admin/AdminSiteMode';
 import AdminWaitlist from '@/components/admin/AdminWaitlist';
 import AdminBlockedAttempts from '@/components/admin/AdminBlockedAttempts';
+import AdminWaitlistEmails from '@/components/admin/AdminWaitlistEmails';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
