@@ -263,6 +263,83 @@ export default function AdminWebhookCharts() {
     [rows, timeZone],
   );
 
+  const refreshDrillRow = useCallback(async (id: string) => {
+    const { data } = await supabase
+      .from('webhook_events')
+      .select('id, event_id, event_type, status, error_message, created_at, processed_at')
+      .eq('id', id)
+      .maybeSingle();
+    if (data) {
+      setDrillRows((prev) =>
+        prev ? prev.map((r) => (r.id === id ? (data as DetailRow) : r)) : prev,
+      );
+    }
+  }, []);
+
+  const runRetry = useCallback(
+    async (event: DetailRow) => {
+      try {
+        const { data, error } = await supabase.functions.invoke('retry-webhook-event', {
+          body: { webhook_event_id: event.id },
+        });
+        if (error) throw error;
+        const result = data as { success?: boolean; error?: string; status?: number };
+        setRetryResults((prev) => ({
+          ...prev,
+          [event.id]: {
+            success: !!result?.success,
+            message: result?.success
+              ? `Replayed (HTTP ${result?.status ?? 200})`
+              : result?.error || 'Retry failed',
+          },
+        }));
+        await refreshDrillRow(event.id);
+        return !!result?.success;
+      } catch (err) {
+        const msg = (err as Error)?.message || 'Retry failed';
+        setRetryResults((prev) => ({ ...prev, [event.id]: { success: false, message: msg } }));
+        return false;
+      }
+    },
+    [refreshDrillRow],
+  );
+
+  const retryOne = useCallback(
+    async (event: DetailRow) => {
+      if (retryingId || bulkRetrying) return;
+      setRetryingId(event.id);
+      const ok = await runRetry(event);
+      setRetryingId(null);
+      toast({
+        title: ok ? 'Retry succeeded' : 'Retry failed',
+        description: ok
+          ? `${event.event_type} was replayed successfully.`
+          : retryResults[event.id]?.message || 'The event could not be replayed.',
+        variant: ok ? undefined : 'destructive',
+      });
+    },
+    [bulkRetrying, retryResults, retryingId, runRetry, toast],
+  );
+
+  const retryAllFailed = useCallback(async () => {
+    const failed = (drillRows ?? []).filter((r) => r.status === 'failed');
+    if (!failed.length || bulkRetrying || retryingId) return;
+    setBulkRetrying(true);
+    let succeeded = 0;
+    for (let i = 0; i < failed.length; i++) {
+      setBulkProgress({ done: i, total: failed.length });
+      const ok = await runRetry(failed[i]);
+      if (ok) succeeded++;
+    }
+    setBulkProgress(null);
+    setBulkRetrying(false);
+    toast({
+      title: 'Bulk retry finished',
+      description: `${succeeded} of ${failed.length} event${failed.length === 1 ? '' : 's'} replayed successfully.`,
+      variant: succeeded === failed.length ? undefined : 'destructive',
+    });
+  }, [bulkRetrying, drillRows, retryingId, runRetry, toast]);
+
   const pointForLabel = useCallback(
     (label?: string) => points.find((p) => p.label === label),
     [points],
