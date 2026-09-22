@@ -260,7 +260,7 @@ export default function FirstLight() {
     setResending(true);
     setResendHint("");
     try {
-      const { error } = await supabase.functions.invoke("resend-waitlist-confirmation", {
+      const { data, error } = await supabase.functions.invoke("resend-waitlist-confirmation", {
         body: { email: confirmed.email },
       });
       if (error) {
@@ -286,6 +286,10 @@ export default function FirstLight() {
             "We couldn't send it just now. Try again shortly or email hello@ontour.live.",
           );
         }
+      } else if ((data as { delivered?: boolean } | null)?.delivered === false) {
+        setResendHint(
+          "We couldn't get that email through. Email hello@ontour.live and we'll sort it out.",
+        );
       } else {
         setCooldown(60);
         setResendHint(
