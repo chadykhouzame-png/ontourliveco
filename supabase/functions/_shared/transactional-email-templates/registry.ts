@@ -11,6 +11,7 @@ export interface TemplateEntry {
 
 import { template as waitlistArtistConfirmation } from './waitlist-artist-confirmation.tsx'
 import { template as waitlistVenueConfirmation } from './waitlist-venue-confirmation.tsx'
+import { template as welcome } from './welcome.tsx'
 
 /**
  * Template registry — maps template names to their React Email components.
@@ -19,4 +20,5 @@ import { template as waitlistVenueConfirmation } from './waitlist-venue-confirma
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'waitlist-artist-confirmation': waitlistArtistConfirmation,
   'waitlist-venue-confirmation': waitlistVenueConfirmation,
+  'welcome': welcome,
 }

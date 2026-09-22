@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { Resend } from "https://esm.sh/resend@4.0.0";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
-import React from "https://esm.sh/react@18.3.1";
-import { renderAsync } from "https://esm.sh/@react-email/components@0.0.22";
-import { WelcomeEmail } from './_templates/welcome.tsx';
+import { sendTemplateEmail } from "../_shared/transactional-email-templates/send-email.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -125,14 +122,7 @@ serve(async (req: Request) => {
       );
     }
 
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (!resendApiKey) {
-      console.error('RESEND_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Email service not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Sending is handled by Lovable's managed email API (LOVABLE_API_KEY).
 
     // --- INPUT VALIDATION ---
     let rawBody;
@@ -180,38 +170,23 @@ serve(async (req: Request) => {
 
     console.log('Welcome email requested for:', email, 'as', userType);
 
-    const resend = new Resend(resendApiKey);
-
     // Determine dashboard URL based on user type
-    const origin = req.headers.get('origin') || 'https://ontour.app';
-    const dashboardUrl = userType === 'artist' 
+    const origin = req.headers.get('origin') || 'https://ontourlive.co';
+    const dashboardUrl = userType === 'artist'
       ? `${origin}/artist/setup`
       : `${origin}/venue/setup`;
 
-    // Render the React Email template
-    const html = await renderAsync(
-      React.createElement(WelcomeEmail, {
-        userType,
-        userEmail: email,
-        dashboardUrl,
-      })
-    );
-
-    // Send email via Resend
-    const { error: emailError } = await resend.emails.send({
-      from: 'On Tour <noreply@ontourlive.co>',
-      to: [email],
-      subject: userType === 'artist' 
-        ? '🎵 Welcome to On Tour, Artist!' 
-        : '🏢 Welcome to On Tour, Venue Partner!',
-      html,
+    // Send through Lovable's managed email (verified sender domain)
+    const result = await sendTemplateEmail('welcome', email, {
+      templateData: { userType, dashboardUrl },
+      idempotencyKey: `welcome-${userType}-${email.toLowerCase()}`,
     });
 
-    if (emailError) {
-      console.error('Error sending welcome email:', emailError);
+    if (!result.sent) {
+      console.warn('Welcome email not sent:', result.reason);
       return new Response(
-        JSON.stringify({ success: false, error: 'Failed to send email' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Email not delivered' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
