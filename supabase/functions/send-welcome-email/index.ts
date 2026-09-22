@@ -122,14 +122,7 @@ serve(async (req: Request) => {
       );
     }
 
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (!resendApiKey) {
-      console.error('RESEND_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Email service not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
+    // Sending is handled by Lovable's managed email API (LOVABLE_API_KEY).
 
     // --- INPUT VALIDATION ---
     let rawBody;
@@ -177,38 +170,23 @@ serve(async (req: Request) => {
 
     console.log('Welcome email requested for:', email, 'as', userType);
 
-    const resend = new Resend(resendApiKey);
-
     // Determine dashboard URL based on user type
-    const origin = req.headers.get('origin') || 'https://ontour.app';
-    const dashboardUrl = userType === 'artist' 
+    const origin = req.headers.get('origin') || 'https://ontourlive.co';
+    const dashboardUrl = userType === 'artist'
       ? `${origin}/artist/setup`
       : `${origin}/venue/setup`;
 
-    // Render the React Email template
-    const html = await renderAsync(
-      React.createElement(WelcomeEmail, {
-        userType,
-        userEmail: email,
-        dashboardUrl,
-      })
-    );
-
-    // Send email via Resend
-    const { error: emailError } = await resend.emails.send({
-      from: 'On Tour <noreply@ontourlive.co>',
-      to: [email],
-      subject: userType === 'artist' 
-        ? '🎵 Welcome to On Tour, Artist!' 
-        : '🏢 Welcome to On Tour, Venue Partner!',
-      html,
+    // Send through Lovable's managed email (verified sender domain)
+    const result = await sendTemplateEmail('welcome', email, {
+      templateData: { userType, dashboardUrl },
+      idempotencyKey: `welcome-${userType}-${email.toLowerCase()}`,
     });
 
-    if (emailError) {
-      console.error('Error sending welcome email:', emailError);
+    if (!result.sent) {
+      console.warn('Welcome email not sent:', result.reason);
       return new Response(
-        JSON.stringify({ success: false, error: 'Failed to send email' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ success: false, error: 'Email not delivered' }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
