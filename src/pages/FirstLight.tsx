@@ -434,7 +434,7 @@ export default function FirstLight() {
               <strong>{confirmed?.email}</strong> when On Tour Live opens. Nothing else to do for now.
             </p>
             <p className="cl-sub cl-sub-quiet">
-              Launching soon · Sydney first.
+              Launching 1 November 2026 · Sydney first.
               <br />
               Watch{" "}
               <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-link">
