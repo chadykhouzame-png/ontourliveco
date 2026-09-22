@@ -176,5 +176,7 @@ serve(async (req) => {
   }
 
   if (isAdmin) return json({ ok: true, status, reason: reason ?? errorCode });
-  return json({ ok: true });
+  // Tell the caller whether it actually went out, without revealing list membership
+  // beyond what they already know about their own address.
+  return json({ ok: true, delivered: status === "sent" });
 });
