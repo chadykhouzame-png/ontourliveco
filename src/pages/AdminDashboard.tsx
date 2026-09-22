@@ -24,6 +24,7 @@ import AdminWaitlist from '@/components/admin/AdminWaitlist';
 import AdminBlockedAttempts from '@/components/admin/AdminBlockedAttempts';
 import AdminWaitlistEmails from '@/components/admin/AdminWaitlistEmails';
 import AdminEmailDelivery from '@/components/admin/AdminEmailDelivery';
+import AdminSignupFunnel from '@/components/admin/AdminSignupFunnel';
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
@@ -110,6 +111,7 @@ const AdminDashboard = () => {
 
           <TabsContent value="waitlist" className="mt-6 space-y-6">
             <AdminWaitlist />
+            <AdminSignupFunnel />
             <AdminEmailDelivery />
             <AdminWaitlistEmails />
             <AdminBlockedAttempts />
