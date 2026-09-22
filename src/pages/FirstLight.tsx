@@ -132,7 +132,7 @@ export default function FirstLight() {
     setRole(next);
     setErrors({});
     setTouched({});
-    setHint("Launching soon · Sydney first");
+    setHint("Launching 1 November 2026 · Sydney first");
     setHintTone("muted");
   }
 
