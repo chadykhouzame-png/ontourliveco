@@ -27,7 +27,7 @@ export default function FirstLight() {
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
   const [, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [hint, setHint] = useState("Launching soon · Sydney first");
+  const [hint, setHint] = useState("Launching 1 November 2026 · Sydney first");
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
@@ -132,7 +132,7 @@ export default function FirstLight() {
     setRole(next);
     setErrors({});
     setTouched({});
-    setHint("Launching soon · Sydney first");
+    setHint("Launching 1 November 2026 · Sydney first");
     setHintTone("muted");
   }
 
@@ -311,7 +311,7 @@ export default function FirstLight() {
     <div className="cl-root">
       <PageSeo
         title="On Tour Live — Join the founding list"
-        description="The booking app for artists and venues. Launching soon, Sydney first. Join the founding list and take your place."
+        description="The booking app for artists and venues. Launching 1 November 2026, Sydney first. Join the founding list and take your place."
         path={seoPath}
       />
       <style>{styles}</style>
@@ -434,7 +434,7 @@ export default function FirstLight() {
               <strong>{confirmed?.email}</strong> when On Tour Live opens. Nothing else to do for now.
             </p>
             <p className="cl-sub cl-sub-quiet">
-              Launching soon · Sydney first.
+              Launching 1 November 2026 · Sydney first.
               <br />
               Watch{" "}
               <a href={socialLinks.instagram.url} target="_blank" rel="noopener noreferrer" className="cl-link">
