@@ -27,7 +27,7 @@ export default function FirstLight() {
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
   const [, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [hint, setHint] = useState("Launching soon · Sydney first");
+  const [hint, setHint] = useState("Launching 1 November 2026 · Sydney first");
   const [hintTone, setHintTone] = useState<"muted" | "ox">("muted");
   const [position, setPosition] = useState<number | null>(null);
   const [shareHint, setShareHint] = useState("");
