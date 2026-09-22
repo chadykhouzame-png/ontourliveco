@@ -111,6 +111,7 @@ const AdminDashboard = () => {
 
           <TabsContent value="waitlist" className="mt-6 space-y-6">
             <AdminWaitlist />
+            <AdminSignupFunnel />
             <AdminEmailDelivery />
             <AdminWaitlistEmails />
             <AdminBlockedAttempts />
