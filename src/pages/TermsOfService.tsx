@@ -3,10 +3,16 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLockup } from '@/components/BrandLockup';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import PageSeo from '@/components/PageSeo';
 
 const TermsOfService = () => {
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <PageSeo
+        title="Terms of Service — On Tour Live"
+        description="The terms that apply when artists and venues use On Tour Live, the Sydney booking app for live music."
+        path="/terms"
+      />
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/70 backdrop-blur-xl border-b border-border/30">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
