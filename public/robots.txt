@@ -12,3 +12,15 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /messages
+Disallow: /analytics
+Disallow: /select-role
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /artist/
+Disallow: /venue/
+Disallow: /join/
+Disallow: /search
+
+Sitemap: https://ontourlive.co/sitemap.xml
