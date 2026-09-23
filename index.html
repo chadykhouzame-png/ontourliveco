@@ -45,7 +45,6 @@
 
     <meta property="og:see_also" content="https://www.instagram.com/ontour.live" />
     <meta property="og:see_also" content="https://www.facebook.com/ontour.live" />
-    <meta property="og:see_also" content="https://www.tiktok.com/@ontour.live" />
 
     <script type="application/ld+json">
     {
@@ -54,10 +53,11 @@
       "name": "On Tour Live",
       "url": "https://ontourlive.co",
       "description": "The booking app for artists and venues. Launching 1 November 2026.",
+      "email": "hello@ontour.live",
+      "logo": "https://ontourlive.co/favicon.png",
       "sameAs": [
         "https://www.instagram.com/ontour.live",
-        "https://www.facebook.com/ontour.live",
-        "https://www.tiktok.com/@ontour.live"
+        "https://www.facebook.com/ontour.live"
       ]
     }
     </script>
@@ -65,10 +65,15 @@
     {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
+      "@id": "https://ontourlive.co/#localbusiness",
       "name": "On Tour Live",
       "url": "https://ontourlive.co",
-      "description": "Booking platform connecting artists and venues. Sydney first, launching soon.",
+      "image": "https://ontourlive.co/og-image.png",
+      "logo": "https://ontourlive.co/favicon.png",
+      "description": "Booking platform connecting artists and venues. Sydney first, launching 1 November 2026.",
       "email": "hello@ontour.live",
+      "priceRange": "Free to join",
+      "currenciesAccepted": "AUD",
       "areaServed": { "@type": "City", "name": "Sydney" },
       "address": {
         "@type": "PostalAddress",
@@ -76,17 +81,40 @@
         "addressRegion": "NSW",
         "addressCountry": "AU"
       },
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "customer support",
-        "email": "hello@ontour.live",
-        "areaServed": "AU",
-        "availableLanguage": "English"
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": -33.8688,
+        "longitude": 151.2093
       },
+      "openingHoursSpecification": [
+        {
+          "@type": "OpeningHoursSpecification",
+          "dayOfWeek": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "opens": "00:00",
+          "closes": "23:59",
+          "description": "Online only — email enquiries are welcome any time and answered on business days."
+        }
+      ],
+      "contactPoint": [
+        {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "hello@ontour.live",
+          "areaServed": "AU",
+          "availableLanguage": "English"
+        }
+      ],
       "sameAs": [
         "https://www.instagram.com/ontour.live",
-        "https://www.facebook.com/ontour.live",
-        "https://www.tiktok.com/@ontour.live"
+        "https://www.facebook.com/ontour.live"
       ]
     }
     </script>
