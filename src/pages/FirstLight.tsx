@@ -310,8 +310,8 @@ export default function FirstLight() {
   return (
     <div className="cl-root">
       <PageSeo
-        title="On Tour Live — Join the founding list"
-        description="The booking app for artists and venues. Launching 1 November 2026, Sydney first. Join the founding list and take your place."
+        title="On Tour Live — Sydney Artist & Venue Booking App"
+        description="Sydney's booking app for artists and venues: DJs, bands and singers meet bars, clubs and hotels. Free to join, launching 1 November 2026 — join the founding list."
         path={seoPath}
       />
       <style>{styles}</style>
